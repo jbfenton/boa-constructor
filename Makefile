@@ -7,10 +7,17 @@ else
     SCRIPT_RUN := ./run.sh
 endif
 
-.PHONY: bootstrap
+.PHONY: bootstrap run check format
 bootstrap:
 	$(SCRIPT_BOOTSTRAP)
 
-.PHONY: run
 run:
 	$(SCRIPT_RUN)
+
+format:
+	uv run ruff check --fix .
+	uv run ruff format .
+
+check:
+	uv run ruff format --check .
+	uv run ruff check .

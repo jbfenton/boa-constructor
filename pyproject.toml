@@ -7,3 +7,56 @@ requires-python = ">=3.12.4"
 dependencies = [
     "wxPython==4.2.2",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [
+    "Debugger/BoaDebugger/BoaDebugger.py",
+    "Debugger/test.py",
+    "Examples/xrc/wxXrcPanel.py",
+    "ExternalLib/Cyclops.py",
+    "ExternalLib/ddeconn.py",
+    "ExternalLib/pylint.py",
+    "ExternalLib/tarfile.py",
+    "ExternalLib/zipfile.py",
+    "Models/EditorModels.py",
+    "Plug-ins/BicycleRepairMan.plug-in.py",
+    "Plug-ins/DragScroller.plug-in.py",
+    "Plug-ins/ExtraZopeCompanions.plug-in.py",
+    "Plug-ins/FlatNotebook.plug-in.py",
+    "Plug-ins/I18NUtils.plug-in.py",
+    "Plug-ins/JavaSupport.plug-in.py",
+    "Plug-ins/PascalSupport.plug-in.py",
+    "Plug-ins/PyPlot.plug-in.py",
+    "Plug-ins/PyrexSupport.plug-in.py",
+    "Plug-ins/UserCompanions.plug-in.py",
+    "Plug-ins/XRCSupport.plug-in.py",
+    "Scripts/FixPythonDocs.py",
+    "Scripts/ManageImageResourcePackage.py",
+    "TestArea/Tests.py",
+    "ZopeLib/DateTime/DateTime.py",
+    "ZopeLib/ZopeFTP.py",
+    "ZopeLib/zoa",
+    "bcrtl/activex/acrobat.py",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E402",
+    "E701",
+    "E722",
+    "E741",
+    "F403",
+    "F405"
+]
+select = [
+    "E",
+    "F",
+    "I"
+]
