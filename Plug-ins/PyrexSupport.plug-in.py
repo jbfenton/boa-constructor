@@ -116,52 +116,70 @@ cdef extern from "Numeric/arrayobject.h":
 """
 
 pyrexStyleEditorConfig = (
-    """
-common.defs.msw={'size': 10, 'backcol': '#FFFFFF', 'lnsize2': 7, 'mono': 'Courier New', 'lnsize': 8, 'helv': 'Lucida Console', 'ln-font': 'Lucida Console', '''
-'''ln-size': 8}
-common.defs.gtk={'mono': 'Courier', 'helv': 'Helvetica', 'other': 'new century schoolbook', 'size': 9, 'lnsize': 6, 'backcol': '#FFFFFF', 'ln-font': 'Lucida Console', '''
-'''ln-size': 8}
-common.styleidnames = {wx.stc.STC_STYLE_DEFAULT: 'Style default', wx.stc.STC_STYLE_LINENUMBER: 'Line numbers', wx.stc.STC_STYLE_BRACELIGHT: 'Matched braces', '''
-'''wx.stc.STC_STYLE_BRACEBAD: 'Unmatched brace', wx.stc.STC_STYLE_CONTROLCHAR: 'Control characters', wx.stc.STC_STYLE_INDENTGUIDE: 'Indent guide'}
-
-[style.pyrex]
-setting.pyrex.-3=
-setting.pyrex.-2=fore:#000000
-setting.pyrex.-1=fore:#000000,back:#88C4FF
-style.pyrex.000=fore:#808080
-style.pyrex.001=fore:#007F00,back:#E8FFE8
-style.pyrex.002=fore:#007F7F
-style.pyrex.003=fore:#7F007F
-style.pyrex.004=fore:#7F007F
-style.pyrex.005=fore:#00007F,bold
-style.pyrex.006=fore:#7F0000
-style.pyrex.007=fore:#000033,back:#FFFFE8
-style.pyrex.008=fore:#0000FF,bold
-style.pyrex.009=fore:#007F7F,bold
-style.pyrex.010=bold
-style.pyrex.011=
-style.pyrex.012=fore:#7F7F7F
-style.pyrex.013=fore:#000000,back:#ECD7EC,eolfilled
-style.pyrex.032=back:%(backcol)s,face:%(mono)s,size:%(size)d
-style.pyrex.033=size:%(ln-size)d,face:%(ln-font)s,back:#A0A0A0
-style.pyrex.034=fore:#0000FF,back:#FFFF88,bold
-style.pyrex.035=fore:#FF0000,back:#FFFF88,bold
-style.pyrex.036=
-style.pyrex.037=
-
-[style.pyrex.default]
-
-[pyrex]
-displaysrc="""
-    + repr(pyrexSource)[1:-1]
-    + """
-braces={}
-styleidnames={wx.stc.STC_P_DEFAULT: 'Default', wx.stc.STC_P_COMMENTLINE: 'Comment', wx.stc.STC_P_NUMBER : 'Number', wx.stc.STC_P_STRING : 'String', '''
-'''wx.stc.STC_P_CHARACTER: 'Single quoted string', wx.stc.STC_P_WORD: 'Keyword', wx.stc.STC_P_TRIPLE:'Triple quotes', wx.stc.STC_P_TRIPLEDOUBLE: 'Triple double quotes', wx.stc.STC_P_CLASSNAME: 'Class definition', wx.stc.STC_P_DEFNAME: 'Function or method', wx.stc.STC_P_OPERATOR: 'Operators', wx.stc.STC_P_IDENTIFIER: 'Identifiers', wx.stc.STC_P_COMMENTBLOCK: 'Comment blocks', wx.stc.STC_P_STRINGEOL: 'EOL unclosed string'}
-lexer=wx.stc.STC_LEX_PYTHON
-keywords=and assert break class continue def del elif else except exec finally for from global if import in is lambda not or pass print raise return try while struct union enum ctypedef cdef void '''
-'''extern NULL
-"""
+    "\n"
+    "common.defs.msw={'size': 10, 'backcol': '#FFFFFF', 'lnsize2': 7, "
+    "'mono': 'Courier New', 'lnsize': 8, 'helv': 'Lucida Console', "
+    "'ln-font': 'Lucida Console', '''\n"
+    "'''ln-size': 8}\n"
+    "common.defs.gtk={'mono': 'Courier', 'helv': 'Helvetica', "
+    "'other': 'new century schoolbook', 'size': 9, 'lnsize': 6, "
+    "'backcol': '#FFFFFF', 'ln-font': 'Lucida Console', '''\n"
+    "'''ln-size': 8}\n"
+    "common.styleidnames = {wx.stc.STC_STYLE_DEFAULT: 'Style default', "
+    "wx.stc.STC_STYLE_LINENUMBER: 'Line numbers', "
+    "wx.stc.STC_STYLE_BRACELIGHT: 'Matched braces', "
+    "'''\n"
+    "'''wx.stc.STC_STYLE_BRACEBAD: 'Unmatched brace', "
+    "wx.stc.STC_STYLE_CONTROLCHAR: 'Control characters', "
+    "wx.stc.STC_STYLE_INDENTGUIDE: 'Indent guide'}\n"
+    "\n"
+    "[style.pyrex]\n"
+    "setting.pyrex.-3=\n"
+    "setting.pyrex.-2=fore:#000000\n"
+    "setting.pyrex.-1=fore:#000000,back:#88C4FF\n"
+    "style.pyrex.000=fore:#808080\n"
+    "style.pyrex.001=fore:#007F00,back:#E8FFE8\n"
+    "style.pyrex.002=fore:#007F7F\n"
+    "style.pyrex.003=fore:#7F007F\n"
+    "style.pyrex.004=fore:#7F007F\n"
+    "style.pyrex.005=fore:#00007F,bold\n"
+    "style.pyrex.006=fore:#7F0000\n"
+    "style.pyrex.007=fore:#000033,back:#FFFFE8\n"
+    "style.pyrex.008=fore:#0000FF,bold\n"
+    "style.pyrex.009=fore:#007F7F,bold\n"
+    "style.pyrex.010=bold\n"
+    "style.pyrex.011=\n"
+    "style.pyrex.012=fore:#7F7F7F\n"
+    "style.pyrex.013=fore:#000000,back:#ECD7EC,eolfilled\n"
+    "style.pyrex.032=back:%(backcol)s,face:%(mono)s,size:%(size)d\n"
+    "style.pyrex.033=size:%(ln-size)d,face:%(ln-font)s,back:#A0A0A0\n"
+    "style.pyrex.034=fore:#0000FF,back:#FFFF88,bold\n"
+    "style.pyrex.035=fore:#FF0000,back:#FFFF88,bold\n"
+    "style.pyrex.036=\n"
+    "style.pyrex.037=\n"
+    "\n"
+    "[style.pyrex.default]\n"
+    "\n"
+    "[pyrex]\n"
+    "displaysrc=" + repr(pyrexSource)[1:-1] + "\n"
+    "braces={}\n"
+    "styleidnames={wx.stc.STC_P_DEFAULT: 'Default', "
+    "wx.stc.STC_P_COMMENTLINE: 'Comment', wx.stc.STC_P_NUMBER : 'Number', "
+    "wx.stc.STC_P_STRING : 'String', '''\n"
+    "'''wx.stc.STC_P_CHARACTER: 'Single quoted string', "
+    "wx.stc.STC_P_WORD: 'Keyword', wx.stc.STC_P_TRIPLE:'Triple quotes', "
+    "wx.stc.STC_P_TRIPLEDOUBLE: 'Triple double quotes', "
+    "wx.stc.STC_P_CLASSNAME: 'Class definition', "
+    "wx.stc.STC_P_DEFNAME: 'Function or method', "
+    "wx.stc.STC_P_OPERATOR: 'Operators', "
+    "wx.stc.STC_P_IDENTIFIER: 'Identifiers', "
+    "wx.stc.STC_P_COMMENTBLOCK: 'Comment blocks', "
+    "wx.stc.STC_P_STRINGEOL: 'EOL unclosed string'}\n"
+    "lexer=wx.stc.STC_LEX_PYTHON\n"
+    "keywords=and assert break class continue def del elif else except exec "
+    "finally for from global if import in is lambda not or pass print raise "
+    "return try while struct union enum ctypedef cdef void '''\n"
+    "'''extern NULL\n"
 )
 
 Plugins.assureConfigFile(pyrex_cfgfile, pyrexStyleEditorConfig)

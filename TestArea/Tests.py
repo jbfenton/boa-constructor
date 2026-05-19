@@ -1,7 +1,10 @@
+import sys
+
 import wx
 import wx.lib.buttons
 
-def postCommandEvent(ctrl, evtType, evtId = None):
+
+def postCommandEvent(ctrl, evtType, evtId=None):
     if evtId is None:
         evtId = ctrl.GetId()
     wx.PostEvent(ctrl, wx.CommandEvent(evtType, evtId))
@@ -11,8 +14,7 @@ def postCommandEvent(ctrl, evtType, evtId = None):
 def test_wxFrame(palette):
     try:
         # New frame
-        postCommandEvent(palette.palettePages[0].buttons['wx.Frame'],
-                         wx.wxEVT_COMMAND_BUTTON_CLICKED)
+        postCommandEvent(palette.palettePages[0].buttons["wx.Frame"], wx.wxEVT_COMMAND_BUTTON_CLICKED)
 
         # Open designer
         mp = palette.editor.getActiveModulePage()
@@ -20,7 +22,7 @@ def test_wxFrame(palette):
         ctrlr.OnDesigner(None)
 
         # Select static text
-        btn = palette.palettePages[2].buttons['wx.StaticText']
+        btn = palette.palettePages[2].buttons["wx.StaticText"]
         btn.up = False
         evt = wx.lib.buttons.GenButtonEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, btn.GetId())
         evt.SetButtonObj(btn)
@@ -31,40 +33,41 @@ def test_wxFrame(palette):
         # Drop component on Designer
         model = palette.editor.getActiveModulePage().model
         evt = wx.MouseEvent(wx.wxEVT_LEFT_DOWN)
-    #        evt.SetEventObject(model.views['Designer'])
+        #        evt.SetEventObject(model.views['Designer'])
         evt.m_x = 10
         evt.m_y = 10
-        wx.PostEvent(model.views['Designer'], evt)
+        wx.PostEvent(model.views["Designer"], evt)
         wx.Yield()
 
         # Select Frame
         evt = wx.MouseEvent(wx.wxEVT_LEFT_DOWN)
         evt.m_x = 0
         evt.m_y = 0
-        wx.PostEvent(model.views['Designer'], evt)
+        wx.PostEvent(model.views["Designer"], evt)
         wx.Yield()
 
         constructorPage = palette.editor.inspector.constr
         for nv in constructorPage.nameValues:
-            if nv.propName == 'Name':
+            if nv.propName == "Name":
                 nv.propEditor.inspectorEdit()
-                nv.propEditor.editorCtrl.editorCtrl.SetValue('TestFrame')
+                nv.propEditor.editorCtrl.editorCtrl.SetValue("TestFrame")
                 nv.propEditor.inspectorPost(False)
                 break
 
         # resize designer
-        model.views['Designer'].SetDimensions(10, 10, 200, 200)
-        model.views['Designer'].SetPosition( (0, 0) )
+        model.views["Designer"].SetDimensions(10, 10, 200, 200)
+        model.views["Designer"].SetPosition((0, 0))
         wx.Yield()
 
-        model.views['Designer'].Close()
+        model.views["Designer"].Close()
     except Exception:
-        wx.MessageBox('Test failed\n'+`sys.exc_info()`)
+        wx.MessageBox("Test failed\n" + repr(sys.exc_info()))
     else:
-        #if model.data == frame_answer:
-        wx.MessageBox('Test succeeded')
+        # if model.data == frame_answer:
+        wx.MessageBox("Test succeeded")
 
-frame_answer = '''#Boa:Frame:TestFrame
+
+frame_answer = """#Boa:Frame:TestFrame
 
 import wx
 
@@ -93,4 +96,4 @@ class TestFrame(wx.Frame):
 
     def __init__(self, parent):
         self._init_ctrls(parent)
-'''
+"""
