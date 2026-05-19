@@ -1,18 +1,20 @@
-""" Plugin to toggle the Error/Output window with a keybinding """
+"""Plugin to toggle the Error/Output window with a keybinding"""
 
 import wx
 
-import Preferences, Utils, Plugins
+import Plugins
+import Preferences
 from Utils import _
 
 # only install if ErrOut is docked in the Editor
-if Preferences.eoErrOutDockWindow != 'editor':
+if Preferences.eoErrOutDockWindow != "editor":
     raise Plugins.SkipPluginSilently
 
-Preferences.keyDefs['ToggleErrOut'] = (wx.ACCEL_ALT, ord('O'), 'Alt-O')
+Preferences.keyDefs["ToggleErrOut"] = (wx.ACCEL_ALT, ord("O"), "Alt-O")
 
-def toggleErrOutWindow(editor): 
+
+def toggleErrOutWindow(editor):
     editor.tabsSplitter._OnSplitterwindowSplitterDoubleclicked(None)
 
-Plugins.registerTool(
-      _('Toggle Error/Output window'), toggleErrOutWindow, key='ToggleErrOut')
+
+Plugins.registerTool(_("Toggle Error/Output window"), toggleErrOutWindow, key="ToggleErrOut")

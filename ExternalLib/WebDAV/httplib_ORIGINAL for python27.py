@@ -28,18 +28,19 @@ second request to the same server, you create a new HTTP object.
 connection for each request.)
 """
 
-import socket
-import string
 # import mimetools   # orig
 import email
+import socket
+import string
 
-HTTP_VERSION = 'HTTP/1.0'
+HTTP_VERSION = "HTTP/1.0"
 HTTP_PORT = 80
+
 
 class HTTP:
     """This class manages a connection to an HTTP server."""
 
-    def __init__(self, host = '', port = 0):
+    def __init__(self, host="", port=0):
         """Initialize a new instance.
 
         If specified, `host' is the name of the remote host to which
@@ -49,7 +50,8 @@ class HTTP:
         """
         self.debuglevel = 0
         self.file = None
-        if host: self.connect(host, port)
+        if host:
+            self.connect(host, port)
 
     def set_debuglevel(self, debuglevel):
         """Set the debug output level.
@@ -60,7 +62,7 @@ class HTTP:
         """
         self.debuglevel = debuglevel
 
-    def connect(self, host, port = 0):
+    def connect(self, host, port=0):
         """Connect to a host on a given port.
 
         Note:  This method is automatically invoked by __init__,
@@ -69,31 +71,32 @@ class HTTP:
         """
         if not port:
             # i = string.find(host, ':')  # orig
-            i = host.find(':')
+            i = host.find(":")
             if i >= 0:
-                host, port = host[:i], host[i+1:]
+                host, port = host[:i], host[i + 1 :]
 
                 # try: port = string.atoi(port)   # orig code
                 # except string.atoi_error:
                 #     raise socket.error, "nonnumeric port"
 
-                try: port = int(port)
+                try:
+                    port = int(port)
                 except (ValueError, TypeError):
-                    raise Exception( socket.error, "nonnumeric port")
+                    raise Exception(socket.error, "nonnumeric port")
 
-
-        if not port: port = HTTP_PORT
+        if not port:
+            port = HTTP_PORT
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if self.debuglevel > 0: print ('connect:', (host, port))
-        self.sock.connect( (host, port) )
-
-
+        if self.debuglevel > 0:
+            print("connect:", (host, port))
+        self.sock.connect((host, port))
 
     def send(self, str_to_send):
         """Send `str' to the server."""
-        if self.debuglevel > 0: print ('send:', str_to_send)
+        if self.debuglevel > 0:
+            print("send:", str_to_send)
         # self.sock.send(str)    # org
-        self.sock.send(str_to_send.encode())    # updated
+        self.sock.send(str_to_send.encode())  # updated
 
     def putrequest(self, request, selector):
         """Send a request to the server.
@@ -103,8 +106,9 @@ class HTTP:
         '/index.html'.
 
         """
-        if not selector: selector = '/'
-        str = '%s %s %s\r\n' % (request, selector, HTTP_VERSION)
+        if not selector:
+            selector = "/"
+        str = "%s %s %s\r\n" % (request, selector, HTTP_VERSION)
         self.send(str)
 
     def putheader(self, header, *args):
@@ -114,12 +118,12 @@ class HTTP:
 
         """
         # str = '%s: %s\r\n' % (header, string.joinfields(args,'\r\n\t'))  # orig
-        str = '%s: %s\r\n' % (header, '\r\n\t'.join(args))
+        str = "%s: %s\r\n" % (header, "\r\n\t".join(args))
         self.send(str)
 
     def endheaders(self):
         """Indicate that the last header line has been sent to the server."""
-        self.send('\r\n')
+        self.send("\r\n")
 
     def getreply(self):
         """Get a reply from the server.
@@ -130,9 +134,10 @@ class HTTP:
         - any RFC822 headers in the response from the server
 
         """
-        self.file = self.sock.makefile('rb')
+        self.file = self.sock.makefile("rb")
         line = self.file.readline()
-        if self.debuglevel > 0: print ('reply:', repr(line))
+        if self.debuglevel > 0:
+            print("reply:", repr(line))
         try:
             [ver, code, msg] = string.split(line, None, 2)
         except ValueError:
@@ -142,7 +147,7 @@ class HTTP:
             except ValueError:
                 self.headers = None
                 return -1, line, self.headers
-        if ver[:5] != 'HTTP/':
+        if ver[:5] != "HTTP/":
             self.headers = None
             return -1, line, self.headers
         errcode = int(code)
@@ -177,32 +182,37 @@ def test():
     by the www.python.org server.
 
     """
-    import sys
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'd')
+    import sys
+
+    opts, args = getopt.getopt(sys.argv[1:], "d")
     dl = 0
     for o, a in opts:
-        if o == '-d': dl = dl + 1
-    host = 'www.python.org'
-    selector = '/'
-    if args[0:]: host = args[0]
-    if args[1:]: selector = args[1]
+        if o == "-d":
+            dl = dl + 1
+    host = "www.python.org"
+    selector = "/"
+    if args[0:]:
+        host = args[0]
+    if args[1:]:
+        selector = args[1]
     h = HTTP()
     h.set_debuglevel(dl)
     h.connect(host)
-    h.putrequest('GET', selector)
+    h.putrequest("GET", selector)
     h.endheaders()
     errcode, errmsg, headers = h.getreply()
-    print ('errcode =', errcode)
-    print ('errmsg  =', errmsg)
-    print ('\n')
+    print("errcode =", errcode)
+    print("errmsg  =", errmsg)
+    print("\n")
     # if headers:   # orig code
     #     for header in headers.headers: print string.strip(header)
     if headers:
-        for header in headers.headers: print (header.strip())
-    print ('\n')
-    print (h.getfile().read())
+        for header in headers.headers:
+            print(header.strip())
+    print("\n")
+    print(h.getfile().read())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

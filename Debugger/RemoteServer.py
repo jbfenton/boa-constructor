@@ -1,12 +1,11 @@
-import sys, os
-import threading
 import base64
-import time
+import os
+import sys
+import threading
 from socketserver import TCPServer
 
-from IsolatedDebugger import DebugServer, DebuggerConnection
+from IsolatedDebugger import DebuggerConnection, DebugServer
 from Tasks import ThreadedTaskHandler
-
 
 try:
     from ExternalLib.xmlrpcserver import RequestHandler
@@ -18,18 +17,17 @@ except ImportError:
 
 debug_server = None
 connection = None
-auth_str = ''
+auth_str = ""
 task_handler = ThreadedTaskHandler()
 
 
-class DebugRequestHandler (RequestHandler):
-
+class DebugRequestHandler(RequestHandler):
     def _authenticate(self):
         h = self.headers
         if auth_str:
-            s = h.get('authentication')
+            s = h.get("authentication")
             if not s or s.split()[-1] != auth_str:
-                raise Exception('Unauthorized: Authentication header missing or incorrect')
+                raise Exception("Unauthorized: Authentication header missing or incorrect")
 
     def call(self, method, params):
         # Override of xmlrpcserver.RequestHandler.call()
@@ -49,34 +47,34 @@ class TaskingMixIn:
 
     def process_request(self, request, client_address):
         """Start a task to process the request."""
-        task_handler.addTask(self.finish_request,
-                             args=(request, client_address))
+        task_handler.addTask(self.finish_request, args=(request, client_address))
+
 
 class TaskingTCPServer(TaskingMixIn, TCPServer):
     allow_reuse_address = 1
 
 
-def start(username, password, host='127.0.0.1', port=26200,
-          server_type='zope'):
+def start(username, password, host="127.0.0.1", port=26200, server_type="zope"):
     global auth_str, debug_server, connection
 
     if debug_server is not None:
-        raise RuntimeError('The debug server is already running')
+        raise RuntimeError("The debug server is already running")
 
     # Create the debug server.
-    if server_type == 'zope':
+    if server_type == "zope":
         from ZopeScriptDebugServer import ZopeScriptDebugServer
+
         ds = ZopeScriptDebugServer()
-    elif server_type == 'basic':
+    elif server_type == "basic":
         ds = DebugServer()
     else:
-        raise ValueError('Unknown debug server type: %s' % server_type)
+        raise ValueError("Unknown debug server type: %s" % server_type)
 
     connection = DebuggerConnection(ds)
     connection.allowEnvChanges()  # Allow changing of sys.path, etc.
 
     # Create an authentication string.
-    auth_str = base64.encodestring('%s:%s' % (username, password)).strip()
+    auth_str = base64.encodestring("%s:%s" % (username, password)).strip()
 
     debug_server = ds
     server = TaskingTCPServer((host, port), DebugRequestHandler)
@@ -98,12 +96,11 @@ def start(username, password, host='127.0.0.1', port=26200,
         t.start()
 
     startDaemon(serve_forever, (server,))
-    #startDaemon(debug_server.servicerThread)
+    # startDaemon(debug_server.servicerThread)
 
     # print >> sys.stderr, "Debug server listening on %s:%s" % tuple(
     #     server.socket.getsockname()[:2])
-    sys.stderr.write("Debug server listening on %s:%s" % tuple(
-        server.socket.getsockname()[:2]))
+    sys.stderr.write("Debug server listening on %s:%s" % tuple(server.socket.getsockname()[:2]))
 
     try:
         import atexit
@@ -111,6 +108,7 @@ def start(username, password, host='127.0.0.1', port=26200,
         pass
     else:
         atexit.register(server.socket.close)
+
 
 def stop():
     global debug_server, connection

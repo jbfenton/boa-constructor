@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        relpath.py
 # Purpose:
 #
@@ -8,7 +8,7 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 1999 - 2003 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 ##b = 'c:\\a\\b\\f\\d'
 ##d = 'c:\\a\\b\\f\\h.txt'
@@ -17,8 +17,9 @@
 
 import os
 
+
 def splitpath(apath):
-    """ Splits a path into a list of directory names """
+    """Splits a path into a list of directory names"""
     path_list = []
     drive, apath = os.path.splitdrive(apath)
     head, tail = os.path.split(apath)
@@ -36,26 +37,26 @@ def splitpath(apath):
 
 
 def relpath(base, comp):
-    """ Return a path to file comp relative to path base. """
-    protsplitbase = base.split('://')
+    """Return a path to file comp relative to path base."""
+    protsplitbase = base.split("://")
     if len(protsplitbase) == 1:
-        baseprot, nbase = 'file', protsplitbase[0]
+        baseprot, nbase = "file", protsplitbase[0]
     elif len(protsplitbase) == 2:
         baseprot, nbase = protsplitbase
     elif len(protsplitbase) == 3:
         baseprot, nbase, zipentry = protsplitbase
     else:
-        raise Exception('Unhandled path %s'%repr(protsplitbase))
+        raise Exception("Unhandled path %s" % repr(protsplitbase))
 
-    protsplitcomp = comp.split('://')
+    protsplitcomp = comp.split("://")
     if len(protsplitcomp) == 1:
-        compprot, ncomp  = 'file', protsplitcomp[0]
+        compprot, ncomp = "file", protsplitcomp[0]
     elif len(protsplitcomp) == 2:
         compprot, ncomp = protsplitcomp
     elif len(protsplitcomp) == 3:
         compprot, ncomp, zipentry = protsplitcomp
     else:
-        raise Exception('Unhandled path %s'%repr(protsplitcomp))
+        raise Exception("Unhandled path %s" % repr(protsplitcomp))
 
     if baseprot != compprot:
         return comp
@@ -70,7 +71,7 @@ def relpath(base, comp):
 
     # relative path defaults to the list of files with
     # a greater index then the entire base
-    rel_path = comp_path_list[len(base_path_list):]
+    rel_path = comp_path_list[len(base_path_list) :]
     # find the first directory for which the 2 paths differ
     found = -1
     idx = 0
@@ -84,4 +85,5 @@ def relpath(base, comp):
 
     return os.path.join(*rel_path)
 
-#print relpath(b, d)
+
+# print relpath(b, d)

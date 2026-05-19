@@ -5,11 +5,12 @@
 
 import wx
 import wx.stc
-if not hasattr(wx.stc, 'STC_CP_DBCS'):
+
+if not hasattr(wx.stc, "STC_CP_DBCS"):
     wx.stc.STC_CP_DBCS = None
 
 
-#-Miscellaneous-----------------------------------------------------------------
+# -Miscellaneous-----------------------------------------------------------------
 
 # Should toolbars have flat buttons, 0 for beveled buttons
 flatTools = wx.TB_FLAT
@@ -22,7 +23,7 @@ childFrameStyle = wx.CLIP_CHILDREN
 dataViewListStyle = wx.LC_LIST
 # Should the palette be a menubar or a notebook
 ## options: 'tabs', 'menu'
-paletteStyle = 'tabs'
+paletteStyle = "tabs"
 # Frame test button on the Palette toolbar
 showFrameTestButton = True
 # Style flags used by most splitters in the IDE
@@ -39,22 +40,23 @@ undefinedWindowCol = wx.Colour(128, 0, 0)
 
 # Info that will be filled into the comment block. (Edit->Add module info)
 # Also used by setup.py
-staticInfoPrefs = { 'Purpose':   '',
-                    'Author':    '<your name>',
-                    'Copyright': '(c) 2006',
-                    'Licence':   '<your licence>',
-                    'Email':     '<your email>',
-                  }
+staticInfoPrefs = {
+    "Purpose": "",
+    "Author": "<your name>",
+    "Copyright": "(c) 2006",
+    "Licence": "<your licence>",
+    "Email": "<your email>",
+}
 
 # Should modules be added to the application if it is the active Model when
 # a module is created from the palette
 autoAddToApplication = True
 
-# Load images from normal image files, 
+# Load images from normal image files,
 # a singe file Image.archive (zip of Image directory)
 # or modules created by resourcepackage
 ## options: 'files', 'zip', 'resource',
-imageStoreType = 'files'
+imageStoreType = "files"
 # Only load image 1st time it is requested then cache it
 # Turn this off to conserve resources on win9x
 useImageCache = False
@@ -67,7 +69,7 @@ recordModuleCallPoint = False
 # Path to an alternative Python Interpreter. By default (blank string) Boa
 # will use the same interpreter it is running on
 ## type: filepath
-pythonInterpreterPath = ''
+pythonInterpreterPath = ""
 
 # Should the initialisation of the help be delayed until first usage?
 delayInitHelp = True
@@ -82,7 +84,7 @@ installBCRTL = False
 
 # Determines how Boa reacts to errors when running
 ## options: 'release', 'development'
-debugMode = 'development'
+debugMode = "development"
 
 # If the environment variable PYTHONSTARTUP is set to a python file
 # this file can be executed at startup in the Shell's namespace
@@ -104,20 +106,20 @@ suSocketFileOpenServer = True
 
 # Where should the stderr and stdout notebook be docked?
 ## options: 'editor', 'inspector', 'undocked'
-eoErrOutDockWindow = 'editor'
+eoErrOutDockWindow = "editor"
 # When docked in the Editor, percentage wise, how high should the default
 # Error/Output window be?
 eoErrOutWindowHeightPerc = 20
 
 # Arguments for Debug Server
 # e.g. '--zope' for PythonScript and PageTemplate debugging support
-debugServerArgs = ''
+debugServerArgs = ""
 
 # Language to use for translations in the IDE. Requires a restart of Boa
 ## type: languages
 i18nLanguage = wx.LANGUAGE_DEFAULT
 
-#-Editor------------------------------------------------------------------------
+# -Editor------------------------------------------------------------------------
 
 # Syntax checking
 # Underlines possible syntax errors with a red squigly line
@@ -145,7 +147,7 @@ callTipsOnOpenParen = True
 handleSpecialEuropeanKeys = False
 # Country code for keyboards
 ## options: 'euro', 'france', 'swiss-german', 'italian'
-euroKeysCountry = 'euro'
+euroKeysCountry = "euro"
 
 # The undo buffer can be cleared after saving, turning this on will
 # never clear it and preserve the editing history but take extra memory
@@ -163,7 +165,7 @@ showFilenameExtensions = False
 
 # Should new pages be added to the end of the Editor notebook or current pos
 ## options: 'current', 'append'
-editorNotebookOpenPos = 'current'
+editorNotebookOpenPos = "current"
 
 # Editor menu items can optionally display images in the menus
 editorMenuImages = True
@@ -171,7 +173,7 @@ editorMenuImages = True
 # Should the Editor fill the available width when the Inspector is closed
 expandEditorOnCloseInspector = False
 
-#-Explorer----------------------------------------------------------------------
+# -Explorer----------------------------------------------------------------------
 
 # Should the Explorer page be active in the Editor (Highly advised)
 exUseExplorer = True
@@ -181,12 +183,12 @@ exUseExplorer = True
 # types of Python modules.
 # StdFiles - The fastest, displaying only file association information.
 ## options: 'BoaFiles', 'StdFiles'
-exDefaultFilter = 'BoaFiles'
+exDefaultFilter = "BoaFiles"
 
 # Normally Boa will startup and run in the Current Working Directory of it's
 # process. With this setting you may overwrite it.
 ## type: dirpath
-exWorkingDirectory = ''
+exWorkingDirectory = ""
 
 # Default width of the tree in the Explorer
 exDefaultTreeWidth = 230
@@ -201,22 +203,22 @@ exOpenFromHere = True
 # Maximum Recent files list size
 exRecentFilesListSize = 25
 
-#-Shell-------------------------------------------------------------------------
+# -Shell-------------------------------------------------------------------------
 
 # Which shell (if any) should be used
 ## options: 'Shell', 'PyCrust', 'None'
-psPythonShell = 'Shell'
+psPythonShell = "Shell"
 
 # Shell prompt (must be 3 chars with trailing space)'
-ps1 = '>>> '
+ps1 = ">>> "
 # Shell prompt, continued line (must be 3 chars with trailing space)'
-ps2 = '... '
+ps2 = "... "
 # Shell debug prompt (must be 3 chars with trailing space)'
-ps3 = 'Db> '
+ps3 = "Db> "
 # Shell prompt, standard input request (must be 3 chars with trailing space)
-ps4 = '<<< '
+ps4 = "<<< "
 
-#-Inspector---------------------------------------------------------------------
+# -Inspector---------------------------------------------------------------------
 
 # Display properties for which source will be generated in Bold
 showModifiedProps = True
@@ -230,12 +232,14 @@ oiEventSelectionHeight = 140
 ## options: 0, wx.NB_FIXEDWIDTH, wx.NB_LEFT, wx.NB_RIGHT, wx.NB_BOTTOM
 inspNotebookFlags = 0
 # Page names for the inspector notebook
-inspPageNames = {'Constr': 'Constr', ##'Constructor',
-                 'Props': 'Props', ##'Properties',
-                 'Evts': 'Evts', ##'Events',
-                 'Objs': 'Objs'} ##'Objects'}
+inspPageNames = {
+    "Constr": "Constr",  ##'Constructor',
+    "Props": "Props",  ##'Properties',
+    "Evts": "Evts",  ##'Events',
+    "Objs": "Objs",
+}  ##'Objects'}
 
-#-Designer----------------------------------------------------------------------
+# -Designer----------------------------------------------------------------------
 
 # Granularity of the Designer's grid.
 dsGridSize = 8
@@ -264,17 +268,17 @@ dsUseSizers = True
 dsInSizerCol = wx.Colour(128, 255, 0)
 dsHasSizerCol = wx.Colour(255, 255, 0)
 
-#-Code generation---------------------------------------------------------------
+# -Code generation---------------------------------------------------------------
 
-# Should the paths to image file be created as 
-# absolute paths or relative to either the directory 
-# of the application file or the directory of the 
+# Should the paths to image file be created as
+# absolute paths or relative to either the directory
+# of the application file or the directory of the
 # module?
-# When a path is created for a module that has 
+# When a path is created for a module that has
 # never been saved it will always be absolute.
-# Remember, when a path is stored relatively, 
-# the current directory of the process must be 
-# correct (relative to the path) when your code 
+# Remember, when a path is stored relatively,
+# the current directory of the process must be
+# correct (relative to the path) when your code
 # executes.
 cgAbsoluteImagePaths = True
 
@@ -283,7 +287,7 @@ cgAbsoluteImagePaths = True
 cgEmptyLineBetweenObjects = True
 
 # Format string used to generate keyword argument parameter
-cgKeywordArgFormat = '%(keyword)s=%(value)s'
+cgKeywordArgFormat = "%(keyword)s=%(value)s"
 
 # Adds a warning to generated _init_* methods that users should not edit them
 cgAddInitMethodWarning = True
@@ -296,7 +300,7 @@ cgLineWrapWidth = 80
 # line's indent
 cgContinuedLineIndent = 6
 
-#-Views-------------------------------------------------------------------------
+# -Views-------------------------------------------------------------------------
 
 # Background colour of the canvas used by OGL views.
 vpOGLCanvasBackgroundColour = wx.WHITE
@@ -316,7 +320,7 @@ vpOGLModuleShapePen = wx.BLACK_PEN
 # Brush used to draw Modules
 vpOGLModuleShapeBrush = wx.LIGHT_GREY_BRUSH
 
-#-Plug-ins----------------------------------------------------------------------
+# -Plug-ins----------------------------------------------------------------------
 
 # Any module in the Plug-ins directory is automatically executed at startup
 # While developing or debugging new plugins it is sometimes useful to
@@ -325,15 +329,15 @@ vpOGLModuleShapeBrush = wx.LIGHT_GREY_BRUSH
 pluginsEnabled = True
 # Path to an additional Plug-ins directory
 ## type: dirpath
-extraPluginsPath = ''
+extraPluginsPath = ""
 # How should errors from plugins be handled
 ## options: 'raise', 'report'
-pluginErrorHandling = 'report'
+pluginErrorHandling = "report"
 # Safety net so COM support has to be explicitly turned on
 # Will stay here until the win9x crashes has been sorted out
 blockCOM = True
 
-#-Core support------------------------------------------------------------------
+# -Core support------------------------------------------------------------------
 
 # Should Python Companions, Models and Views be loaded at startup
 csPythonSupport = True
@@ -349,7 +353,7 @@ csHtmlSupport = True
 # Handle xml files
 csXmlSupport = True
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # wxStyledTextCtrl default settings, edited on a seperate config node.
 # Docs from the Scintilla web page
 
@@ -377,7 +381,7 @@ STCBufferedDraw = True
 # whitespace every indent size columns. They make it easy to see which constructs
 # line up especially when they extend over multiple pages.
 STCIndentationGuides = False
-# Set the code page used to interpret the bytes of the document as characters. 
+# Set the code page used to interpret the bytes of the document as characters.
 ## options: 0, wx.stc.STC_CP_UTF8, wx.stc.STC_CP_DBCS
 STCCodePage = wx.stc.STC_CP_UTF8
 
@@ -420,77 +424,141 @@ STCCodeBrowseColour = wx.Colour(0, 0, 255)
 STCDebugBrowseColour = wx.Colour(255, 0, 0)
 
 # Markers
-STCLinePointer = wx.stc.STC_MARK_SHORTARROW, 'BLACK', 'BLUE'
-STCBreakpointMarker = wx.stc.STC_MARK_CIRCLE, 'BLACK', 'RED'
-STCTmpBreakpointMarker = wx.stc.STC_MARK_CIRCLE, 'BLACK', 'BLUE'
-STCDisabledBreakpointMarker = wx.stc.STC_MARK_CIRCLE, 'BLACK', wx.Colour(0xCC, 0xCC, 0xCC)
-STCMarkPlaceMarker = wx.stc.STC_MARK_SHORTARROW, 'BLACK', 'YELLOW'
+STCLinePointer = wx.stc.STC_MARK_SHORTARROW, "BLACK", "BLUE"
+STCBreakpointMarker = wx.stc.STC_MARK_CIRCLE, "BLACK", "RED"
+STCTmpBreakpointMarker = wx.stc.STC_MARK_CIRCLE, "BLACK", "BLUE"
+STCDisabledBreakpointMarker = wx.stc.STC_MARK_CIRCLE, "BLACK", wx.Colour(0xCC, 0xCC, 0xCC)
+STCMarkPlaceMarker = wx.stc.STC_MARK_SHORTARROW, "BLACK", "YELLOW"
 
-STCDiffAddedMarker = wx.stc.STC_MARK_PLUS, 'BLACK', 'WHITE'
-STCDiffRemovedMarker = wx.stc.STC_MARK_MINUS, 'BLACK', 'WHITE'
-STCDiffChangesMarker = wx.stc.STC_MARK_SMALLRECT, 'BLACK', 'WHITE'
+STCDiffAddedMarker = wx.stc.STC_MARK_PLUS, "BLACK", "WHITE"
+STCDiffRemovedMarker = wx.stc.STC_MARK_MINUS, "BLACK", "WHITE"
+STCDiffChangesMarker = wx.stc.STC_MARK_SMALLRECT, "BLACK", "WHITE"
 
-STCFoldingOpen = wx.stc.STC_MARK_MINUS, 'BLACK', 'WHITE'
-STCFoldingClose = wx.stc.STC_MARK_PLUS, 'BLACK', 'WHITE'
+STCFoldingOpen = wx.stc.STC_MARK_MINUS, "BLACK", "WHITE"
+STCFoldingClose = wx.stc.STC_MARK_PLUS, "BLACK", "WHITE"
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 # Editable preferences
-exportedProperties = ['flatTools', 'childFrameStyle', 'dataViewListStyle',
-  'paletteStyle', 'showFrameTestButton',
-  'pastels', 'pastelMedium', 'pastelLight', 'undefinedWindowCol',
-  'imageStoreType', 'pythonInterpreterPath', 'delayInitHelp', 'usePydocHelp',
-  'logStdStreams', 'recordModuleCallPoint', 'autoAddToApplication',
-  'installBCRTL', 'debugMode',
-  'suExecPythonStartup', 'suBoaConstricted',
-  'suSocketFileOpenServer',
-  'eoErrOutDockWindow', 'eoErrOutWindowHeightPerc', 'debugServerArgs',
-  'i18nLanguage',
-
-  'checkSyntax', 'onlyCheckIfLineModified', 'checkSourceOnSave',
-  'autoRefreshOnCodeComplete', 'importOnCodeComplete', 'callTipsOnOpenParen', 
-  'handleSpecialEuropeanKeys', 'euroKeysCountry', 'autoReindent', 
-  'neverEmptyUndoBuffer',
-
-  'rememberOpenFiles', 'showFilenameExtensions', 'editorNotebookOpenPos',
-  'editorMenuImages', 'expandEditorOnCloseInspector',
-
-  'exUseExplorer', 'exDefaultFilter', 'exWorkingDirectory', 'exDefaultTreeWidth',
-  'exInspectInspectableFiles', 'exOpenFromHere', 'exRecentFilesListSize',
-
-  'psPythonShell', 'ps1', 'ps2', 'ps3', 'ps4',
-
-  'showModifiedProps', 'propValueColour',
-  'oiLineHeight', 'oiEventSelectionHeight', 'inspNotebookFlags',
-
-  'cgAbsoluteImagePaths', 'cgEmptyLineBetweenObjects', 'cgKeywordArgFormat',
-  'cgAddInitMethodWarning', 'cgWrapLines', 'cgLineWrapWidth',
-  'cgContinuedLineIndent',
-
-  'dsGridSize', 'dsSelectionTagSize', 'dsSelectionFrameWidth',
-  'dsDefaultControlSize', 'dsSelectionTagCol', 'dsAnchorEnabledCol', 
-  'dsAnchorDisabledCol', 'dsUseSizers', 'dsInSizerCol', 'dsHasSizerCol',
-
-  'vpOGLCanvasBackgroundColour', 'vpOGLLinePen', 'vpOGLLineBrush',
-  'vpOGLClassShapePen', 'vpOGLClassShapeBrush', 'vpOGLExternalClassShapePen',
-  'vpOGLClassShapeBrush', 'vpOGLExternalModuleShapePen',
-  'vpOGLModuleShapeBrush',
+exportedProperties = [
+    "flatTools",
+    "childFrameStyle",
+    "dataViewListStyle",
+    "paletteStyle",
+    "showFrameTestButton",
+    "pastels",
+    "pastelMedium",
+    "pastelLight",
+    "undefinedWindowCol",
+    "imageStoreType",
+    "pythonInterpreterPath",
+    "delayInitHelp",
+    "usePydocHelp",
+    "logStdStreams",
+    "recordModuleCallPoint",
+    "autoAddToApplication",
+    "installBCRTL",
+    "debugMode",
+    "suExecPythonStartup",
+    "suBoaConstricted",
+    "suSocketFileOpenServer",
+    "eoErrOutDockWindow",
+    "eoErrOutWindowHeightPerc",
+    "debugServerArgs",
+    "i18nLanguage",
+    "checkSyntax",
+    "onlyCheckIfLineModified",
+    "checkSourceOnSave",
+    "autoRefreshOnCodeComplete",
+    "importOnCodeComplete",
+    "callTipsOnOpenParen",
+    "handleSpecialEuropeanKeys",
+    "euroKeysCountry",
+    "autoReindent",
+    "neverEmptyUndoBuffer",
+    "rememberOpenFiles",
+    "showFilenameExtensions",
+    "editorNotebookOpenPos",
+    "editorMenuImages",
+    "expandEditorOnCloseInspector",
+    "exUseExplorer",
+    "exDefaultFilter",
+    "exWorkingDirectory",
+    "exDefaultTreeWidth",
+    "exInspectInspectableFiles",
+    "exOpenFromHere",
+    "exRecentFilesListSize",
+    "psPythonShell",
+    "ps1",
+    "ps2",
+    "ps3",
+    "ps4",
+    "showModifiedProps",
+    "propValueColour",
+    "oiLineHeight",
+    "oiEventSelectionHeight",
+    "inspNotebookFlags",
+    "cgAbsoluteImagePaths",
+    "cgEmptyLineBetweenObjects",
+    "cgKeywordArgFormat",
+    "cgAddInitMethodWarning",
+    "cgWrapLines",
+    "cgLineWrapWidth",
+    "cgContinuedLineIndent",
+    "dsGridSize",
+    "dsSelectionTagSize",
+    "dsSelectionFrameWidth",
+    "dsDefaultControlSize",
+    "dsSelectionTagCol",
+    "dsAnchorEnabledCol",
+    "dsAnchorDisabledCol",
+    "dsUseSizers",
+    "dsInSizerCol",
+    "dsHasSizerCol",
+    "vpOGLCanvasBackgroundColour",
+    "vpOGLLinePen",
+    "vpOGLLineBrush",
+    "vpOGLClassShapePen",
+    "vpOGLClassShapeBrush",
+    "vpOGLExternalClassShapePen",
+    "vpOGLClassShapeBrush",
+    "vpOGLExternalModuleShapePen",
+    "vpOGLModuleShapeBrush",
 ]
 
-exportedSTCProps = ['STCViewEOL', 'STCUseTabs', 'STCTabWidth', 'STCIndent',
-  'STCLineNumMarginWidth',
-  'STCSymbolMarginWidth', 'STCFoldingMarginWidth', 'STCBufferedDraw',
-  'STCIndentationGuides', 'STCCodePage',
-  'STCViewWhiteSpace', 'STCCaretPolicy', 'STCCaretPeriod',
-  'STCEdgeMode', 'STCEdgeColumnWidth',
-  'STCCallTipBackColour', 'STCSyntaxErrorColour', 'STCCodeBrowseColour',
-  'STCDebugBrowseColour',
+exportedSTCProps = [
+    "STCViewEOL",
+    "STCUseTabs",
+    "STCTabWidth",
+    "STCIndent",
+    "STCLineNumMarginWidth",
+    "STCSymbolMarginWidth",
+    "STCFoldingMarginWidth",
+    "STCBufferedDraw",
+    "STCIndentationGuides",
+    "STCCodePage",
+    "STCViewWhiteSpace",
+    "STCCaretPolicy",
+    "STCCaretPeriod",
+    "STCEdgeMode",
+    "STCEdgeColumnWidth",
+    "STCCallTipBackColour",
+    "STCSyntaxErrorColour",
+    "STCCodeBrowseColour",
+    "STCDebugBrowseColour",
 ]
 
-exportedCorePluginProps = ['pluginsEnabled', 'extraPluginsPath', 'pluginErrorHandling',
-  'blockCOM',
-  'csPythonSupport', 'csWxPythonSupport', 'csConfigSupport', 'csCppSupport',
-  'csHtmlSupport', 'csXmlSupport',
+exportedCorePluginProps = [
+    "pluginsEnabled",
+    "extraPluginsPath",
+    "pluginErrorHandling",
+    "blockCOM",
+    "csPythonSupport",
+    "csWxPythonSupport",
+    "csConfigSupport",
+    "csCppSupport",
+    "csHtmlSupport",
+    "csXmlSupport",
 ]
 
 exportedPluginProps = []

@@ -33,67 +33,70 @@ Continuation lines are now handled for class, method and function defs
 # XXX Add regex for __calling__ code.
 # XXX Mainly so that line conts can be used
 
-import os, sys
 import importlib
+import os
+import pprint
 import re
-import string, pprint
-# from types import IntType, StringType    #id([][,]id)*
-
-import Preferences, Utils
-from Utils import _
+import string
+import sys
 
 import methodparse
+
+# from types import IntType, StringType    #id([][,]id)*
+import Utils
+from Utils import _
 
 method_indent = Utils.getIndentBlock()
 body_indent = method_indent * 2
 
-id = '[A-Za-z_][A-Za-z0-9_]*'
+id = "[A-Za-z_][A-Za-z0-9_]*"
 is_id = re.compile(id)
-obj_def = '[A-Za-z_][A-Za-z0-9_.]*'
-blank_line = re.compile('^[ \t]*($|#)')
-is_class = re.compile(r'^[ \t]*class[ \t]+(?P<id>%s)[ \t]*(?P<sup>\([^)]*\))?[ \t]*:' % id)
-is_class_start = re.compile(r'^[ \t]*class[ \t]+(?P<id>%s)[ \t]*[\(\:]' % id)
-is_method = re.compile(r'^[ \t]*def[ \t]+(?P<id>%s)[ \t]*\((?P<sig>.*)\)[ \t]*[:][ \t]*$' % id)
-is_method_start = re.compile(r'^[ \t]*def[ \t]+(?P<id>%s)[ \t]*\(' % id)
-is_func = re.compile(r'^def[ \t]+(?P<id>%s)[ \t]*\((?P<sig>.*)\)[ \t]*[:][ \t]*$' % id)
-is_func_start = re.compile(r'^def[ \t]+(?P<id>%s)[ \t]*\(' % id)
-is_attrib = re.compile(r'[ \t]*self[.](?P<name>%s)[ \t]*=[ \t]*' % id)
-is_attrib_from_call = re.compile(r'[ \t]*self[.](?P<name>%s)[ \t]*=[ \t]*(?P<classpath>%s)\(' % (id, obj_def))
-is_name = re.compile(r'[ \t]*(?P<name>%s)[ \t]*=[ \t]*' % id)
-is_name_from_call = re.compile(r'[ \t]*(?P<name>%s)[ \t]*=[ \t]*(?P<classpath>%s)\(' % (id, obj_def))
+obj_def = "[A-Za-z_][A-Za-z0-9_.]*"
+blank_line = re.compile("^[ \t]*($|#)")
+is_class = re.compile(r"^[ \t]*class[ \t]+(?P<id>%s)[ \t]*(?P<sup>\([^)]*\))?[ \t]*:" % id)
+is_class_start = re.compile(r"^[ \t]*class[ \t]+(?P<id>%s)[ \t]*[\(\:]" % id)
+is_method = re.compile(r"^[ \t]*def[ \t]+(?P<id>%s)[ \t]*\((?P<sig>.*)\)[ \t]*[:][ \t]*$" % id)
+is_method_start = re.compile(r"^[ \t]*def[ \t]+(?P<id>%s)[ \t]*\(" % id)
+is_func = re.compile(r"^def[ \t]+(?P<id>%s)[ \t]*\((?P<sig>.*)\)[ \t]*[:][ \t]*$" % id)
+is_func_start = re.compile(r"^def[ \t]+(?P<id>%s)[ \t]*\(" % id)
+is_attrib = re.compile(r"[ \t]*self[.](?P<name>%s)[ \t]*=[ \t]*" % id)
+is_attrib_from_call = re.compile(r"[ \t]*self[.](?P<name>%s)[ \t]*=[ \t]*(?P<classpath>%s)\(" % (id, obj_def))
+is_name = re.compile(r"[ \t]*(?P<name>%s)[ \t]*=[ \t]*" % id)
+is_name_from_call = re.compile(r"[ \t]*(?P<name>%s)[ \t]*=[ \t]*(?P<classpath>%s)\(" % (id, obj_def))
 ## HELP don't know what are_names is meant to search for nor how to fix it (it produces and error when uncommented).
 # are_names = re.compile(r'[ \t]*((?P<names>%s)[ \t]*[,][ \t]*)+(?P<lastname>%s)[ \t]*)*=[ \t]*' % (id, id))
-is_import = re.compile(r'^[ \t]*import[ \t]+(?P<imp>[^#;]+)')
-is_from = re.compile(r'^[ \t]*from[ \t]+(?P<module>%s([ \t]*\\.[ \t]*%s)*)[ \t]+import[ \t]+(?P<imp>[^#;]+)' % (id, id))
-is_for = re.compile(r'^[ \t]*for[ \t]+(?P<names>.+)[ \t]+in[ \t]+.+[ \t]*:')
-dedent = re.compile(r'^[^ \t]')
-indent = re.compile(r'^[^ \t]*')
+is_import = re.compile(r"^[ \t]*import[ \t]+(?P<imp>[^#;]+)")
+is_from = re.compile(r"^[ \t]*from[ \t]+(?P<module>%s([ \t]*\\.[ \t]*%s)*)[ \t]+import[ \t]+(?P<imp>[^#;]+)" % (id, id))
+is_for = re.compile(r"^[ \t]*for[ \t]+(?P<names>.+)[ \t]+in[ \t]+.+[ \t]*:")
+dedent = re.compile(r"^[^ \t]")
+indent = re.compile(r"^[^ \t]*")
 is_doc_quote = re.compile("'''")
 id_doc_quote_dbl = re.compile('"""')
-is_todo = re.compile(r'^[ \t]*# XXX')
-is_todo2 = re.compile(r'^[ \t]*# TODO:')
-is_wid = re.compile(r'^\[(?P<wids>.*)\][ \t]*[=][ \t]*wxNewId[(](?P<count>\d+)[)]$')
-is_break_line = re.compile('^#-+(?P<descr>.*%s)-+$' % obj_def)
-is_resource = '(?P<imppath>%s)[.]get(?P<imgname>%s)%%s[(][)]' % (obj_def, id)
-is_resource_bitmap = re.compile(is_resource % 'Bitmap')
-is_resource_icon = re.compile(is_resource % 'Icon')
+is_todo = re.compile(r"^[ \t]*# XXX")
+is_todo2 = re.compile(r"^[ \t]*# TODO:")
+is_wid = re.compile(r"^\[(?P<wids>.*)\][ \t]*[=][ \t]*wxNewId[(](?P<count>\d+)[)]$")
+is_break_line = re.compile("^#-+(?P<descr>.*%s)-+$" % obj_def)
+is_resource = "(?P<imppath>%s)[.]get(?P<imgname>%s)%%s[(][)]" % (obj_def, id)
+is_resource_bitmap = re.compile(is_resource % "Bitmap")
+is_resource_icon = re.compile(is_resource % "Icon")
 
 sq3string = r"(\b[rR])?'''([^'\\]|\\.|'(?!''))*(''')?"
 dq3string = r'(\b[rR])?"""([^"\\]|\\.|"(?!""))*(""")?'
-is_doc = re.compile('(?P<string>%s|%s)' % (sq3string, dq3string))
+is_doc = re.compile("(?P<string>%s|%s)" % (sq3string, dq3string))
 
 # XXX Provide for lines between entries
-sep_line = '#[-]+.*'
-str_name = '# Name:[ \t]*(?P<name>.*)'
-str_purpose = '# Purpose:[ \t]*(?P<purpose>.*)'
-str_author = '# Author:[ \t]*(?P<author>.*)'
-str_created = '# Created:[ \t]*(?P<created>.*)'
-str_rcs_id = '# RCS-ID:[ \t]*(?P<rcs_id>.*)'
-str_copyright = '# Copyright:[ \t]*(?P<copyright>.*)'
-str_licence = '# Licence:[ \t]*(?P<licence>[^#]*#[-]+)'
+sep_line = "#[-]+.*"
+str_name = "# Name:[ \t]*(?P<name>.*)"
+str_purpose = "# Purpose:[ \t]*(?P<purpose>.*)"
+str_author = "# Author:[ \t]*(?P<author>.*)"
+str_created = "# Created:[ \t]*(?P<created>.*)"
+str_rcs_id = "# RCS-ID:[ \t]*(?P<rcs_id>.*)"
+str_copyright = "# Copyright:[ \t]*(?P<copyright>.*)"
+str_licence = "# Licence:[ \t]*(?P<licence>[^#]*#[-]+)"
 
-is_info = re.compile(sep_line + str_name + str_purpose + str_author + \
-                     str_created + str_rcs_id + str_copyright + str_licence, re.DOTALL)
+is_info = re.compile(
+    sep_line + str_name + str_purpose + str_author + str_created + str_rcs_id + str_copyright + str_licence, re.DOTALL
+)
 
 
 class ModuleParseError(Exception):
@@ -108,7 +111,7 @@ class CodeBlock:
         self.locals = {}
 
     def __repr__(self):
-        return '[%d - %d]' % (self.start, self.end)
+        return "[%d - %d]" % (self.start, self.end)
 
     def renumber(self, from_line, increment):
         if self.start > from_line:
@@ -128,8 +131,8 @@ class CodeBlock:
 
     def getparams(self):
         self.params = {}
-        for fld in methodparse.safesplitfields(self.sig, ','):
-            kv = fld.split('=', 1)
+        for fld in methodparse.safesplitfields(self.sig, ","):
+            kv = fld.split("=", 1)
             if len(kv) == 1:
                 self.params[kv] = None
             else:
@@ -138,13 +141,15 @@ class CodeBlock:
 
     def localnames(self):
         locls = list(self.locals.keys())
-        return [name for name in [fld.split('=')[0]
-                                  for fld in methodparse.safesplitfields(self.signature, ',')]
-                if name not in locls] + list(self.locals.keys())
+        return [
+            name
+            for name in [fld.split("=")[0] for fld in methodparse.safesplitfields(self.signature, ",")]
+            if name not in locls
+        ] + list(self.locals.keys())
 
 
 class Attrib:
-    def __init__(self, name, lineno, objtype=''):
+    def __init__(self, name, lineno, objtype=""):
         self.name = name
         self.lineno = lineno
         self.objtype = objtype
@@ -161,7 +166,7 @@ def renumber(lineno, increment, start):
 
 # each Python class is represented by an instance of this class
 class Class:
-    """ Class to represent a Python class. """
+    """Class to represent a Python class."""
 
     def __init__(self, module, name, super, file, lineno):
         self.module = module
@@ -174,14 +179,19 @@ class Class:
         self.attributes = {}
         self.class_attributes = {}
         self.file = file
-        self.block = CodeBlock('', lineno, lineno)
+        self.block = CodeBlock("", lineno, lineno)
 
     def __repr__(self):
-        return self.name + repr(self.block) + '\n' + '\n'.join(
-            ['    ' + meth + repr(self.methods[meth]) for meth in self.method_order])
+        return (
+            self.name
+            + repr(self.block)
+            + "\n"
+            + "\n".join(["    " + meth + repr(self.methods[meth]) for meth in self.method_order])
+        )
 
     def add_method(self, name, sig, linestart, lineend=None, to_bottom=1):
-        if not lineend: lineend = linestart
+        if not lineend:
+            lineend = linestart
         self.methods[name] = CodeBlock(sig, linestart, lineend)
         if to_bottom:
             self.method_order.append(name)
@@ -195,19 +205,19 @@ class Class:
         del self.methods[name]
         self.method_order.remove(name)
 
-    def add_attr(self, name, lineno, thetype=''):
+    def add_attr(self, name, lineno, thetype=""):
         if name in self.attributes:
             self.attributes[name].append(CodeBlock(thetype, lineno, lineno))
         else:
             self.attributes[name] = [CodeBlock(thetype, lineno, lineno)]
 
-    def add_class_attr(self, name, lineno, thetype=''):
+    def add_class_attr(self, name, lineno, thetype=""):
         if name in self.class_attributes:
             self.class_attributes[name].append(CodeBlock(thetype, lineno, lineno))
         else:
             self.class_attributes[name] = [CodeBlock(thetype, lineno, lineno)]
 
-    def add_local(self, name, meth, lineno, thetype=''):
+    def add_local(self, name, meth, lineno, thetype=""):
         if meth in self.methods:
             if name not in self.methods[meth].locals:
                 self.methods[meth].locals[name] = Attrib(name, lineno, thetype)
@@ -224,7 +234,7 @@ class Class:
         for name, meth in list(self.methods.items()):
             if meth.contains(line_no):
                 return name, meth
-        return '', None
+        return "", None
 
     def calcExtent(self):
         # return max(*[m.end for m in self.methods.values()])
@@ -235,18 +245,19 @@ class Class:
         return ext
 
 
-class Test2: pass
+class Test2:
+    pass
 
 
 class Module:
-    """ Represents a Python module.
+    """Represents a Python module.
 
     Parses and maintains dictionaries of the classes and
-    functions defined in a module. """
+    functions defined in a module."""
 
     def finaliseEntry(self, cur_class, cur_meth, cur_func, lineno):
-        """ When a new structure is encountered, finalise the current
-        structure, whatever it is. """
+        """When a new structure is encountered, finalise the current
+        structure, whatever it is."""
         if cur_class:
             # Gobble up blank lines
             lineno = lineno - 1
@@ -255,7 +266,7 @@ class Module:
 
             if cur_meth:
                 cur_class.end_method(cur_meth, lineno)
-                cur_meth = ''
+                cur_meth = ""
             cur_class.block.end = lineno
 
             cur_class = None
@@ -273,17 +284,17 @@ class Module:
         return line
 
     def decomment(self, line):
-        return methodparse.safesplitfields(line, '#', returnBlanks=1)[0]
+        return methodparse.safesplitfields(line, "#", returnBlanks=1)[0]
 
-    line_conts = (',', '\\', '(')
+    line_conts = (",", "\\", "(")
 
     def readcontinuedlines(self, lineno, terminator):
-        contline = ''
+        contline = ""
         while lineno < len(self.source):
             line = self.decomment(self.source[lineno]).rstrip()
             if line:
                 if line[-1] in self.line_conts:
-                    while line and line[-1] == '\\':
+                    while line and line[-1] == "\\":
                         line = line[:-1]
                     contline = contline + line
                     lineno = lineno + 1
@@ -291,7 +302,7 @@ class Module:
                 elif not terminator:
                     contline = contline + line
                     return lineno, contline
-                elif line[-1] in string.digits + string.ascii_letters + '_':
+                elif line[-1] in string.digits + string.ascii_letters + "_":
                     contline = contline + line
                     lineno = lineno + 1
                     continue
@@ -304,7 +315,7 @@ class Module:
                 lineno = lineno + 1
                 continue
 
-        return -1, ''
+        return -1, ""
 
     def __init__(self, module, modulesrc, eol=os.linesep):  # , classes = {}, class_order = [], file = ''):
         self.classes = {}  # classes
@@ -326,65 +337,65 @@ class Module:
         self.from_imports_star_cache = {}
 
         cur_class = None
-        cur_meth = ''
+        cur_meth = ""
         cur_func = None
-        file = ''
+        file = ""
         self.lineno = 0
         self.source = modulesrc
         self.eol = os.linesep
         if self.source:
-            if self.source[0].endswith('\r\n'):  # win
-                self.eol = '\r\n'
-            elif self.source[0].endswith('\n'):  # unix
-                self.eol = '\n'
-            elif self.source[0].endswith('\r'):  # mac
-                self.eol = '\r'
+            if self.source[0].endswith("\r\n"):  # win
+                self.eol = "\r\n"
+            elif self.source[0].endswith("\n"):  # unix
+                self.eol = "\n"
+            elif self.source[0].endswith("\r"):  # mac
+                self.eol = "\r"
 
         self.loc = 0
         while self.lineno < len(self.source):
             self.loc = self.loc + 1
             line = self.readline().rstrip()
 
-            cont, cur_class, cur_meth, cur_func = self.parseLine(module, file,
-                                                                 line, self.lineno, cur_class, cur_meth, cur_func)
+            cont, cur_class, cur_meth, cur_func = self.parseLine(
+                module, file, line, self.lineno, cur_class, cur_meth, cur_func
+            )
 
         # if it's the last class in the source, it will not dedent
         # check manually
-        cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class, cur_meth,
-                                                           cur_func, self.lineno + 1)
+        cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class, cur_meth, cur_func, self.lineno + 1)
 
     def getObjType(self, rem):
         if rem:
             if rem[0] in ('"', "'"):
-                return 'string'
-            elif rem[0] in string.digits + '+-':
-                return 'number'
-            elif rem[0] == '{':
-                return 'dict'
-            elif rem[0] == '[':
-                return 'list'
-            elif rem[0] == '(':
-                return 'tuple'
-            elif rem[0] in string.ascii_letters + '_':
-                return 'ref'
+                return "string"
+            elif rem[0] in string.digits + "+-":
+                return "number"
+            elif rem[0] == "{":
+                return "dict"
+            elif rem[0] == "[":
+                return "list"
+            elif rem[0] == "(":
+                return "tuple"
+            elif rem[0] in string.ascii_letters + "_":
+                return "ref"
             # else: print 'Unhandled objtype', rem
-        return ''
+        return ""
 
     def parseLineIsolated(self, line, lineno):
         cls = self.getClassForLineNo(lineno)
         if cls:
             mthName, mth = cls.getMethodForLineNo(lineno)
-            return self.parseLine('', '', line, lineno, cls, mthName, None)
+            return self.parseLine("", "", line, lineno, cls, mthName, None)
         else:
             fnc = self.getFunctionForLineNo(lineno)
             if fnc:
-                return self.parseLine('', '', line, lineno, None, '', fnc)
-        return self.parseLine('', '', line, lineno, None, '', None)
+                return self.parseLine("", "", line, lineno, None, "", fnc)
+        return self.parseLine("", "", line, lineno, None, "", None)
 
     def parseLine(self, module, file, line, lineno, cur_class, cur_meth, cur_func):
         res = is_todo.match(line) or is_todo2.match(line)
         if res:
-            self.todos.append((lineno, line[res.span()[1]:].strip()))
+            self.todos.append((lineno, line[res.span()[1] :].strip()))
             return 0, cur_class, cur_meth, cur_func
 
         if blank_line.match(line):
@@ -393,7 +404,7 @@ class Module:
             if len(line) == 80:
                 res = is_break_line.match(line)
                 if res:
-                    self.break_lines[lineno] = res.group('descr')
+                    self.break_lines[lineno] = res.group("descr")
 
             return 0, cur_class, cur_meth, cur_func
 
@@ -405,35 +416,34 @@ class Module:
             res = is_class.match(line)
             if not res:
                 # check for line conts
-                lno, contl = self.readcontinuedlines(lineno - 1, ':')
+                lno, contl = self.readcontinuedlines(lineno - 1, ":")
                 if lno == -1:
                     return 0, cur_class, cur_meth, cur_func
-                class_name = res2.group('id')
-                inherit = contl[contl.find('('):contl.rfind(')') + 1]
+                class_name = res2.group("id")
+                inherit = contl[contl.find("(") : contl.rfind(")") + 1]
             else:
-                class_name = res.group('id')
-                inherit = res.group('sup')
+                class_name = res.group("id")
+                inherit = res.group("sup")
 
             # we found a class definition
-            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class,
-                                                               cur_meth, cur_func, lineno)
+            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class, cur_meth, cur_func, lineno)
             if inherit:
                 # the class inherits from other classes
                 inherit = inherit[1:-1].strip()
                 names = []
-                for n in inherit.split(','):
+                for n in inherit.split(","):
                     n = n.strip()
                     if n:
                         if n in self.classes:
                             # we know this super class
                             n = self.classes[n]
                         else:
-                            c = n.split('.')
+                            c = n.split(".")
                             if len(c) > 1:
                                 # super class is of the
                                 # form module.class:
                                 # look in module for class
-                                m = c[-2]
+                                c[-2]
                                 c = c[-1]
                         names.append(n)
                 inherit = names
@@ -464,7 +474,7 @@ class Module:
             ##                    order = self.class_order.index(cn)
             ##            else:
             cur_class = Class(module, class_name, inherit, file, lineno)
-            cur_meth = ''
+            cur_meth = ""
             self.classes[class_name] = cur_class
             self.class_order.append(class_name)
             ##            if order == -1:
@@ -478,17 +488,16 @@ class Module:
         if res2:
             res = is_func.match(line)
             if not res:
-                lno, contl = self.readcontinuedlines(lineno - 1, ':')
+                lno, contl = self.readcontinuedlines(lineno - 1, ":")
                 if lno == -1:
                     return 0, cur_class, cur_meth, cur_func
-                res_group_id = res2.group('id')
-                res_group_sig = contl[contl.find('(') + 1:contl.rfind(')')]
+                res_group_id = res2.group("id")
+                res_group_sig = contl[contl.find("(") + 1 : contl.rfind(")")]
             else:
-                res_group_id = res.group('id')
-                res_group_sig = res.group('sig')
+                res_group_id = res.group("id")
+                res_group_sig = res.group("sig")
 
-            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class,
-                                                               cur_meth, cur_func, lineno)
+            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class, cur_meth, cur_func, lineno)
             func_name = res_group_id
             cur_func = self.functions[func_name] = CodeBlock(res_group_sig, lineno, 0)
             self.function_order.append(func_name)
@@ -498,14 +507,14 @@ class Module:
         if res2:
             res = is_method.match(line)
             if not res:
-                lno, contl = self.readcontinuedlines(lineno - 1, ':')
+                lno, contl = self.readcontinuedlines(lineno - 1, ":")
                 if lno == -1:
                     return 0, cur_class, cur_meth, cur_func
-                res_group_id = res2.group('id')
-                res_group_sig = contl[contl.find('(') + 1:contl.rfind(')')]
+                res_group_id = res2.group("id")
+                res_group_sig = contl[contl.find("(") + 1 : contl.rfind(")")]
             else:
-                res_group_id = res.group('id')
-                res_group_sig = res.group('sig')
+                res_group_id = res.group("id")
+                res_group_sig = res.group("sig")
 
             # found a method definition
             if cur_class:
@@ -522,8 +531,8 @@ class Module:
             # found a attribute binding
             if cur_class:
                 # and we know the class it belongs to
-                classpath = res.group('classpath')
-                cur_class.add_attr(res.group('name'), lineno, classpath)
+                classpath = res.group("classpath")
+                cur_class.add_attr(res.group("name"), lineno, classpath)
 
             return 0, cur_class, cur_meth, cur_func
 
@@ -532,17 +541,17 @@ class Module:
             # found a attribute binding with possible object type
             if cur_class:
                 # and we know the class it belongs to
-                rem = line[res.end():]
+                rem = line[res.end() :]
                 objtype = self.getObjType(rem)
-                cur_class.add_attr(res.group('name'), lineno, objtype)
+                cur_class.add_attr(res.group("name"), lineno, objtype)
 
             return 0, cur_class, cur_meth, cur_func
 
         res = is_for.match(line)
         if res:
             names = []
-            for name in methodparse.safesplitfields(res.group('names'), ','):
-                name = name.strip('()')
+            for name in methodparse.safesplitfields(res.group("names"), ","):
+                name = name.strip("()")
                 if is_id.match(name):
                     names.append(name)
 
@@ -564,20 +573,19 @@ class Module:
             else:
                 for name in names:
                     if name not in self.globals:
-                        self.globals[name] = CodeBlock('', self.lineno, lineno)
+                        self.globals[name] = CodeBlock("", self.lineno, lineno)
                         self.global_order.append(name)
 
             return 0, cur_class, cur_meth, cur_func
 
         if dedent.match(line):
             # end of class definition
-            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class,
-                                                               cur_meth, cur_func, lineno)
+            cur_class, cur_meth, cur_func = self.finaliseEntry(cur_class, cur_meth, cur_func, lineno)
 
         res = is_import.match(line)
         if res:
-            if line[-1] == '\\':
-                lno, contl = self.readcontinuedlines(lineno - 1, '')
+            if line[-1] == "\\":
+                lno, contl = self.readcontinuedlines(lineno - 1, "")
                 if lno == -1:
                     return 0, cur_class, cur_meth, cur_func
                 res = is_import.match(contl)
@@ -585,31 +593,31 @@ class Module:
                     return 0, cur_class, cur_meth, cur_func
 
             # import module
-            for n in res.group('imp').split(','):
+            for n in res.group("imp").split(","):
                 n = n.strip()
-                i = [s for s in n.split('.')]
-                self.imports['.'.join(i)] = [lineno]
+                i = [s for s in n.split(".")]
+                self.imports[".".join(i)] = [lineno]
             return 0, cur_class, cur_meth, cur_func
 
         res = is_from.match(line)
         if res:
             # from module import stuff
-            if line[-1] == '\\':
-                lno, contl = self.readcontinuedlines(lineno - 1, '')
+            if line[-1] == "\\":
+                lno, contl = self.readcontinuedlines(lineno - 1, "")
                 if lno == -1:
                     return 0, cur_class, cur_meth, cur_func
                 res = is_from.match(contl)
                 if not res:
                     return 0, cur_class, cur_meth, cur_func
 
-            mod, names = res.group('module'), res.group('imp').split(',')
+            mod, names = res.group("module"), res.group("imp").split(",")
             self.from_imports[mod] = [lineno]
 
             for n in names:
                 n = n.strip()
                 if n:
                     self.from_imports[mod].append(n)
-                    if n != '*':
+                    if n != "*":
                         self.from_imports_names[n] = mod
                     else:
                         self.from_imports_star.append(mod)
@@ -623,11 +631,11 @@ class Module:
         objtype = None
         res = is_name_from_call.match(line)
         if res:
-            objtype = res.group('classpath')
+            objtype = res.group("classpath")
 
         res = is_name.match(line)
         if res:
-            rem = line[res.end():]
+            rem = line[res.end() :]
             if objtype is None:
                 objtype = self.getObjType(rem)
             # found a name binding
@@ -635,13 +643,13 @@ class Module:
             if cur_class:
                 # and we know the class it belongs to
                 if cur_meth:
-                    cur_class.add_local(res.group('name'), cur_meth, lineno, objtype)
+                    cur_class.add_local(res.group("name"), cur_meth, lineno, objtype)
                 else:
                     # must be class attr
-                    cur_class.add_class_attr(res.group('name'), lineno, line[res.end():])
+                    cur_class.add_class_attr(res.group("name"), lineno, line[res.end() :])
             # function
             elif cur_func:
-                name = res.group('name')
+                name = res.group("name")
                 if name not in list(cur_func.locals.keys()):
                     cur_func.locals[name] = Attrib(name, lineno, objtype)
             ##                if self.functions.has_key(cur_func):
@@ -649,7 +657,7 @@ class Module:
             ##                        self.functions[cur_func].locals[name] = Attrib(name, lineno)
             # global
             else:
-                name = res.group('name')
+                name = res.group("name")
                 if name not in self.globals:
                     self.globals[name] = CodeBlock(objtype, self.lineno, lineno)
                     self.global_order.append(name)
@@ -677,35 +685,35 @@ class Module:
 
     def extractClassBody(self, class_name):
         block = self.classes[class_name].block
-        return self.source[block.start:block.end]
+        return self.source[block.start : block.end]
 
     def addMethod(self, class_name, method_name, method_params, method_body, to_bottom=1):
         new_length = len(method_body) + 2
-        if not method_body: return
+        if not method_body:
+            return
         a_class = self.classes[class_name]
         if method_name in a_class.method_order:
-            raise Exception(_('Method exists'))
+            raise Exception(_("Method exists"))
 
         # Add a method code block
         if to_bottom or not a_class.method_order:
             ins_point = a_class.calcExtent()
-            pre_blank = ['']
+            pre_blank = [""]
             post_blank = []
         else:
             ins_point = a_class.methods[a_class.method_order[0]].start - 1
             pre_blank = []
-            post_blank = ['']
+            post_blank = [""]
 
         # renumber code blocks
         self.renumber(new_length, ins_point)
 
-        a_class.add_method(method_name, method_params, ins_point + 1, ins_point + \
-                           new_length, to_bottom)
+        a_class.add_method(method_name, method_params, ins_point + 1, ins_point + new_length, to_bottom)
 
         # Add in source
-        self.source[ins_point: ins_point] = \
-            pre_blank + ['%sdef %s(%s):' % (method_indent, method_name, method_params)] + \
-            method_body + post_blank
+        self.source[ins_point:ins_point] = (
+            pre_blank + ["%sdef %s(%s):" % (method_indent, method_name, method_params)] + method_body + post_blank
+        )
 
     def addLine(self, line, line_no):
         self.source.insert(line_no, line)
@@ -713,11 +721,11 @@ class Module:
 
     def extractMethodBody(self, class_name, method_name):
         block = self.classes[class_name].methods[method_name]
-        return self.source[block.start:block.end]
+        return self.source[block.start : block.end]
 
     def extractFunctionBody(self, function_name):
         block = self.functions[function_name]
-        return self.source[block.start:block.end]
+        return self.source[block.start : block.end]
 
     def renumber(self, deltaLines, start):
         if deltaLines:
@@ -741,24 +749,26 @@ class Module:
     ##
     def replaceBody(self, name, code_block_dict, new_body):
         newLines = len(new_body)
-        if not new_body: return
+        if not new_body:
+            return
         code_block = code_block_dict[name]
         prevLines = code_block.end - code_block.start
         deltaLines = newLines - prevLines
 
-        self.source[code_block.start: code_block.end] = new_body
+        self.source[code_block.start : code_block.end] = new_body
 
         self.renumber(deltaLines, code_block.start)
 
     def replaceMethodBody(self, class_name, method_name, new_body):
-        if not ' '.join(new_body).strip(): new_body = [body_indent + 'pass', '']
+        if not " ".join(new_body).strip():
+            new_body = [body_indent + "pass", ""]
         self.replaceBody(method_name, self.classes[class_name].methods, new_body)
 
     def removeMethod(self, class_name, name):
         code_block = self.classes[class_name].methods[name]
         totLines = code_block.end - code_block.start + 1  # def decl
 
-        self.source[code_block.start - 1: code_block.end] = []
+        self.source[code_block.start - 1 : code_block.end] = []
 
         self.renumber(-totLines, code_block.start - 1)
 
@@ -768,20 +778,20 @@ class Module:
         try:
             m = is_doc.search(body)
         except RuntimeError as err:
-            if str(err) != 'maximum recursion limit exceeded':
+            if str(err) != "maximum recursion limit exceeded":
                 raise
             else:
-                return '<i>Doc string too big for sre</i>'
+                return "<i>Doc string too big for sre</i>"
         if m:
             s, e = m.span()
-            return body[s + 3:e - 3].strip()
+            return body[s + 3 : e - 3].strip()
         else:
-            return ''
+            return ""
 
     def getModuleDoc(self):
-        """ Return doc string for module. Scan the area from the start of the
-            file up to the first occurence of a doc string containing structure
-            like func or class """
+        """Return doc string for module. Scan the area from the start of the
+        file up to the first occurence of a doc string containing structure
+        like func or class"""
         if self.class_order:
             classStart = self.classes[self.class_order[0]].block.start - 1
         else:
@@ -792,14 +802,14 @@ class Module:
         else:
             funcStart = len(self.source)
 
-        modTop = self.source[:min(classStart, funcStart)]
-        return self.searchDoc(' '.join(self.formatDocStr(modTop)))
+        modTop = self.source[: min(classStart, funcStart)]
+        return self.searchDoc(" ".join(self.formatDocStr(modTop)))
 
     def formatDocStr(self, lines):
         l = []
         for line in lines:
             if not line.strip():
-                l.append('<P>')
+                l.append("<P>")
             else:
                 l.append(line)
         return l
@@ -817,25 +827,23 @@ class Module:
         else:
             methStart = cls.block.end
 
-        classDoc = self.source[cls.block.start: min(methStart,
-                                                    cls.block.end)]
+        classDoc = self.source[cls.block.start : min(methStart, cls.block.end)]
 
-        return self.searchDoc(' '.join(self.formatDocStr(classDoc)))
+        return self.searchDoc(" ".join(self.formatDocStr(classDoc)))
 
     def getClassMethDoc(self, class_name, meth_name):
-        """ Extract the doc string for a method """
+        """Extract the doc string for a method"""
         methDoc = self.extractMethodBody(class_name, meth_name)
-        return self.searchDoc(' '.join(self.formatDocStr(methDoc)))
+        return self.searchDoc(" ".join(self.formatDocStr(methDoc)))
 
     def getFunctionDoc(self, function_name):
         funcDoc = self.extractFunctionBody(function_name)
-        return self.searchDoc(' '.join(self.formatDocStr(funcDoc)))
+        return self.searchDoc(" ".join(self.formatDocStr(funcDoc)))
 
     def renameClass(self, old_class_name, new_class_name):
         cls = self.classes[old_class_name]
         idx = cls.block.start - 1
-        self.source[idx] = self.source[idx].replace(old_class_name,
-                                                    new_class_name, 1)
+        self.source[idx] = self.source[idx].replace(old_class_name, new_class_name, 1)
         cls.name = new_class_name
         del self.classes[old_class_name]
         self.classes[new_class_name] = cls
@@ -848,8 +856,7 @@ class Module:
         # untested
         meth = self.classes[class_name].methods[old_method_name]
         idx = meth.start - 1
-        self.source[idx] = self.source[idx].replace(old_method_name,
-                                                    new_method_name, 1)
+        self.source[idx] = self.source[idx].replace(old_method_name, new_method_name, 1)
         del self.classes[class_name].methods[old_method_name]
         self.classes[class_name].methods[new_method_name] = meth
         # rename order
@@ -857,21 +864,21 @@ class Module:
         ##        del self.classes[class_name].method_order[idx]
         ##        self.classes[class_name].method_order.insert(idx, new_method_name)
 
-        self.classes[class_name].method_order[ \
-            self.classes[class_name].method_order.index(old_method_name)] = new_method_name
+        self.classes[class_name].method_order[self.classes[class_name].method_order.index(old_method_name)] = (
+            new_method_name
+        )
 
     def addFunction(self, func_name, func_params, func_body):
-        if not func_body: return
+        if not func_body:
+            return
 
         # Add a func code block
         ins_point = len(self.source)
-        self.functions[func_name] = CodeBlock(func_params,
-                                              ins_point, ins_point + len(func_body))
+        self.functions[func_name] = CodeBlock(func_params, ins_point, ins_point + len(func_body))
         self.function_order.append(func_name)
 
         # Add in source
-        self.source[ins_point: ins_point] = \
-            ['def %s(%s):' % (func_name, func_params)] + func_body + ['']
+        self.source[ins_point:ins_point] = ["def %s(%s):" % (func_name, func_params)] + func_body + [""]
 
     def replaceFunctionBody(self, func_name, new_body):
         self.replaceBody(func_name, self.functions, new_body)
@@ -881,7 +888,7 @@ class Module:
         ins_point = cb.start
         func_size = cb.end - ins_point
 
-        self.source[ins_point: cb.end] = []
+        self.source[ins_point : cb.end] = []
         self.function_order.remove(func_name)
         del self.functions[func_name]
 
@@ -896,7 +903,8 @@ class Module:
         def AddPathToHierarchy(path, result, fn):
             """We have an exhausted path. Simply put it into the result dictionary."""
             if path[0] in list(result.keys()):
-                if len(path) > 1: fn(path[1:], result[path[0]], fn)
+                if len(path) > 1:
+                    fn(path[1:], result[path[0]], fn)
             else:
                 for part in path:
                     result[part] = {}
@@ -911,8 +919,7 @@ class Module:
                     exhausted.reverse()
                     AddPathToHierarchy(exhausted, result, AddPathToHierarchy)
                 else:
-                    rv[cls.name] = self.ExhaustBranch(cls.name, classes,
-                                                      path + [cls.name], result)
+                    rv[cls.name] = self.ExhaustBranch(cls.name, classes, path + [cls.name], result)
         if len(rv) == 0:
             exhausted = path
             exhausted.reverse()
@@ -920,7 +927,7 @@ class Module:
         return rv
 
     def createHierarchy(self):
-        """ Build the inheritance hierarchy """
+        """Build the inheritance hierarchy"""
         hierc = {}
         for cls in list(self.classes.keys()):
             self.ExhaustBranch(cls, self.classes, [cls], hierc)
@@ -930,29 +937,30 @@ class Module:
         info_block = {}
         c = []
         for cnt in range(len(self.source)):
-            if self.source[cnt][:2] == '#-': c.append(cnt)
+            if self.source[cnt][:2] == "#-":
+                c.append(cnt)
             if len(c) == 2:
-                data = os.linesep.join(self.source[c[0]:c[1] + 1])
+                data = os.linesep.join(self.source[c[0] : c[1] + 1])
 
                 info = is_info.search(data)
                 if info:
                     for key in list(info.groupdict().keys()):
                         info_block[key] = info.group(key).strip()
                 else:
-                    return 'no info'
+                    return "no info"
 
         return info_block
 
     def addImportStatement(self, impStmt, resourceImport=0):
-        """ Adds an import statement to the code and internal dict if it isn't
-            added yet """
-        impLine = ''
+        """Adds an import statement to the code and internal dict if it isn't
+        added yet"""
+        impLine = ""
         isImportFrom = 0
         defLineNo = self.lineno
 
         m = is_import.match(impStmt)
         if m:
-            for n in m.group('imp').split(','):
+            for n in m.group("imp").split(","):
                 n = n.strip()
                 if n not in self.imports:
                     self.imports[n] = [defLineNo]
@@ -960,18 +968,18 @@ class Module:
         else:
             m = is_from.match(impStmt)
             if m:
-                mod = m.group('module')
+                mod = m.group("module")
                 if mod not in self.from_imports:
                     self.from_imports[mod] = [defLineNo]
                     impLine = impStmt
                     isImportFrom = 1
             else:
-                raise ModuleParseError(_('Import statement invalid: %s') % impStmt)
+                raise ModuleParseError(_("Import statement invalid: %s") % impStmt)
 
         if impLine:
             # Add it beneath import wx
-            if 'wx' in self.imports:
-                insLine = self.imports['wx'][0]
+            if "wx" in self.imports:
+                insLine = self.imports["wx"][0]
                 # Component imports are in a block with the wx import
                 if not resourceImport:
                     self.source.insert(insLine, impLine)
@@ -985,13 +993,12 @@ class Module:
                     allImports.sort()
 
                     # find the first gap after import wxPy
-                    newInsLine = -1
                     nextImpLn = -1
                     idx = 0
                     prevLn = start = end = -1
                     while idx < len(allImports):
                         ln, md = allImports[idx]
-                        if start == -1 and ln == insLine and md == 'wx':
+                        if start == -1 and ln == insLine and md == "wx":
                             start = ln
                         elif start != -1 and ln > prevLn + 1:
                             end = prevLn + 1
@@ -1044,15 +1051,21 @@ class Module:
     def getEOLFixedLines(self):
         res = []
         for line in self.source:
-            if not (line.endswith('\r\n') or line.endswith('\n') or line.endswith('\r')):
+            if not (line.endswith("\r\n") or line.endswith("\n") or line.endswith("\r")):
                 line += self.eol
             res.append(line)
         return res
 
     def __repr__(self):
-        return 'Module: %s\n' % self.name + \
-               'Classes: \n' + pprint.pformat(self.classes) + '\n' + \
-               'Functions: \n' + pprint.pformat(self.functions) + '\n'
+        return (
+            "Module: %s\n" % self.name
+            + "Classes: \n"
+            + pprint.pformat(self.classes)
+            + "\n"
+            + "Functions: \n"
+            + pprint.pformat(self.functions)
+            + "\n"
+        )
 
 
 def moduleFile(module, path=[], inpackage=0):
@@ -1076,19 +1089,19 @@ def moduleFile(module, path=[], inpackage=0):
         except ImportError:
             f = None
     if f is None:
-    #     fullpath = path + sys.path
-    #     f, file, (suff, mode, type) = imp.find_module(module, fullpath)
-    # if type == imp.PKG_DIRECTORY:
-    #     return Module(module, [], {'__path__': [file]}, ['__path__'])
-    # if type != imp.PY_SOURCE:
-    #     # not Python source, can't do anything with this module
-    #     f.close()
-    #     return Module(module, [])
+        #     fullpath = path + sys.path
+        #     f, file, (suff, mode, type) = imp.find_module(module, fullpath)
+        # if type == imp.PKG_DIRECTORY:
+        #     return Module(module, [], {'__path__': [file]}, ['__path__'])
+        # if type != imp.PY_SOURCE:
+        #     # not Python source, can't do anything with this module
+        #     f.close()
+        #     return Module(module, [])
 
         fullpath = path + sys.path
         f, file, (suff, mode, type) = importlib.abc.MetaPathFinder.find_spec(module, fullpath)
         if type == importlib.PKG_DIRECTORY:
-            return Module(module, [], {'__path__': [file]}, ['__path__'])
+            return Module(module, [], {"__path__": [file]}, ["__path__"])
         if type != importlib.PY_SOURCE:
             # not Python source, can't do anything with this module
             f.close()
@@ -1099,7 +1112,7 @@ def moduleFile(module, path=[], inpackage=0):
     return mod
 
 
-if __name__ == '__main__':
-    lines = open('moduleparse.py', 'rb').readlines()
-    m = Module('', lines[:])
+if __name__ == "__main__":
+    lines = open("moduleparse.py", "rb").readlines()
+    m = Module("", lines[:])
     print(m.from_imports_names)

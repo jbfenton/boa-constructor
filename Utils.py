@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        Utils.py
 # Purpose:     General purpose functions and classes
 #
@@ -8,16 +8,19 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 1999 - 2007 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
-import string, os, sys, glob, pprint, types, re, traceback
+# ----------------------------------------------------------------------
+import os
+import re
+import string
+import sys
+import traceback
+from configparser import ConfigParser
+from html.parser import HTMLParser
 
 import wx
-from wx import adv
 
 import Preferences
 from Preferences import IS
-from configparser import ConfigParser
-from html.parser import HTMLParser
 
 # Centralised i18n gettext compatible definition
 _ = wx.GetTranslation
@@ -26,56 +29,67 @@ _ = wx.GetTranslation
 def toPyPath(filename):
     return os.path.join(Preferences.pyPath, filename)
 
+
 def ShowErrorMessage(parent, caption, mess):
-    dlg = wx.MessageDialog(parent, mess.__class__.__name__ +': '+repr(mess),
-                          caption, wx.OK | wx.ICON_EXCLAMATION)
-    try: dlg.ShowModal()
-    finally: dlg.Destroy()
+    dlg = wx.MessageDialog(parent, mess.__class__.__name__ + ": " + repr(mess), caption, wx.OK | wx.ICON_EXCLAMATION)
+    try:
+        dlg.ShowModal()
+    finally:
+        dlg.Destroy()
+
 
 def ShowMessage(parent, caption, message, msgTpe=wx.ICON_INFORMATION):
     dlg = wx.MessageDialog(parent, message, caption, wx.OK | msgTpe)
-    try: dlg.ShowModal()
-    finally: dlg.Destroy()
+    try:
+        dlg.ShowModal()
+    finally:
+        dlg.Destroy()
+
 
 def yesNoDialog(parent, title, question):
     dlg = wx.MessageDialog(parent, question, title, wx.YES_NO | wx.ICON_QUESTION)
-    try: return (dlg.ShowModal() == wx.ID_YES)
-    finally: dlg.Destroy()
+    try:
+        return dlg.ShowModal() == wx.ID_YES
+    finally:
+        dlg.Destroy()
 
-def AddToolButtonBmpObject(frame, toolbar, thebitmap, hint, triggermeth,
-      theToggleBitmap=wx.NullBitmap):
+
+def AddToolButtonBmpObject(frame, toolbar, thebitmap, hint, triggermeth, theToggleBitmap=wx.NullBitmap):
     nId = wx.NewIdRef(count=1)
 
-    if 'wx'in str(type(toolbar)):
-        toolbar.AddTool(nId, '', thebitmap, hint, wx.ITEM_NORMAL)
+    if "wx" in str(type(toolbar)):
+        toolbar.AddTool(nId, "", thebitmap, hint, wx.ITEM_NORMAL)
     else:
         toolbar.AddTool(nId, thebitmap, theToggleBitmap, hint, False)
 
     frame.Bind(wx.EVT_TOOL, triggermeth, id=nId)
     return nId
 
-def AddToolButtonBmpFile(frame, toolbar, filename, hint, triggermeth):
-    return AddToolButtonBmpObject(frame, toolbar, IS.load(filename),
-      hint, triggermeth)
 
-def AddToolButtonBmpIS(frame, toolbar, name, hint, triggermeth, toggleBmp = ''):
+def AddToolButtonBmpFile(frame, toolbar, filename, hint, triggermeth):
+    return AddToolButtonBmpObject(frame, toolbar, IS.load(filename), hint, triggermeth)
+
+
+def AddToolButtonBmpIS(frame, toolbar, name, hint, triggermeth, toggleBmp=""):
     if toggleBmp:
         return AddToggleToolButtonBmpObject(frame, toolbar, IS.load(name), hint[:85], triggermeth)
     else:
         return AddToolButtonBmpObject(frame, toolbar, IS.load(name), hint[:85], triggermeth)
+
 
 def AddToggleToolButtonBmpObject(frame, toolbar, thebitmap, hint, triggermeth):
     nId = wx.NewIdRef(count=1)
     # toolbar.AddTool(nId, thebitmap, thebitmap, shortHelpString = hint, isToggle = True)
     # toolbar.AddTool(toolId=nId, label='', bitmap=wx.BitmapBundle(thebitmap), shortHelp=hint, kind=wx.ITEM_NORMAL)
     # frame.Bind(wx.EVT_TOOL, triggermeth, id=nId)
-    toolbar.AddCheckTool(toolId=nId, label='', bitmap1=wx.BitmapBundle(thebitmap),shortHelp=hint)
+    toolbar.AddCheckTool(toolId=nId, label="", bitmap1=wx.BitmapBundle(thebitmap), shortHelp=hint)
     frame.Bind(wx.EVT_TOOL, triggermeth, id=nId)
     return nId
 
-#This format follows wxWidgets conventions
+
+# This format follows wxWidgets conventions
 def windowIdentifier(frameName, ctrlName):
-    return 'wxID_' + frameName.upper() + ctrlName.upper()
+    return "wxID_" + frameName.upper() + ctrlName.upper()
 
 
 class BoaFileDropTarget(wx.FileDropTarget):
@@ -95,7 +109,8 @@ class BoaFileDropTarget(wx.FileDropTarget):
             wx.EndBusyCursor()
             return error_occurred
 
-def split_seq(seq, pivot, transformFunc = None):
+
+def split_seq(seq, pivot, transformFunc=None):
     result = []
     cur_sect = []
     for itm in seq:
@@ -105,9 +120,9 @@ def split_seq(seq, pivot, transformFunc = None):
         # else:
         #     cur_sect.append(itm)
         if transformFunc:
-            transformResult = eval("itm."+transformFunc)
+            transformResult = eval("itm." + transformFunc)
         else:
-            transformResult=None
+            transformResult = None
 
         if transformFunc and transformResult == pivot or itm == pivot:
             result.append(cur_sect)
@@ -118,24 +133,27 @@ def split_seq(seq, pivot, transformFunc = None):
 
     return result
 
+
 allowed_width = 78
+
+
 def human_split(line):
     indent = line.find(line.strip())
 
     # XXX use safe split, commas in quotes will break
-    segments = line.split(',')
-    for idx in range(len(segments)-1):
-        segments[idx] = segments[idx]+','
+    segments = line.split(",")
+    for idx in range(len(segments) - 1):
+        segments[idx] = segments[idx] + ","
 
     result = []
-    cur_line = ''
+    cur_line = ""
     for segment in segments:
         if indent + len(segment) > allowed_width:
             pass
         elif len(cur_line + segment) > allowed_width:
             result.append(cur_line)
-            cur_line = ' ' * (indent + 2) + segment
-#            print cur_line, indent + 2
+            cur_line = " " * (indent + 2) + segment
+        #            print cur_line, indent + 2
         else:
             cur_line = cur_line + segment
 
@@ -143,198 +161,228 @@ def human_split(line):
 
     return result
 
+
 def duplicateMenu(source):
-    """ Create an duplicate of a menu (does not do sub menus)"""
+    """Create an duplicate of a menu (does not do sub menus)"""
     dest = wx.Menu()
     for menu in source.GetMenuItems():
         if menu.IsSeparator():
             dest.AppendSeparator()
         else:
-            dest.Append(menu.GetId(), menu.GetItemLabelText(), menu.GetHelp(), menu.IsCheckable())  # wascommented out. don't know y.
-            #dest.Append(menu)
+            dest.Append(
+                menu.GetId(), menu.GetItemLabelText(), menu.GetHelp(), menu.IsCheckable()
+            )  # wascommented out. don't know y.
+            # dest.Append(menu)
             mi = dest.FindItemById(menu.GetId())
             if menu.IsCheckable() and menu.IsChecked():
                 mi.Check(True)
     return dest
 
-def getValidName(usedNames, baseName, ext = '', n = 1, itemCB = lambda x:x):
+
+def getValidName(usedNames, baseName, ext="", n=1, itemCB=lambda x: x):
     def tryName(baseName, ext, n):
-        return '%s%d%s' %(baseName, n, ext and '.'+ext)
-    while list(filter(lambda key, name = tryName(baseName, ext, n), itemCB = itemCB: \
-                 itemCB(key) == name, usedNames)): n = n + 1
+        return "%s%d%s" % (baseName, n, ext and "." + ext)
+
+    while list(filter(lambda key, name=tryName(baseName, ext, n), itemCB=itemCB: itemCB(key) == name, usedNames)):
+        n = n + 1
     return tryName(baseName, ext, n)
 
+
 def srcRefFromCtrlName(ctrlName):
-    return ctrlName and 'self.'+ctrlName or 'self'
+    return ctrlName and "self." + ctrlName or "self"
+
 
 def ctrlNameFromSrcRef(srcRef):
-    return srcRef == 'self' and '' or srcRef[5:]
+    return srcRef == "self" and "" or srcRef[5:]
+
 
 def getWxPyNameForClass(Class):
-    """ Strips away _modules from the class identifier """
-    classPathSegs = Class.__module__.split('.') + [Class.__name__]
+    """Strips away _modules from the class identifier"""
+    classPathSegs = Class.__module__.split(".") + [Class.__name__]
 
     # INFO This is causing a problem with wx.stc.StyledTextCtrl ; it stripps out the _stc however the 'stc' part
     # is needed to get the correct name of the wx item being created.
     # I think this was intended to remove '_core' from wx class names however it will also take out '_adv' and '_stc'
     # which are needed to build the full wx class name for items in those modules.
     # Trying this fix to simply remove the underscore from affected class names.
-    if classPathSegs[1] in {'_adv', '_stc', '_media', '_html'}:
-        classname = '.'.join(classPathSegs)
-        return classname.replace('_','')
+    if classPathSegs[1] in {"_adv", "_stc", "_media", "_html"}:
+        classname = ".".join(classPathSegs)
+        return classname.replace("_", "")
     else:
-        return '.'.join([pathSeg for pathSeg in classPathSegs if pathSeg[0] != '_'])
+        return ".".join([pathSeg for pathSeg in classPathSegs if pathSeg[0] != "_"])
+
 
 def winIdRange(count):
     return [wx.NewIdRef(count=1) for x in range(count)]
 
+
 wxNewIds = winIdRange
 
+
 def methodLooksLikeEvent(method):
-    return len(method) >= 3 and method[:2] == 'On' and method[2] in string.ascii_uppercase
+    return len(method) >= 3 and method[:2] == "On" and method[2] in string.ascii_uppercase
+
 
 def startswith(str, substr):
-    return len(str) >= len(substr) and str[:len(substr)] == substr
+    return len(str) >= len(substr) and str[: len(substr)] == substr
+
 
 # ws2s = string.maketrans(string.whitespace, ' '*len(string.whitespace))
 def whitespacetospace(str):
-    return str.replace(string.whitespace, ' '*len(string.whitespace))
+    return str.replace(string.whitespace, " " * len(string.whitespace))
+
 
 ##tst_str = ' 1\t\n 3'
 ##print `whitespacetospace(tst_str)`
 
+
 class PaintEventHandler(wx.EvtHandler):
-    """ This class is used to merge paint requests.
+    """This class is used to merge paint requests.
 
-        Each paint is captured and saved. Later on the idle event,
-        the non-duplicated paints are executed. The code attempts to be
-        efficient by determining the enclosing rectangle where multiple
-        rectangles intersect.
-        This is required only on GTK systems.
+    Each paint is captured and saved. Later on the idle event,
+    the non-duplicated paints are executed. The code attempts to be
+    efficient by determining the enclosing rectangle where multiple
+    rectangles intersect.
+    This is required only on GTK systems.
 
-        Note: there is an assumption here that event handling is synchronous
-        i.e. the paints called from the idle event handler are processed
-        before the Refresh() call returns.
+    Note: there is an assumption here that event handling is synchronous
+    i.e. the paints called from the idle event handler are processed
+    before the Refresh() call returns.
     """
 
     def __init__(self, window):
         wx.EvtHandler.__init__(self)
-        self.painting=0
-        self.updates=[]
+        self.painting = 0
+        self.updates = []
         self.window = window
         window.PushEventHandler(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_IDLE, self.OnIdle)
+
     def OnPaint(self, event):
         if self.painting == 1:
             event.Skip()
             return
         newRect = self.window.GetUpdateRegion().GetBox()
-        newList=[]
+        newList = []
         for rect in self.updates:
             if self.RectanglesOverlap(rect, newRect):
-                newRect = self.MergeRectangles(rect,newRect)
+                newRect = self.MergeRectangles(rect, newRect)
             else:
                 newList.append(rect)
         self.updates = newList
         self.updates.append(newRect)
         event.Skip()
+
     def OnIdle(self, event):
         if len(self.updates) == 0:
             event.Skip()
             if len(self.updates) > 0:
                 self.RequestMore()
             return
-        self.painting=1
+        self.painting = 1
         for rect in self.updates:
             self.window.Refresh(0, rect)
-        self.updates=[]
-        self.painting=0
+        self.updates = []
+        self.painting = 0
         event.Skip()
+
     def RectanglesOverlap(self, rect1, rect2):
-        " Returns 1 if Rectangles overlap, 0 otherwise "
-        if rect1.x > rect2.x + rect2.width : return 0
-        if rect1.y > rect2.y + rect2.height : return 0
-        if rect1.x + rect1.width < rect2.x : return 0
-        if rect1.y + rect1.height < rect2.y : return 0
+        "Returns 1 if Rectangles overlap, 0 otherwise"
+        if rect1.x > rect2.x + rect2.width:
+            return 0
+        if rect1.y > rect2.y + rect2.height:
+            return 0
+        if rect1.x + rect1.width < rect2.x:
+            return 0
+        if rect1.y + rect1.height < rect2.y:
+            return 0
         return 1
+
     def MergeRectangles(self, rect1, rect2):
-        " Returns a rectangle containing both rect1 and rect2"
+        "Returns a rectangle containing both rect1 and rect2"
         if rect1.x < rect2.x:
-            x=rect1.x
-            if x+rect1.width > rect2.x + rect2.width:
+            x = rect1.x
+            if x + rect1.width > rect2.x + rect2.width:
                 width = rect1.width
             else:
                 width = rect2.x + rect2.width - rect1.x
         else:
-            x=rect2.x
-            if x+rect2.width > rect1.x + rect1.width:
+            x = rect2.x
+            if x + rect2.width > rect1.x + rect1.width:
                 width = rect2.width
             else:
                 width = rect1.x + rect1.width - rect2.x
         if rect1.y < rect2.y:
-            y=rect1.y
-            if y+rect1.height > rect2.y + rect2.height:
+            y = rect1.y
+            if y + rect1.height > rect2.y + rect2.height:
                 height = rect1.height
             else:
                 height = rect2.y + rect2.height - rect1.y
         else:
-            y=rect2.y
-            if y+rect2.height > rect1.y + rect1.height:
+            y = rect2.y
+            if y + rect2.height > rect1.y + rect1.height:
                 height = rect2.height
             else:
                 height = rect1.y + rect1.height - rect2.y
         rv = wx.Rect(x, y, width, height)
         return rv
 
+
 def getI18NLangDir():
     d = wx.GetApp().locale.GetCanonicalName()
-    path = toPyPath(os.path.join('locale', d))
+    path = toPyPath(os.path.join("locale", d))
     if not os.path.exists(path):
-        if '_' in d:
-            path = toPyPath(os.path.join('locale', d.split('_', 1)[0]))
+        if "_" in d:
+            path = toPyPath(os.path.join("locale", d.split("_", 1)[0]))
             if not os.path.exists(path):
-                return ''
+                return ""
         else:
-            return ''
+            return ""
     return path
 
+
 def showTip(frame, forceShow=0):
-    """ Displays tip of the day.
+    """Displays tip of the day.
 
     Driven from and updates config file
     """
     try:
-        conf = createAndReadConfig('Explorer')
+        conf = createAndReadConfig("Explorer")
     except IOError:
         conf = None
         showTip, index = (1, 0)
     else:
-        showTip = conf.getboolean('tips', 'showonstartup')
-        index = conf.getint('tips', 'tipindex')
+        showTip = conf.getboolean("tips", "showonstartup")
+        index = conf.getint("tips", "tipindex")
 
     if showTip or forceShow:
         # try to find translated tips
         tipsDir = getI18NLangDir()
         if not tipsDir:
-            tipsFile = toPyPath('Docs/tips.txt')
+            tipsFile = toPyPath("Docs/tips.txt")
         else:
-            tipsFile = tipsDir+'/tips.txt'
+            tipsFile = tipsDir + "/tips.txt"
             if not os.path.exists(tipsFile):
-                tipsFile = toPyPath('Docs/tips.txt')
+                tipsFile = toPyPath("Docs/tips.txt")
 
         tp = wx.adv.CreateFileTipProvider(tipsFile, index)
         showTip = wx.adv.ShowTip(frame, tp, showTip)
         index = tp.GetCurrentTip()
         if conf:
-            conf.set('tips', 'showonstartup', showTip and 'true' or 'false')
-            conf.set('tips', 'tipindex', str(index))
+            conf.set("tips", "showonstartup", showTip and "true" or "false")
+            conf.set("tips", "tipindex", str(index))
             try:
                 writeConfig(conf)
             except IOError:
-                wx.LogError(_('Could not edit tips settings, please make '
-                      'sure that the Explorer.*.cfg file is not read only and you '
-                      'have sufficient priviledges to write to this file.'))
+                wx.LogError(
+                    _(
+                        "Could not edit tips settings, please make "
+                        "sure that the Explorer.*.cfg file is not read only and you "
+                        "have sufficient priviledges to write to this file."
+                    )
+                )
+
 
 def readTextFromClipboard():
     clip = wx.TheClipboard
@@ -342,29 +390,33 @@ def readTextFromClipboard():
     try:
         data = wx.TextDataObject()
         clip.GetData(data)
-        ret_data = data.GetText().replace('\n',os.linesep)
+        ret_data = data.GetText().replace("\n", os.linesep)
         return ret_data
     finally:
         clip.Close()
+
 
 def writeTextToClipboard(text):
     clip = wx.TheClipboard
     clip.Open()
     try:
         # clip.SetData(wx.TextDataObject(text))
-        toBeSaved=wx.TextDataObject(text)
+        toBeSaved = wx.TextDataObject(text)
         clip.SetData(toBeSaved)
     finally:
         clip.Close()
 
 
 _sharedConfs = {}
-def createAndReadConfig(name, forPlatform=1):
-    """ Return an initialised ConfigFile object """
-    confFile = os.path.join(Preferences.rcPath, '%s%s.cfg' % (name,
-        forPlatform and '.'+Preferences.thisPlatform or ''))
 
-    if not confFile in _sharedConfs:
+
+def createAndReadConfig(name, forPlatform=1):
+    """Return an initialised ConfigFile object"""
+    confFile = os.path.join(
+        Preferences.rcPath, "%s%s.cfg" % (name, forPlatform and "." + Preferences.thisPlatform or "")
+    )
+
+    if confFile not in _sharedConfs:
         conf = ConfigParser()
         conf.read(confFile)
         conf.confFile = confFile
@@ -372,8 +424,10 @@ def createAndReadConfig(name, forPlatform=1):
 
     return _sharedConfs[confFile]
 
+
 def writeConfig(conf):
-    conf.write(open(conf.confFile, 'w'))
+    conf.write(open(conf.confFile, "w"))
+
 
 import wx.html
 
@@ -387,19 +441,22 @@ class wxHtmlWindowUrlClick(wx.PyEvent):
         self.SetEventType(wxEVT_HTML_URL_CLICK)
         self.linkinfo = (linkinfo.GetHref(), linkinfo.GetTarget())
 
+
 class wxUrlClickHtmlWindow(wx.html.HtmlWindow):
-    """ HTML window that generates and OnLinkClicked event.
+    """HTML window that generates and OnLinkClicked event.
 
     Use this to avoid having to override HTMLWindow
     """
+
     def OnLinkClicked(self, linkinfo):
         wx.PostEvent(self, wxHtmlWindowUrlClick(linkinfo))
 
-def wxProxyPanel(parent, Win, *args, **kwargs):
-    """ Function which put's a panel in between two controls.
 
-        Mainly for better repainting under GTK.
-        Based on a pattern by Kevin Gill.
+def wxProxyPanel(parent, Win, *args, **kwargs):
+    """Function which put's a panel in between two controls.
+
+    Mainly for better repainting under GTK.
+    Based on a pattern by Kevin Gill.
     """
     panel = wx.Panel(parent, -1, style=wx.TAB_TRAVERSAL | wx.CLIP_CHILDREN)
 
@@ -409,42 +466,50 @@ def wxProxyPanel(parent, Win, *args, **kwargs):
         win = Win
         win.Reparent(panel)
     else:
-        raise Exception(_('Unhandled type for Win'))
+        raise Exception(_("Unhandled type for Win"))
 
     def OnWinSize(evt, win=win):
         win.SetSize(evt.GetSize())
+
     panel.Bind(wx.EVT_SIZE, OnWinSize)
     return panel, win
 
+
 def IsComEnabled():
-    if Preferences.blockCOM: return False
+    if Preferences.blockCOM:
+        return False
     try:
-        import win32com
+        __import__("win32com")
     except ImportError:
         return False
     else:
         return True
 
-import stat, shutil
-skipdirs = ('CVS',)
-dofiles = ('.py',)
+
+import shutil
+import stat
+
+skipdirs = ("CVS",)
+dofiles = (".py",)
+
 
 def updateFile(src, dst):
     if not os.path.isdir(src):
-        if os.path.splitext(src)[-1] in dofiles and \
-              ( not os.path.exists(dst) or \
-              os.stat(dst)[stat.ST_MTIME] < os.stat(src)[stat.ST_MTIME]):
-            print('copying', src, dst)
+        if os.path.splitext(src)[-1] in dofiles and (
+            not os.path.exists(dst) or os.stat(dst)[stat.ST_MTIME] < os.stat(src)[stat.ST_MTIME]
+        ):
+            print("copying", src, dst)
             shutil.copy2(src, dst)
 
 
 def updateDir(src, dst):
-    """ Traverse src and assures that dst is up to date """
-    os.path.walk(src, visit_update, (src, dst) )
+    """Traverse src and assures that dst is up to date"""
+    os.path.walk(src, visit_update, (src, dst))
+
 
 def visit_update(paths, dirname, names):
     src, dst = paths
-    reldir = dirname[len(src)+1:]
+    reldir = dirname[len(src) + 1 :]
     if reldir:
         dstdirname = os.path.join(dst, reldir)
     else:
@@ -452,32 +517,43 @@ def visit_update(paths, dirname, names):
     if os.path.basename(dirname) in skipdirs:
         return
     if not os.path.exists(dstdirname):
-        print('creating', dstdirname)
+        print("creating", dstdirname)
         os.makedirs(dstdirname)
     for name in names:
         srcname = os.path.join(dirname, name)
         dstname = os.path.join(dstdirname, name)
         updateFile(srcname, dstname)
 
+
 def get_current_frame():
     try:
-        Exception, 'get_exc_info'
+        Exception, "get_exc_info"
     except:
         return sys.exc_info()[2].tb_frame.f_back
 
+
 def descr_frame(frame):
-    if frame: return ('<frame:%s(%s)%s [%s]>'%(
-          os.path.basename(frame.f_code.co_filename), frame.f_lineno,
-          frame.f_code.co_name, id(frame)) )
-    else: return 'None'
+    if frame:
+        return "<frame:%s(%s)%s [%s]>" % (
+            os.path.basename(frame.f_code.co_filename),
+            frame.f_lineno,
+            frame.f_code.co_name,
+            id(frame),
+        )
+    else:
+        return "None"
+
 
 padWidth = 80
-pad = padWidth*' '
+pad = padWidth * " "
+
 
 class PseudoFile:
-    """ Base class for file like objects to facilitate StdOut for the Shell."""
-    def __init__(self, output = None):
-        if output is None: output = []
+    """Base class for file like objects to facilitate StdOut for the Shell."""
+
+    def __init__(self, output=None):
+        if output is None:
+            output = []
         self.output = output
 
     def writelines(self, l):
@@ -492,109 +568,141 @@ class PseudoFile:
     def isatty(self):
         return False
 
+
 class PseudoFileOutStore(PseudoFile):
-    """ File like obj with list storage """
+    """File like obj with list storage"""
+
     def write(self, s):
         self.output.append(s)
 
     def read(self):
-        return ''.join(self.output)
+        return "".join(self.output)
 
 
 class LoggerPF(PseudoFile):
-    """ Base class for logging file like objects """
+    """Base class for logging file like objects"""
+
     def pad(self, s):
         padded = s + pad
         return padded[:padWidth] + padded[padWidth:].strip()
 
+
 class OutputLoggerPF(LoggerPF):
-    """ Logs stdout to wxLog functions"""
+    """Logs stdout to wxLog functions"""
+
     def write(self, s):
         if s.strip():
             if Preferences.recordModuleCallPoint:
                 frame = get_current_frame()
-                ss = s.strip()+ ' : <<%s, %d>>' % (
-                     frame.f_back.f_code.co_filename,
-                     frame.f_back.f_lineno,)
+                ss = s.strip() + " : <<%s, %d>>" % (
+                    frame.f_back.f_code.co_filename,
+                    frame.f_back.f_lineno,
+                )
             else:
                 ss = s
-            wx.LogMessage(self.pad(ss).replace('%', '%%'))
+            wx.LogMessage(self.pad(ss).replace("%", "%%"))
 
         sys.__stdout__.write(s)
+
 
 # XXX Should try to recognise warnings
 # Match start against [v for k, v in __builtins__.items() if type(v) is types.ClassType and issubclass(v, Warning)]
 
-class ErrorLoggerPF(LoggerPF):
-    """ Logs stderr to wxLog functions"""
-    def write(self, s):
-        if not hasattr(self, 'buffer'):
-            self.buffer = ''
 
-        if s == '    ':
+class ErrorLoggerPF(LoggerPF):
+    """Logs stderr to wxLog functions"""
+
+    def write(self, s):
+        if not hasattr(self, "buffer"):
+            self.buffer = ""
+
+        if s == "    ":
             self.buffer = s
-        elif s[-1] != '\n':
+        elif s[-1] != "\n":
             self.buffer = self.buffer + s
         else:
-            wx.LogError(self.pad(self.buffer+s[:-1]).replace('%', '%%'))
+            wx.LogError(self.pad(self.buffer + s[:-1]).replace("%", "%%"))
 
         sys.__stderr__.write(s)
+
 
 def installErrOutLoggers():
     sys.stdout = OutputLoggerPF()
     sys.stderr = ErrorLoggerPF()
 
+
 def uninstallErrOutLoggers():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
 
-def getCtrlsFromDialog(dlg, className):
-    """ Returns children of given class from dialog.
 
-    This is useful for standard dialogs that does not expose their children """
-    return list(filter(lambda d, cn=className: d.__class__.__name__ == cn,
-                  dlg.GetChildren()))
+def getCtrlsFromDialog(dlg, className):
+    """Returns children of given class from dialog.
+
+    This is useful for standard dialogs that does not expose their children"""
+    return list(filter(lambda d, cn=className: d.__class__.__name__ == cn, dlg.GetChildren()))
+
 
 class MyHTMLParser(HTMLParser):
-
-    __ret_str= ''
+    __ret_str = ""
 
     def handle_data(self, data):
-        self.__ret_str += data + '\n'
+        self.__ret_str += data + "\n"
 
     def converted_text(self):
         return self.__ret_str
+
 
 def html2txt(htmlblock):
     p = MyHTMLParser()
     p.feed(htmlblock)
     return p.converted_text()
 
+
 def getEntireWxNamespace():
-    """ Return a dictionary containing the entire (non filtered) wxPython
-        namespace """
-    modules = ['activex', 'animate', 'aui', 'calendar', 'combo', 'dataview',
-               'gizmos', 'glcanvas', 'grid', 'html', 'html2', 'media',
-               'propgrid', 'richtext', 'stc', 'webkit', 'wizard', 'wx']
+    """Return a dictionary containing the entire (non filtered) wxPython
+    namespace"""
+    modules = [
+        "activex",
+        "animate",
+        "aui",
+        "calendar",
+        "combo",
+        "dataview",
+        "gizmos",
+        "glcanvas",
+        "grid",
+        "html",
+        "html2",
+        "media",
+        "propgrid",
+        "richtext",
+        "stc",
+        "webkit",
+        "wizard",
+        "wx",
+    ]
     namespace = {}
     for module in modules:
         try:
-            exec('from wx import %s' % module)
+            exec("from wx import %s" % module)
         except ImportError:
             pass
         else:
             namespace.update(locals()[module].__dict__)
     return namespace
 
+
 class FrameRestorerMixin:
-    """ Used by top level windows to restore from hidden or iconised state
+    """Used by top level windows to restore from hidden or iconised state
     and to load and persist window dimensions
 
     Classes using the mixin must define self.setDefaultDimensions()
     To be able to save, a winConfOption attr must be defined.
     """
-    confFile = 'Explorer'
-    confSection = 'windowdims'
+
+    confFile = "Explorer"
+    confSection = "windowdims"
     frameRestorerWindows = {}
 
     def restore(self):
@@ -623,11 +731,16 @@ class FrameRestorerMixin:
         if not conf.has_option(self.confSection, self.winConfOption):
             dims = None
         else:
-            dims = eval(conf.get(self.confSection , self.winConfOption),
-                        {'wxSize': wx.Size, 'wxPoint': wx.Point,
-                         'wxDefaultSize': wx.DefaultSize,
-                         'wxDefaultPosition': wx.DefaultPosition,
-                         'wx': wx})
+            dims = eval(
+                conf.get(self.confSection, self.winConfOption),
+                {
+                    "wxSize": wx.Size,
+                    "wxPoint": wx.Point,
+                    "wxDefaultSize": wx.DefaultSize,
+                    "wxDefaultPosition": wx.DefaultPosition,
+                    "wx": wx,
+                },
+            )
 
         if dims:
             self.setDimensions(dims)
@@ -647,6 +760,7 @@ class FrameRestorerMixin:
         self.saveDims(None)
         self.loadDims()
 
+
 def callOnFrameRestorers(method):
     for name, window in list(FrameRestorerMixin.frameRestorerWindows.items()):
         if not window:
@@ -656,30 +770,36 @@ def callOnFrameRestorers(method):
 
 
 def setupCloseWindowOnEscape(win):
-    def OnCloseWin(event, win=win): win.Close()
+    def OnCloseWin(event, win=win):
+        win.Close()
 
     wxID_CLOSEWIN = wx.NewIdRef(count=1)
     win.Bind(wx.EVT_MENU, OnCloseWin, id=wxID_CLOSEWIN)
     return (wx.ACCEL_NORMAL, wx.WXK_ESCAPE, wxID_CLOSEWIN)
 
+
 def getModelBaseDir(model):
-    if hasattr(model, 'app') and model.app and model.app.savedAs:
+    if hasattr(model, "app") and model.app and model.app.savedAs:
         return os.path.dirname(model.app.filename)
     elif model.savedAs:
         return os.path.dirname(model.filename)
     else:
-        return ''
+        return ""
+
 
 def pathRelativeToModel(path, model):
     from relpath import relpath
+
     mbd = getModelBaseDir(model)
     if mbd:
         return relpath(mbd, path)
     else:
         return path
 
+
 class BottomAligningSplitterMix:
-    """ Mixin class that keeps the bottom window in a splitter at a constant height """
+    """Mixin class that keeps the bottom window in a splitter at a constant height"""
+
     def __init__(self):
         self.Bind(wx.EVT_SIZE, self._OnSplitterwindowSize)
         self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGED, self._OnSplitterwindowSplitterSashPosChanged, id=self.GetId())
@@ -691,11 +811,10 @@ class BottomAligningSplitterMix:
         self._win2sze = self._getWin2Sze()
 
     def bottomWindowIsOpen(self):
-        return self.GetSashPosition()+1 != self.GetClientSize().y - self.GetSashSize()
+        return self.GetSashPosition() + 1 != self.GetClientSize().y - self.GetSashSize()
 
     def openBottomWindow(self):
-        self.SetSashPosition(
-         int(self.GetClientSize().y *(1.0-Preferences.eoErrOutWindowHeightPerc)))
+        self.SetSashPosition(int(self.GetClientSize().y * (1.0 - Preferences.eoErrOutWindowHeightPerc)))
         self._win2sze = self._getWin2Sze()
 
     def closeBottomWindow(self):
@@ -704,29 +823,36 @@ class BottomAligningSplitterMix:
 
     def _getWin2Sze(self):
         win2 = self.GetWindow2()
-        if win2 : return win2.GetSize().y
-        else:     return 0
+        if win2:
+            return win2.GetSize().y
+        else:
+            return 0
 
     def _OnSplitterwindowSize(self, event):
         sashpos = self.GetClientSize().y - self._win2sze - self.GetSashSize()
         self.SetSashPosition(sashpos)
-        if event: event.Skip()
+        if event:
+            event.Skip()
 
     def _OnSplitterwindowSplitterSashPosChanged(self, event):
         self._win2sze = self._getWin2Sze()
-        if event: event.Skip()
+        if event:
+            event.Skip()
 
     def _OnSplitterwindowSplitterDoubleclicked(self, event):
         if self.bottomWindowIsOpen():
             self.closeBottomWindow()
         else:
             self.openBottomWindow()
-        if event: event.Skip()
+        if event:
+            event.Skip()
+
 
 class BottomAligningSplitterWindow(wx.SplitterWindow, BottomAligningSplitterMix):
     def __init__(self, *_args, **_kwargs):
-        wx.SplitterWindow.__init__(*((self,)+_args), **_kwargs)
+        wx.SplitterWindow.__init__(*((self,) + _args), **_kwargs)
         BottomAligningSplitterMix.__init__(self)
+
 
 def traverseTreeCtrl(tree, treeItem, func):
     func(tree, treeItem)
@@ -739,11 +865,11 @@ def traverseTreeCtrl(tree, treeItem, func):
 class ListCtrlLabelEditFixEH(wx.EvtHandler):
     """Fixes broken LabelEdit/Cursor behaviour on MSW
 
-       Add in constructor:
-       ListCtrlLabelEditFixEH(<control>)
+    Add in constructor:
+    ListCtrlLabelEditFixEH(<control>)
 
-       Add in destructor:
-       <control>.PopEventHandler(True)
+    Add in destructor:
+    <control>.PopEventHandler(True)
     """
 
     wxEVT_CTRLEDIT = wx.NewIdRef(count=1)
@@ -757,7 +883,7 @@ class ListCtrlLabelEditFixEH(wx.EvtHandler):
         listCtrl.PushEventHandler(self)
 
     def OnBeginLabelEdit(self, event):
-        if not self._blockMouseEdit and wx.Platform == '__WXMSW__':
+        if not self._blockMouseEdit and wx.Platform == "__WXMSW__":
             event.Veto()
             wx.CallAfter(self.ctrlLabelEdit, event.GetIndex())
         else:
@@ -768,7 +894,10 @@ class ListCtrlLabelEditFixEH(wx.EvtHandler):
         self._blockMouseEdit = True
         self.listCtrl.EditLabel(idx)
 
+
 SEL_FOC = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
+
+
 def selectBeforePopup(event):
     """Ensures the item the mouse is pointing at is selected before a popup.
 
@@ -784,8 +913,9 @@ def selectBeforePopup(event):
                         ctrl.SetItemState(i, 0, SEL_FOC)
                 ctrl.SetItemState(n, SEL_FOC, SEL_FOC)
 
+
 def getListCtrlSelection(listctrl, state=wx.LIST_STATE_SELECTED):
-    """ Returns list of item indexes of given state """
+    """Returns list of item indexes of given state"""
     res = []
     idx = -1
     while True:
@@ -795,12 +925,14 @@ def getListCtrlSelection(listctrl, state=wx.LIST_STATE_SELECTED):
         res.append(idx)
     return res
 
+
 class ListCtrlSelectionManagerMix:
     """Mixin that defines a platform independent selection policy
 
     As selection single and multi-select list return the item index or a
     list of item indexes respectively.
     """
+
     wxEVT_DOPOPUPMENU = wx.NewIdRef(count=1)
     _menu = None
 
@@ -809,15 +941,15 @@ class ListCtrlSelectionManagerMix:
         self.Connect(-1, -1, self.wxEVT_DOPOPUPMENU, self.OnLCSMDoPopup)
 
     def getPopupMenu(self):
-        """ Override to implement dynamic menus (create) """
+        """Override to implement dynamic menus (create)"""
         return self._menu
 
     def setPopupMenu(self, menu):
-        """ Must be set for default behaviour """
+        """Must be set for default behaviour"""
         self._menu = menu
 
     def afterPopupMenu(self, menu):
-        """ Override to implement dynamic menus (destroy) """
+        """Override to implement dynamic menus (destroy)"""
         pass
 
     def getSelection(self):
@@ -833,7 +965,7 @@ class ListCtrlSelectionManagerMix:
     def OnLCSMRightDown(self, event):
         selectBeforePopup(event)
         menu = self.getPopupMenu()
-        #event.Skip()
+        # event.Skip()
         if menu:
             # XXX
             self.PopupMenu(menu, event.GetPosition())
@@ -877,22 +1009,26 @@ class ListCtrlSelectionManagerMix:
 ##    evt.kw = kw
 ##    wx.PostEvent(app, evt)
 
+
 def getIndentBlock():
     if Preferences.STCUseTabs:
-        return '\t'
+        return "\t"
     else:
-        return Preferences.STCIndent*' '
+        return Preferences.STCIndent * " "
+
 
 def getIndentedStrForLen(n):
     if Preferences.STCUseTabs:
         d, m = divmod(n, Preferences.STCTabWidth)
         if m:
             d += 1
-        return '\t'*d
+        return "\t" * d
     else:
-        return n*' '
+        return n * " "
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def canReadStream(stream):
     try:
@@ -900,26 +1036,30 @@ def canReadStream(stream):
     except AttributeError:
         return not stream.eof()
 
+
 def find_dotted_module(name, path=None):
     import imp
-    segs = name.split('.')
+
+    segs = name.split(".")
     file = None
     while segs:
-        if file: file.close()
+        if file:
+            file.close()
         file, filename, desc = imp.find_module(segs[0], path)
         del segs[0]
         path = [filename]
     return file, filename, desc
 
-def appendMenuItem(menu, wId, label, code=(), bmp='', help=''):
+
+def appendMenuItem(menu, wId, label, code=(), bmp="", help=""):
     # XXX Add kind=wx.ITEM_NORMALwhen 2.3.3 is minimum.
-    text = label + (code and ' \t'+code[2] or '')
+    text = label + (code and " \t" + code[2] or "")
     menuItem = wx.MenuItem(menu, wId, text, help)
-    if Preferences.editorMenuImages and bmp and bmp != '-':
-        if wx.Platform == '__WXGTK__' and wx.VERSION >= (2,3,3) or \
-              wx.Platform == '__WXMSW__':
+    if Preferences.editorMenuImages and bmp and bmp != "-":
+        if wx.Platform == "__WXGTK__" and wx.VERSION >= (2, 3, 3) or wx.Platform == "__WXMSW__":
             menuItem.SetBitmap(Preferences.IS.load(bmp))
     menu.Append(menuItem)
+
 
 def getNotebookPage(notebook, name):
     for i in range(notebook.GetPageCount()):
@@ -927,18 +1067,20 @@ def getNotebookPage(notebook, name):
             return i
     return -1
 
+
 def getViewTitle(view):
-    if hasattr(view, 'viewTitle'):
+    if hasattr(view, "viewTitle"):
         return view.viewTitle
     else:
         return view.viewName
 
+
 # reset all sizes to platform defaults
 def resetMinSize(parent, ignoreCtrls=(), ignoreClasses=()):
     # need this for some cases in linux, otherwise cuts off text
-    if wx.Platform == '__WXGTK__' and isinstance(parent, wx.StaticText):
+    if wx.Platform == "__WXGTK__" and isinstance(parent, wx.StaticText):
         textSize = parent.GetTextExtent(parent.GetLabel())
-        size = wx.Size(textSize[0]+2,-1)
+        size = wx.Size(textSize[0] + 2, -1)
     else:
         size = wx.DefaultSize
 
@@ -949,6 +1091,7 @@ def resetMinSize(parent, ignoreCtrls=(), ignoreClasses=()):
         if child not in ignoreCtrls and not isinstance(child, ignoreClasses):
             resetMinSize(child, ignoreCtrls, ignoreClasses)
 
+
 def wxPyExceptHook(type, value, trace):
     if wx and sys and traceback:
         exc = traceback.format_exception(type, value, trace)
@@ -957,9 +1100,10 @@ def wxPyExceptHook(type, value, trace):
         sys.__excepthook__(type, value, trace)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 coding_re = re.compile(r"coding[:=]\s*([-\w_.]+)")
+
 
 def coding_spec(str):
     """Return the encoding declaration according to PEP 263.
@@ -976,24 +1120,31 @@ def coding_spec(str):
     name = match.group(1)
     # Check whether the encoding is known
     import codecs
+
     try:
         codecs.lookup(name)
     except LookupError:
         # The standard encoding error does not indicate the encoding
-        raise LookupError(_('Unknown encoding %s')%name)
+        raise LookupError(_("Unknown encoding %s") % name)
     return name
 
-unicodeErrorMsg = 'Please change the defaultencoding in sitecustomize.py or '\
-    'use Boa command-line parameter -U handle this encoding.\nError message %s'
+
+unicodeErrorMsg = (
+    "Please change the defaultencoding in sitecustomize.py or "
+    "use Boa command-line parameter -U handle this encoding.\nError message %s"
+)
+
 
 def stringFromControl(u):
-    try: wx.USE_UNICODE, UnicodeError
-    except (AttributeError, NameError): return u
+    try:
+        wx.USE_UNICODE, UnicodeError
+    except (AttributeError, NameError):
+        return u
 
     if wx.USE_UNICODE:
         try:
             return str(u)
-        except UnicodeError as err:
+        except UnicodeError:
             try:
                 spec = coding_spec(u)
                 if spec is None:
@@ -1001,68 +1152,88 @@ def stringFromControl(u):
                 return u.encode(spec)
             except UnicodeError as err:
                 try:
-                    s = _('Unable to encode unicode string, please change '\
-                          'the defaultencoding in sitecustomize.py to handle this '\
-                          'encoding.\nError message %s')%str(err)
+                    s = _(
+                        "Unable to encode unicode string, please change "
+                        "the defaultencoding in sitecustomize.py to handle this "
+                        "encoding.\nError message %s"
+                    ) % str(err)
                 except UnicodeError as err:
-                    raise Exception('Unable to encode unicode string, please change '\
-                          'the defaultencoding in sitecustomize.py to handle this '\
-                          'encoding.\nError message %s'%str(err))
+                    raise Exception(
+                        "Unable to encode unicode string, please change "
+                        "the defaultencoding in sitecustomize.py to handle this "
+                        "encoding.\nError message %s" % str(err)
+                    )
                 else:
                     raise Exception(s)
     else:
         return u
 
+
 def stringToControl(s, safe=False):
-    try: wx.USE_UNICODE, UnicodeError
-    except (AttributeError, NameError): return s
+    try:
+        wx.USE_UNICODE, UnicodeError
+    except (AttributeError, NameError):
+        return s
 
     if wx.USE_UNICODE:
         try:
             if safe:
-                return s.decode(sys.getdefaultencoding(), 'ignore')
+                return s.decode(sys.getdefaultencoding(), "ignore")
             else:
                 return str(s)
-        except UnicodeError as err:
+        except UnicodeError:
             try:
                 spec = coding_spec(s)
                 if spec is None:
                     raise
                 return s.decode(spec)
-            except UnicodeError as err:
+            except UnicodeError:
                 try:
-                    s = _('Unable to decode unicode string, please change '\
-                          'the defaultencoding in sitecustomize.py to handle this '\
-                          'encoding.\n Error message %s')
+                    s = _(
+                        "Unable to decode unicode string, please change "
+                        "the defaultencoding in sitecustomize.py to handle this "
+                        "encoding.\n Error message %s"
+                    )
                 except UnicodeError as err:
-                    raise Exception('Unable to decode unicode string, please change '\
-                          'the defaultencoding in sitecustomize.py to handle this '\
-                          'encoding.\n Error message %s'%str(err))
+                    raise Exception(
+                        "Unable to decode unicode string, please change "
+                        "the defaultencoding in sitecustomize.py to handle this "
+                        "encoding.\n Error message %s" % str(err)
+                    )
                 else:
                     raise Exception(s)
     else:
         return s
 
-def safeDecode(s):
-    return s.decode(sys.getdefaultencoding(), 'replace')
 
-#-------------------------------------------------------------------------------
+def safeDecode(s):
+    return s.decode(sys.getdefaultencoding(), "replace")
+
+
+# -------------------------------------------------------------------------------
+
 
 def getEOLMode(text, default=os.linesep):
-    if text.find('\r\n') != -1: return '\r\n'
-    elif text.find('\r') != -1: return '\r'
-    elif text.find('\n') != -1: return '\n'
-    else: return default
+    if text.find("\r\n") != -1:
+        return "\r\n"
+    elif text.find("\r") != -1:
+        return "\r"
+    elif text.find("\n") != -1:
+        return "\n"
+    else:
+        return default
+
 
 def toUnixEOLMode(text):
-    return text.replace('\r\n', '\n').replace('\r', '\n')
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
 
 def checkMixedEOLs(text):
-    """ Returns False for mixed EOLs """
+    """Returns False for mixed EOLs"""
 
-    crlf = text.count('\r\n')
-    lf = text.count('\n')
-    cr = text.count('\r')
+    crlf = text.count("\r\n")
+    lf = text.count("\n")
+    cr = text.count("\r")
 
     if crlf and (lf > crlf or cr > crlf):
         return True
@@ -1071,7 +1242,9 @@ def checkMixedEOLs(text):
     else:
         return False
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 class InspectorSessionMix:
     def doPost(self, inspector):
@@ -1087,11 +1260,11 @@ class InspectorSessionMix:
     def doUp(self, inspector):
         pass
 
+
 def getEventChecked(event):
     # XXX Chaos :(
     checked = event.IsChecked()
-    if wx.Platform == '__WXGTK__' or wx.VERSION[:3] > (2, 5, 3):
+    if wx.Platform == "__WXGTK__" or wx.VERSION[:3] > (2, 5, 3):
         return checked
     else:
         return not checked
-

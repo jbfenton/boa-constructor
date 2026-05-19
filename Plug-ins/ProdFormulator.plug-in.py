@@ -1,65 +1,85 @@
-import os, sys, string
+import Plugins
 
-import Preferences, Utils, Plugins
+if not Plugins.transportInstalled("ZopeLib.ZopeExplorer"):
+    raise Plugins.SkipPlugin("Zope support is not enabled")
 
-if not Plugins.transportInstalled('ZopeLib.ZopeExplorer'):
-    raise Plugins.SkipPlugin('Zope support is not enabled')
-
-#---Model-----------------------------------------------------------------------
+# ---Model-----------------------------------------------------------------------
 
 # Define new zope image and a Model for opening in the Editor
-from ZopeLib.ZopeEditorModels import addZOAImage, ZOAIcons, ZopeBlankEditorModel, ZopeController
+from ZopeLib.ZopeEditorModels import ZOAIcons, ZopeBlankEditorModel, ZopeController, addZOAImage
 
-addZOAImage('Formulator Form', 'Images/ZOA/FormulatorForm.png')
+addZOAImage("Formulator Form", "Images/ZOA/FormulatorForm.png")
 
-field_meta_types = ['FileField', 'MultiCheckBoxField', 'LinesField',
-      'ListField', 'TextAreaField', 'MultiListField', 'EmailField',
-      'CheckBoxField', 'PasswordField', 'FloatField', 'PatternField',
-      'LinkField', 'StringField', 'RawTextAreaField', 'IntegerField',
-      'RadioField', 'DateTimeField']
+field_meta_types = [
+    "FileField",
+    "MultiCheckBoxField",
+    "LinesField",
+    "ListField",
+    "TextAreaField",
+    "MultiListField",
+    "EmailField",
+    "CheckBoxField",
+    "PasswordField",
+    "FloatField",
+    "PatternField",
+    "LinkField",
+    "StringField",
+    "RawTextAreaField",
+    "IntegerField",
+    "RadioField",
+    "DateTimeField",
+]
 for field in field_meta_types:
-    addZOAImage(field, 'Images/ZOA/FormulatorField.png')
+    addZOAImage(field, "Images/ZOA/FormulatorField.png")
+
 
 class FormulatorFormModel(ZopeBlankEditorModel):
-    imgIdx = ZOAIcons['Formulator Form']
+    imgIdx = ZOAIcons["Formulator Form"]
 
-#---Controller------------------------------------------------------------------
+
+# ---Controller------------------------------------------------------------------
 
 # Connect controller to the model
 from Models import Controllers
 
 Controllers.modelControllerReg[FormulatorFormModel] = ZopeController
 
-#---Views-----------------------------------------------------------------------
+# ---Views-----------------------------------------------------------------------
 
-from Views.EditorViews import EditorView
 import wx
 
+from Views.EditorViews import EditorView
+
+
 class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
-    viewName = 'Order'
-    viewTitle = 'Order'
-    
-    refreshBmp = 'Images/Editor/Refresh.png'
-    addGroupBmp = 'Images/Shared/NewItem.png'
-    remGroupBmp = 'Images/Shared/DeleteItem.png'
-    moveUpBmp = 'Images/Shared/up.png'
-    moveDownBmp = 'Images/Shared/down.png'
+    viewName = "Order"
+    viewTitle = "Order"
+
+    refreshBmp = "Images/Editor/Refresh.png"
+    addGroupBmp = "Images/Shared/NewItem.png"
+    remGroupBmp = "Images/Shared/DeleteItem.png"
+    moveUpBmp = "Images/Shared/up.png"
+    moveDownBmp = "Images/Shared/down.png"
 
     def __init__(self, parent, model):
         wid = wx.NewIdRef(count=1)
-        wx.TreeCtrl.__init__(self, parent, wid,
-         style = wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER | wx.TR_EDIT_LABELS)
-        EditorView.__init__(self, model,
-          (('Refresh', self.OnRefresh, self.refreshBmp, 'Refresh'),
-           ('-', None, '', ''),
-           ('Add group', self.OnAddGroup, self.addGroupBmp, ''),
-           ('Remove group', self.OnRemoveGroup, self.remGroupBmp, ''),
-           ('Rename group', self.OnRenameGroup, '-', ''),
-           ('-', None, '', ''),
-           ('Move up', self.OnMoveUp, self.moveUpBmp, ''),
-           ('Move down', self.OnMoveDown, self.moveDownBmp, ''),
-           ('Move fields to other group', self.OnMoveFieldToGroup, '-', ''),
-            ), -1)
+        wx.TreeCtrl.__init__(self, parent, wid, style=wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER | wx.TR_EDIT_LABELS)
+        EditorView.__init__(
+            self,
+            model,
+            (
+                ("Refresh", self.OnRefresh, self.refreshBmp, "Refresh"),
+                ("-", None, "", ""),
+                ("Add group", self.OnAddGroup, self.addGroupBmp, ""),
+                ("Remove group", self.OnRemoveGroup, self.remGroupBmp, ""),
+                ("Rename group", self.OnRenameGroup, "-", ""),
+                ("-", None, "", ""),
+                ("Move up", self.OnMoveUp, self.moveUpBmp, ""),
+                ("Move down", self.OnMoveDown, self.moveDownBmp, ""),
+                ("Move fields to other group", self.OnMoveFieldToGroup, "-", ""),
+            ),
+            -1,
+        )
 
         self.Bind(wx.EVT_KEY_UP, self.OnKeyPressed)
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit, id=wid)
@@ -77,15 +97,16 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         return self.model.zopeObj.getResource()
 
     sysmsg = '<div class="system-msg">'
+
     def getRespMesg(self, html):
         # msgTagStart = string.find(html, self.sysmsg)
         msgTagStart = html.find(self.sysmsg)
         if msgTagStart != -1:
-            msgStart = msgTagStart+len(self.sysmsg)
-            msgEnd = html.find( '</div>', msgStart)
+            msgStart = msgTagStart + len(self.sysmsg)
+            msgEnd = html.find("</div>", msgStart)
             if msgEnd != -1:
                 return html[msgStart:msgEnd]
-        return ''
+        return ""
 
     def statusUpdate(self, html):
         self.model.editor.setStatus(self.getRespMesg(html))
@@ -102,7 +123,7 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
 
         if selectGroupField is not None:
             selGrp, selFld = selectGroupField
-            if selGrp == selFld == None:
+            if selGrp is None and selFld is None:
                 si = ri
             else:
                 si = None
@@ -115,8 +136,7 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
             if group == selGrp and selFld is None:
                 si = gi
             for field, meta in fields:
-                fi = self.AppendItem(gi, '%s [%s]' %(field, meta),
-                      data=wx.TreeItemData( (field, meta, group) ))
+                fi = self.AppendItem(gi, "%s [%s]" % (field, meta), data=wx.TreeItemData((field, meta, group)))
                 if group == selGrp and field == selFld:
                     si = fi
             self.Expand(gi)
@@ -131,7 +151,7 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         root = self.GetRootItem()
         while itm != root:
             itm = self.GetItemParent(itm)
-            #print itm, itm.IsOk()
+            # print itm, itm.IsOk()
             cnt = cnt + 1
         return cnt
 
@@ -141,28 +161,28 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
             self.EndEditLabel(self.GetSelection(), 0)
 
     def OnAddGroup(self, event):
-        dlg = wx.TextEntryDialog(self, 'Enter new group name', 'Add Group', '')
+        dlg = wx.TextEntryDialog(self, "Enter new group name", "Add Group", "")
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 grpName = dlg.GetValue()
                 self.getFormulatorForm().add_group(grpName)
-                self.refreshCtrl( (grpName, None) )
+                self.refreshCtrl((grpName, None))
         finally:
             dlg.Destroy()
 
     def OnRemoveGroup(self, event):
         ti = self.GetSelection()
         if self.getItemLevel(ti) != 1:
-            wx.LogError('Selected item is not a group')
+            wx.LogError("Selected item is not a group")
         else:
             grpName = self.GetItemText(ti)
             self.getFormulatorForm().remove_group(grpName)
-            self.refreshCtrl( (grpName, None) )
+            self.refreshCtrl((grpName, None))
 
     def OnRenameGroup(self, event):
         ti = self.GetSelection()
         if self.getItemLevel(ti) != 1:
-            wx.LogError('Selected item is not a group')
+            wx.LogError("Selected item is not a group")
         else:
             self.EditLabel(ti)
 
@@ -172,13 +192,13 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         lbl = self.GetItemText(ti)
         if lev == 1:
             self.statusUpdate(self.getFormulatorForm().manage_move_group_up(lbl))
-            self.refreshCtrl( (lbl, None) )
+            self.refreshCtrl((lbl, None))
         elif lev == 2:
             fld, mta, grp = self.GetItemData(ti).GetData()
-            self.statusUpdate(self.getFormulatorForm().zoa.props.Formulator.move_field('up', grp, fld))
-            self.refreshCtrl( (grp, fld) )
+            self.statusUpdate(self.getFormulatorForm().zoa.props.Formulator.move_field("up", grp, fld))
+            self.refreshCtrl((grp, fld))
         else:
-            wx.LogError('Cannot move root')
+            wx.LogError("Cannot move root")
 
     def OnMoveDown(self, event):
         ti = self.GetSelection()
@@ -186,33 +206,32 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         lbl = self.GetItemText(ti)
         if lev == 1:
             self.statusUpdate(self.getFormulatorForm().manage_move_group_down(lbl))
-            self.refreshCtrl( (lbl, None) )
+            self.refreshCtrl((lbl, None))
         elif lev == 2:
             fld, mta, grp = self.GetItemData(ti).GetData()
-            self.statusUpdate(self.getFormulatorForm().zoa.props.Formulator.move_field('down', grp, fld))
-            self.refreshCtrl( (grp, fld) )
+            self.statusUpdate(self.getFormulatorForm().zoa.props.Formulator.move_field("down", grp, fld))
+            self.refreshCtrl((grp, fld))
         else:
-            wx.LogError('Cannot move root (%d)'%lev)
+            wx.LogError("Cannot move root (%d)" % lev)
 
     def OnMoveFieldToGroup(self, event):
         ti = self.GetSelection()
         lev = self.getItemLevel(ti)
-        lbl = self.GetItemText(ti)
+        self.GetItemText(ti)
         if lev != 2:
-            wx.LogError('Not a field')
+            wx.LogError("Not a field")
         else:
             groups = [d[0] for d in self._groupedFields]
             fld, mta, fromGroup = self.GetItemData(ti).GetData()
             groups.remove(fromGroup)
-            dlg = wx.SingleChoiceDialog(self, 'Choose group to move to',
-                  'Move to other group', groups)
+            dlg = wx.SingleChoiceDialog(self, "Choose group to move to", "Move to other group", groups)
             try:
                 if dlg.ShowModal() == wx.ID_OK:
                     toGroup = dlg.GetStringSelection()
                     self.statusUpdate(
-                      self.getFormulatorForm().zoa.props.Formulator.move_field(
-                      'group', fromGroup, fld, toGroup))
-                    self.refreshCtrl( (toGroup, fld) )
+                        self.getFormulatorForm().zoa.props.Formulator.move_field("group", fromGroup, fld, toGroup)
+                    )
+                    self.refreshCtrl((toGroup, fld))
             finally:
                 dlg.Destroy()
 
@@ -225,9 +244,8 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         ti = event.GetItem()
         oldName = self.GetItemText(ti)
         newName = event.GetLabel()
-        self.statusUpdate(self.getFormulatorForm().manage_rename_group(oldName,
-              {'new_name':newName}))
-        self.refreshCtrl( (newName, None) )
+        self.statusUpdate(self.getFormulatorForm().manage_rename_group(oldName, {"new_name": newName}))
+        self.refreshCtrl((newName, None))
 
     def OnRefresh(self, event):
         ti = self.GetSelection()
@@ -235,113 +253,133 @@ class FormulatorFormOrderView(wx.TreeCtrl, EditorView):
         lbl = self.GetItemText(ti)
         if lev == 2:
             fld, mta, grp = self.GetItemData(ti).GetData()
-            self.refreshCtrl( (grp, fld) )
+            self.refreshCtrl((grp, fld))
         elif lev == 1:
-            self.refreshCtrl( (lbl, None) )
+            self.refreshCtrl((lbl, None))
         elif lev == 0:
-            self.refreshCtrl( (None, None) )
+            self.refreshCtrl((None, None))
         else:
-            self.refreshCtrl( None )
+            self.refreshCtrl(None)
 
-#---Explorer--------------------------------------------------------------------
+
+# ---Explorer--------------------------------------------------------------------
 
 # Node in the explorer
-from Views import SourceViews
 from ZopeLib import ZopeViews
 from ZopeLib.ZopeExplorer import ZopeItemNode, ZopeNode, zopeClassMap
+
 
 class FormulatorFormNode(ZopeItemNode):
     Model = FormulatorFormModel
     defaultViews = (FormulatorFormOrderView,)
     additionalViews = (ZopeViews.ZopeUndoView, ZopeViews.ZopeSecurityView)
+
     def isFolderish(self):
         return True
+
     def checkentry(self, name, metatype, path):
-        return FormulatorFieldNode(*(name, path, self.clipboard,
-            -1, self, self.server, self.root, self.properties, metatype))
+        return FormulatorFieldNode(
+            *(name, path, self.clipboard, -1, self, self.server, self.root, self.properties, metatype)
+        )
+
 
 class FormulatorFieldNode(ZopeNode):
     Model = FormulatorFormModel
+
     def open(self, editor):
-        editor.explorer.controllers['zope'].doInspectZopeItem(self)
+        editor.explorer.controllers["zope"].doInspectZopeItem(self)
         return None, None
 
-zopeClassMap['Formulator Form'] = FormulatorFormNode
 
-#---PropertyEditors-------------------------------------------------------------
+zopeClassMap["Formulator Form"] = FormulatorFormNode
+
+# ---PropertyEditors-------------------------------------------------------------
 from PropEdit.PropertyEditors import EnumConfPropEdit
+
 
 class EncTypeEnumConfPropEdit(EnumConfPropEdit):
     def getValues(self):
-        return ['', 'application/x-www-form-urlencoded', 'multipart/form-data']
+        return ["", "application/x-www-form-urlencoded", "multipart/form-data"]
+
 
 class MethodEnumConfPropEdit(EnumConfPropEdit):
     def getValues(self):
-        return ['GET', 'POST']
+        return ["GET", "POST"]
 
-#---Companion-------------------------------------------------------------------
-def fieldify(props, prefix='field_'):
+
+# ---Companion-------------------------------------------------------------------
+def fieldify(props, prefix="field_"):
     res = {}
     for n, v in list(props.items()):
         if isinstance(v, type([])):
-            res[prefix+n] = '\n'.join(v)
+            res[prefix + n] = "\n".join(v)
         else:
-            res[prefix+n] = str(v)
+            res[prefix + n] = str(v)
     return res
 
+
 # Companion used for creation from palette and inspection/posting of props
-from ZopeLib.ZopeCompanions import CustomZopePropsMixIn, ZopeCompanion, BoolZopePropEdit, EvalZopePropEdit
+import RTTI
 from Companions.BaseCompanions import HelperDTC
 from PropEdit.PropertyEditors import ContainerConfPropEdit
-import RTTI
+from ZopeLib.ZopeCompanions import BoolZopePropEdit, CustomZopePropsMixIn, EvalZopePropEdit, ZopeCompanion
+
 
 class FieldBoolZopePropEdit(BoolZopePropEdit):
-    boolKeyMap = {'true': '1', 'false': ''}
+    boolKeyMap = {"true": "1", "false": ""}
+
 
 class DateTimeFieldConfPropEdit(ContainerConfPropEdit):
     def getSubCompanion(self):
         return DateTimeFieldSubCompanion
 
-ZopeCompanion.propMapping.update({'field_boolean': FieldBoolZopePropEdit,
-                                  'form_enctype': EncTypeEnumConfPropEdit,
-                                  'form_method': MethodEnumConfPropEdit,
-                                  'field_date': DateTimeFieldConfPropEdit})
+
+ZopeCompanion.propMapping.update(
+    {
+        "field_boolean": FieldBoolZopePropEdit,
+        "form_enctype": EncTypeEnumConfPropEdit,
+        "form_method": MethodEnumConfPropEdit,
+        "field_date": DateTimeFieldConfPropEdit,
+    }
+)
+
 
 class FormulatorFormZC(CustomZopePropsMixIn, ZopeCompanion):
     def create(self):
-        prodPath = '/manage_addProduct/Formulator/'
-        mime, res = self.call(self.objPath, prodPath+'manage_add',
-              id=self.name, title='', URL1='', submit='')
+        prodPath = "/manage_addProduct/Formulator/"
+        mime, res = self.call(self.objPath, prodPath + "manage_add", id=self.name, title="", URL1="", submit="")
 
     def getProps(self):
-        #path, name = os.path.split(self.objPath)
-        mime, res = self.call(self.objPath, 'zoa/props/Formulator/Form')
+        # path, name = os.path.split(self.objPath)
+        mime, res = self.call(self.objPath, "zoa/props/Formulator/Form")
         return eval(res)
 
     def SetProp(self, name, value):
         props = self.getProps()
         props[name] = value
 
-        groups = props['Groups']; del props['Groups']
+        props["Groups"]
+        del props["Groups"]
 
-        if name == 'Groups':
+        if name == "Groups":
             pass
         else:
-            mime, res = self.callkw(self.objPath, 'manage_settings', fieldify(props))
+            mime, res = self.callkw(self.objPath, "manage_settings", fieldify(props))
 
-    propOrder = ('title', 'row_length', 'action', 'method', 'enctype', 'Groups')
-    propTypeMap = {'title':       ('string', 'title'),
-                   'row_length':  ('int', 'row_length'),
-                   'action':      ('string', 'action'),
-                   'method':      ('form_method', 'method'),
-                   'enctype':     ('form_enctype', 'enctype'),
-                   'Groups':      ('list', 'Groups'),
-                  }
+    propOrder = ("title", "row_length", "action", "method", "enctype", "Groups")
+    propTypeMap = {
+        "title": ("string", "title"),
+        "row_length": ("int", "row_length"),
+        "action": ("string", "action"),
+        "method": ("form_method", "method"),
+        "enctype": ("form_enctype", "enctype"),
+        "Groups": ("list", "Groups"),
+    }
+
 
 class DateTimeFieldSubCompanion(HelperDTC):
     def __init__(self, name, designer, ownerCompanion, obj, ownerPropWrap):
-        HelperDTC.__init__(self, name, designer, ownerCompanion, obj,
-              ownerPropWrap)
+        HelperDTC.__init__(self, name, designer, ownerCompanion, obj, ownerPropWrap)
         self.propItems = []
 
     def getPropEditor(self, prop):
@@ -349,29 +387,31 @@ class DateTimeFieldSubCompanion(HelperDTC):
 
     def getPropList(self):
         if self.obj is None:
-            raise 'First assign a DateTime to the property.'
+            raise "First assign a DateTime to the property."
 
         name, val = self.ownerCompn.propTypeMap[self.name]
-        subProps = [('sub%s_year'%name, self.obj.year() ),
-                    ('sub%s_month'%name, self.obj.month() ),
-                    ('sub%s_day'%name, self.obj.day() ),
-                    ('sub%s_hour'%name, self.obj.hour() ),
-                    ('sub%s_minute'%name, self.obj.minute() ),]
+        subProps = [
+            ("sub%s_year" % name, self.obj.year()),
+            ("sub%s_month" % name, self.obj.month()),
+            ("sub%s_day" % name, self.obj.day()),
+            ("sub%s_hour" % name, self.obj.hour()),
+            ("sub%s_minute" % name, self.obj.minute()),
+        ]
         propLst = []
         for prop in subProps:
-            propLst.append(RTTI.PropertyWrapper(prop[0], 'NameRoute',
-                  self.GetProp, self.SetProp))
+            propLst.append(RTTI.PropertyWrapper(prop[0], "NameRoute", self.GetProp, self.SetProp))
         self.propItems = subProps
 
-        return {'constructor': [],
-                'properties': propLst}
+        return {"constructor": [], "properties": propLst}
 
     def GetProp(self, name):
         for prop in self.propItems:
-            if prop[0] == name: return prop[1]
+            if prop[0] == name:
+                return prop[1]
 
     def SetProp(self, name, value):
-        raise 'Property editing not supported yet'
+        raise "Property editing not supported yet"
+
 
 def keyListFromDictList(key, dctLst):
     res = []
@@ -379,53 +419,55 @@ def keyListFromDictList(key, dctLst):
         res.append(dct[key])
     return res
 
+
 def dictListFind(name, value, dctLst):
     for dct in dctLst:
         if name in dct and dct[name] == value:
             return dct
     return None
 
+
 def select_d(entries_list, from_clause, where_clause):
-    """ SQL wannabe """
+    """SQL wannabe"""
     pass
 
-FieldPropMap =  {'FileField': 'string',
-                 #'MultiCheckBoxField': 'list',
-                 #'LinesField': 'list',
-                 #'ListField': 'list',
-                 #'TextAreaField': 'stringlist',
-                 #'MultiCheckboxField': 'stringlist',
-                 #'MultiListField': 'stringlist',
-                 'EmailField': 'string',
-                 'CheckBoxField': 'field_boolean',
-                 'PasswordField': 'string',
-                 #'FloatField': 'float',
-                 'PatternField': 'string',
-                 'LinkField': 'string',
-                 'StringField': 'string',
-                 #'RawTextAreaField': 'stringlist',
-                 #'IntegerField': 'string',
-                 #'RadioField': 'stringlist',
-                 'DateTimeField': 'field_date',
-                 }
-NotSupportedPropTypes = ['date']
+
+FieldPropMap = {
+    "FileField": "string",
+    #'MultiCheckBoxField': 'list',
+    #'LinesField': 'list',
+    #'ListField': 'list',
+    #'TextAreaField': 'stringlist',
+    #'MultiCheckboxField': 'stringlist',
+    #'MultiListField': 'stringlist',
+    "EmailField": "string",
+    "CheckBoxField": "field_boolean",
+    "PasswordField": "string",
+    #'FloatField': 'float',
+    "PatternField": "string",
+    "LinkField": "string",
+    "StringField": "string",
+    #'RawTextAreaField': 'stringlist',
+    #'IntegerField': 'string',
+    #'RadioField': 'stringlist',
+    "DateTimeField": "field_date",
+}
+NotSupportedPropTypes = ["date"]
+
 
 class FormulatorFieldZC(CustomZopePropsMixIn, ZopeCompanion):
-
     def create(self):
         # XXX move to one zoa call assertfilteredmetatypesfor(container_metatype)
         # assert that called only in Formulator
-        mime, res = self.call(self.objPath, 'zoa/metatype')
-        assert res=='Formulator Form', \
-              'Formulator fields can only be created inside a Formulator Form'
+        mime, res = self.call(self.objPath, "zoa/metatype")
+        assert res == "Formulator Form", "Formulator fields can only be created inside a Formulator Form"
 
         # fetch valid field types
-        mime, res = self.call(self.objPath, 'zoa/filteredmetatypes')
+        mime, res = self.call(self.objPath, "zoa/filteredmetatypes")
         availableFields = eval(res)
 
-        fieldNames = keyListFromDictList('name', availableFields)
-        dlg = wx.SingleChoiceDialog(None, 'Choose the formulator field to add',
-            'Add field', fieldNames)
+        fieldNames = keyListFromDictList("name", availableFields)
+        dlg = wx.SingleChoiceDialog(None, "Choose the formulator field to add", "Add field", fieldNames)
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 fieldName = dlg.GetStringSelection()
@@ -434,32 +476,36 @@ class FormulatorFieldZC(CustomZopePropsMixIn, ZopeCompanion):
         finally:
             dlg.Destroy()
 
-        mime, res = self.call(self.objPath,
-              'manage_addProduct/Formulator/manage_addField',
-              id=self.name, title='', fieldname=fieldName, URL1='', submit='')
+        mime, res = self.call(
+            self.objPath,
+            "manage_addProduct/Formulator/manage_addField",
+            id=self.name,
+            title="",
+            fieldname=fieldName,
+            URL1="",
+            submit="",
+        )
 
     def getPropertyMap(self):
         propMap = []
-        for (propName, propVal) in self.propItems:
-            propMap.append( {'id': propName,
-                             'type': self.getPropertyType(propName)} )
+        for propName, propVal in self.propItems:
+            propMap.append({"id": propName, "type": self.getPropertyType(propName)})
         return propMap
 
     def getPropertyType(self, name):
         if name in self.propTypeMap:
             return self.propTypeMap[name][0]
         else:
-            return 'default'
+            return "default"
 
     def getProps(self):
-        mime, res = self.call(self.objPath, 'zoa/props/Formulator/Field')
-        from ZopeLib.DateTime import DateTime
+        mime, res = self.call(self.objPath, "zoa/props/Formulator/Field")
         lst = eval(res)
 
         self.propTypeMap = {}
         dct = {}
         for name, val, tpe, opts in lst:
-            propEditType = FieldPropMap.get(tpe, 'default')
+            propEditType = FieldPropMap.get(tpe, "default")
             if propEditType in NotSupportedPropTypes:
                 continue
             self.propTypeMap[name] = (propEditType, name)
@@ -470,28 +516,30 @@ class FormulatorFieldZC(CustomZopePropsMixIn, ZopeCompanion):
         props = self.getProps()
         props[name] = value
 
-        messages = props['Messages']; del props['Messages']
-##        overrides = props['Overrides']; del props['Overrides']
+        messages = props["Messages"]
+        del props["Messages"]
+        ##        overrides = props['Overrides']; del props['Overrides']
 
-        if name == 'Messages':
-            mime, res = self.callkw(self.objPath, 'manage_messages', fieldify(messages, ''))
-##        elif name == 'Overrides':
-##            mime, res = self.callkw(self.objPath, 'manage_override', fieldify(overrides))
+        if name == "Messages":
+            mime, res = self.callkw(self.objPath, "manage_messages", fieldify(messages, ""))
+        ##        elif name == 'Overrides':
+        ##            mime, res = self.callkw(self.objPath, 'manage_override', fieldify(overrides))
         else:
             ##print fieldify(props)
-            mime, res = self.callkw(self.objPath, 'manage_edit', fieldify(props))
+            mime, res = self.callkw(self.objPath, "manage_edit", fieldify(props))
 
     propOrder = None
 
 
 # Add to the Zope palette
 import PaletteStore
+
 # form
-PaletteStore.paletteLists['Zope'].append('Formulator Form')
-PaletteStore.compInfo['Formulator Form'] = ['FormulatorForm', FormulatorFormZC]
+PaletteStore.paletteLists["Zope"].append("Formulator Form")
+PaletteStore.compInfo["Formulator Form"] = ["FormulatorForm", FormulatorFormZC]
 # fields
-PaletteStore.paletteLists['Zope'].append('FormulatorField')
-fieldCompInfo = ['FormulatorField', FormulatorFieldZC]
-PaletteStore.compInfo['FormulatorField'] = fieldCompInfo
+PaletteStore.paletteLists["Zope"].append("FormulatorField")
+fieldCompInfo = ["FormulatorField", FormulatorFieldZC]
+PaletteStore.compInfo["FormulatorField"] = fieldCompInfo
 for field in field_meta_types:
     PaletteStore.compInfo[field] = fieldCompInfo

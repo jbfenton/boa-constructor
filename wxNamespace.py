@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        wxNamespace.py
 # Purpose:
 #
@@ -8,19 +8,21 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2001 - 2007
 # Licence:     GPL
-#-----------------------------------------------------------------------------
-import Preferences as _Prefs
+# -----------------------------------------------------------------------------
 
 import wx
+import wx.gizmos
+import wx.grid
 import wx.html
 import wx.lib.calendar
-import wx.grid
 import wx.stc
-import wx.gizmos
+
 # import wx.adv.Wizard
+
 
 def getWxClass(name):
     return getWxObjPath(name)
+
 
 ##def getNamesOfType(aType):
 ##    res = []
@@ -31,9 +33,10 @@ def getWxClass(name):
 ##            res.append(k)
 ##    return res
 
+
 def getWxObjPath(objPath):
-    pathSegs = objPath.split('.')
-    if pathSegs[0] != 'wx':
+    pathSegs = objPath.split(".")
+    if pathSegs[0] != "wx":
         return None
     obj = wx
     for name in pathSegs[1:]:
@@ -43,10 +46,10 @@ def getWxObjPath(objPath):
             return None
     return obj
 
+
 def getWxNamespaceForObjPath(objPath):
     obj = getWxObjPath(objPath)
     if obj:
         return dir(obj)
     else:
         return []
-

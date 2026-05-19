@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        RegExplorer.py
 # Purpose:     Classes for exploring the windows registry
 #
@@ -8,26 +8,26 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2001 - 2007 Riaan Booysen
 # Licence:     GPL
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-import string, os, sys
+import os
 
 import wx
 
-import Preferences, Utils, Plugins
-
+import Plugins
+import Utils
 from Explorers import ExplorerNodes
-from Models import EditorModels, EditorHelper
-import RTTI
+from Models import EditorHelper
 
 try:
     import _winreg
 except ImportError:
-    raise Plugins.SkipPluginSilently ('Requires windows')
+    raise Plugins.SkipPluginSilently("Requires windows")
 
-#---Explorer classes------------------------------------------------------------
+# ---Explorer classes------------------------------------------------------------
 
 wxID_REGOPEN, wxID_REGINSPECT = Utils.wxNewIds(2)
+
 
 class RegController(ExplorerNodes.Controller, ExplorerNodes.ClipboardControllerMix):
     def __init__(self, editor, list, inspector, controllers):
@@ -38,10 +38,16 @@ class RegController(ExplorerNodes.Controller, ExplorerNodes.ClipboardControllerM
         self.menu = wx.Menu()
         self.inspector = inspector
 
-        self.setupMenu(self.menu, self.list,
-              [ (wxID_REGOPEN, 'Open', self.OnOpenItems, '-'),
-                (wxID_REGINSPECT, 'Inspect', self.OnInspectItem, '-'),
-                (-1, '-', None, '') ] + self.clipMenuDef)
+        self.setupMenu(
+            self.menu,
+            self.list,
+            [
+                (wxID_REGOPEN, "Open", self.OnOpenItems, "-"),
+                (wxID_REGINSPECT, "Inspect", self.OnInspectItem, "-"),
+                (-1, "-", None, ""),
+            ]
+            + self.clipMenuDef,
+        )
         self.toolbarMenus = [self.clipMenuDef]
 
     def destroy(self):
@@ -64,21 +70,19 @@ class RegController(ExplorerNodes.Controller, ExplorerNodes.ClipboardControllerM
 
 
 class RegCatNode(ExplorerNodes.CategoryNode):
-    itemProtocol = 'reg'
-    defName = 'Registry'
-    defaultStruct = {'path': 'HKEY_LOCAL_MACHINE',
-                     'computername': ''}
+    itemProtocol = "reg"
+    defName = "Registry"
+    defaultStruct = {"path": "HKEY_LOCAL_MACHINE", "computername": ""}
+
     def __init__(self, clipboard, config, parent, bookmarks):
-        ExplorerNodes.CategoryNode.__init__(self, 'Registry', ('explorer', 'reg'),
-              clipboard, config, parent)
+        ExplorerNodes.CategoryNode.__init__(self, "Registry", ("explorer", "reg"), clipboard, config, parent)
         self.bookmarks = bookmarks
 
     def createParentNode(self):
         return self
 
     def createChildNode(self, name, props):
-        itm = RegItemNode(name, props, props['path'], self.clipboard,
-              EditorHelper.imgFolder, self)
+        itm = RegItemNode(name, props, props["path"], self.clipboard, EditorHelper.imgFolder, self)
         itm.category = name
         itm.bookmarks = self.bookmarks
         return itm
@@ -89,42 +93,40 @@ class RegCatNode(ExplorerNodes.CategoryNode):
 
 
 class RegItemNode(ExplorerNodes.ExplorerNode):
-    protocol = 'reg'
+    protocol = "reg"
     connection = False
+
     def __init__(self, name, props, resourcepath, clipboard, imgIdx, parent):
         if not resourcepath:
-            resourcepath = '/'
-        ExplorerNodes.ExplorerNode.__init__(self, name, resourcepath, clipboard,
-              imgIdx, parent, props)
+            resourcepath = "/"
+        ExplorerNodes.ExplorerNode.__init__(self, name, resourcepath, clipboard, imgIdx, parent, props)
 
         self.hkey = None
 
     def initHkey(self):
-        if self.resourcepath.find('\\') == -1:
+        if self.resourcepath.find("\\") == -1:
             key, subkey = self.resourcepath, None
-        else:    
-            key, subkey = str.split(self.resourcepath, '\\', 1)
-        key =_winreg.__dict__[key]
-        if self.properties['computername']:
-            compName = self.properties['computername']
         else:
-            compName = None
+            key, subkey = str.split(self.resourcepath, "\\", 1)
+        key = _winreg.__dict__[key]
+        if self.properties["computername"]:
+            self.properties["computername"]
+        else:
+            pass
 
-        #hdl = _winreg.ConnectRegistry(compName, )
+        # hdl = _winreg.ConnectRegistry(compName, )
         self.hkey = _winreg.CreateKey(key, subkey)
 
-
     def getURI(self):
-        return '%s://%s' % (self.protocol, self.resourcepath)
+        return "%s://%s" % (self.protocol, self.resourcepath)
 
     def isFolderish(self):
         return True
 
     def createChildNode(self, name, props):
         newname = os.path.join(self.resourcepath, name)
-        #isFolder = tpe == 'key'
-        item = RegItemNode(name, props, newname, self.clipboard,
-              EditorHelper.imgFolder, self)
+        # isFolder = tpe == 'key'
+        item = RegItemNode(name, props, newname, self.clipboard, EditorHelper.imgFolder, self)
         item.category = self.category
         item.bookmarks = self.bookmarks
         return item
@@ -132,18 +134,20 @@ class RegItemNode(ExplorerNodes.ExplorerNode):
     def enumReg(self, func, key):
         idx = 0
         res = []
-        #vals = []
-        #for res, func in ((keys, _winreg.EnumKey), (vals, _winreg.EnumValue)):
+        # vals = []
+        # for res, func in ((keys, _winreg.EnumKey), (vals, _winreg.EnumValue)):
         while 1:
-            try: res.append(func(key, idx))
-            except EnvironmentError: break
-            else: idx = idx + 1
+            try:
+                res.append(func(key, idx))
+            except EnvironmentError:
+                break
+            else:
+                idx = idx + 1
         return res
 
     def openList(self):
         self.initHkey()
 
-        idx = 0
         res = []
         for skey in self.enumReg(_winreg.EnumKey, self.hkey):
             res.append(self.createChildNode(skey, self.properties))
@@ -156,10 +160,10 @@ class RegItemNode(ExplorerNodes.ExplorerNode):
     def renameItem(self, name, newName):
         pass
 
-    def load(self, mode='rb'):
-        return ''
+    def load(self, mode="rb"):
+        return ""
 
-    def save(self, filename, data, mode='wb'):
+    def save(self, filename, data, mode="wb"):
         pass
 
     def newFolder(self, name):
@@ -177,28 +181,31 @@ class RegItemNode(ExplorerNodes.ExplorerNode):
 class RegExpClipboard(ExplorerNodes.ExplorerClipboard):
     pass
 
-#---Companion classes-----------------------------------------------------------
 
-from Companions.BaseCompanions import HelperDTC
-from PropEdit import PropertyEditors
-import RTTI
+# ---Companion classes-----------------------------------------------------------
+
 import types
 
+from PropEdit import PropertyEditors
+
+
 class RegPropReaderMixin:
-    propMapping = {'default': PropertyEditors.EvalConfPropEdit}
+    propMapping = {"default": PropertyEditors.EvalConfPropEdit}
+
     def getPropEditor(self, prop):
-        return self.propMapping.get(type(self.GetProp(prop)),
-              self.propMapping['default'])
+        return self.propMapping.get(type(self.GetProp(prop)), self.propMapping["default"])
 
     def buildItems(self, items, propList):
-        #print propList
+        # print propList
         for name, value in propList:
-            if not value: value = ''
+            if not value:
+                value = ""
             elif types.StringType is type(value[0]):
                 value = value[0]
 
-            items.append( (str.split(name, ':')[1], value) )
+            items.append((str.split(name, ":")[1], value))
         return items
+
 
 class RegCompanion(RegPropReaderMixin, ExplorerNodes.ExplorerCompanion):
     def __init__(self, name, regNode):
@@ -209,13 +216,14 @@ class RegCompanion(RegPropReaderMixin, ExplorerNodes.ExplorerCompanion):
         res = []
         self.regNode.initHkey()
         for name, val, tpe in self.regNode.enumReg(_winreg.EnumValue, self.regNode.hkey):
-            res.append( (name, val) )
+            res.append((name, val))
         return res
 
     def SetProp(self, name, value):
-        raise 'Property editing not supported yet'
+        raise "Property editing not supported yet"
 
 
-#-------------------------------------------------------------------------------
-ExplorerNodes.register(RegItemNode, clipboard=RegExpClipboard,
-      confdef=('explorer', 'reg'), controller=RegController, category=RegCatNode)
+# -------------------------------------------------------------------------------
+ExplorerNodes.register(
+    RegItemNode, clipboard=RegExpClipboard, confdef=("explorer", "reg"), controller=RegController, category=RegCatNode
+)

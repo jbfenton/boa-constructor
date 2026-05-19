@@ -5,16 +5,22 @@
 #     from wx import wxNO_3D
 
 try:
-    from wx import DIALOG_MODAL as wxDIALOG_MODAL
+    from wx import DIALOG_MODAL as _wxDIALOG_MODAL
 except ImportError:
-    from wx import wxDIALOG_MODAL
+    pass
+else:
+    wxDIALOG_MODAL = _wxDIALOG_MODAL
 
 try:
-    from wx import DIALOG_MODELESS as wxDIALOG_MODELESS
+    from wx import DIALOG_MODELESS as _wxDIALOG_MODELESS
 except ImportError:
-    from wx import wxDIALOG_MODELESS
+    pass
+else:
+    wxDIALOG_MODELESS = _wxDIALOG_MODELESS
 
 try:
-    from wx.tools.img2py import crunch_data
+    from wx.tools.img2py import crunch_data as _crunch_data
 except ImportError:
-    from ExternalLib.wxtools import crunch_data
+    pass
+else:
+    crunch_data = _crunch_data

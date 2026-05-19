@@ -1,6 +1,6 @@
-#Boa:Frame:AttrMixinFrame
+# Boa:Frame:AttrMixinFrame
 
-""" Example module which demonstrates the use of Attribute Mixin classes.
+"""Example module which demonstrates the use of Attribute Mixin classes.
 
 Attribute Mixin classes can be used to centralise attribute declarations
 that can be shared between frames.
@@ -15,24 +15,42 @@ import wx
 #       be in the same directory as the frame module
 from AttrMixins import Test_AttrMixin
 
+
 def create(parent):
     return AttrMixinFrame(parent)
 
-[wxID_ATTRMIXINFRAME, wxID_ATTRMIXINFRAMEBUTTON1, 
+
+[
+    wxID_ATTRMIXINFRAME,
+    wxID_ATTRMIXINFRAMEBUTTON1,
 ] = [wx.NewIdRef(count=1) for _init_ctrls in range(2)]
+
 
 # Note: Inherits from the AttrMixin class after wxFrame
 class AttrMixinFrame(wx.Frame, Test_AttrMixin):
     def _init_ctrls(self, prnt):
         # generated method, don't edit
-        wx.Frame.__init__(self, id=wxID_ATTRMIXINFRAME, name='AttrMixinFrame',
-              parent=prnt, pos=wx.Point(352, 222), size=wx.Size(201, 104),
-              style=wx.DEFAULT_FRAME_STYLE, title=self.frameTitle)
+        wx.Frame.__init__(
+            self,
+            id=wxID_ATTRMIXINFRAME,
+            name="AttrMixinFrame",
+            parent=prnt,
+            pos=wx.Point(352, 222),
+            size=wx.Size(201, 104),
+            style=wx.DEFAULT_FRAME_STYLE,
+            title=self.frameTitle,
+        )
         self.SetClientSize(wx.Size(193, 77))
 
-        self.button1 = wx.Button(id=wxID_ATTRMIXINFRAMEBUTTON1,
-              label=self.buttonLabel, name='button1', parent=self,
-              pos=wx.Point(0, 0), size=wx.Size(193, 77), style=0)
+        self.button1 = wx.Button(
+            id=wxID_ATTRMIXINFRAMEBUTTON1,
+            label=self.buttonLabel,
+            name="button1",
+            parent=self,
+            pos=wx.Point(0, 0),
+            size=wx.Size(193, 77),
+            style=0,
+        )
 
     def __init__(self, parent):
         # Note: Call inherited mixin constructor before _init_ctrls
@@ -41,7 +59,7 @@ class AttrMixinFrame(wx.Frame, Test_AttrMixin):
         self._init_ctrls(parent)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = wx.App()
     wx.InitAllImageHandlers()
     frame = create(None)

@@ -80,6 +80,7 @@ BabelizerIOError
 Version: $Id$
 Author: Jonathan Feinberg <jdf@pobox.com>
 """
+
 import re
 import urllib
 
@@ -89,18 +90,20 @@ We try each of them in turn, based on the relative number of times I've
 seen each of these patterns.  $1.00 to anyone who can provide a heuristic
 for knowing which one to use.   This includes AltaVista employees.
 """
-__where = [re.compile(r'name=\"q\">([^<]*)'),
-           re.compile(r'td bgcolor=white>([^<]*)'),
-           re.compile(r'<\/strong><br>([^<]*)')
-          ]
+__where = [
+    re.compile(r"name=\"q\">([^<]*)"),
+    re.compile(r"td bgcolor=white>([^<]*)"),
+    re.compile(r"<\/strong><br>([^<]*)"),
+]
 
-__languages = { 'english'   : 'en',
-                'french'    : 'fr',
-                'spanish'   : 'es',
-                'german'    : 'de',
-                'italian'   : 'it',
-                'portugese' : 'pt',
-              }
+__languages = {
+    "english": "en",
+    "french": "fr",
+    "spanish": "es",
+    "german": "de",
+    "italian": "it",
+    "portugese": "pt",
+}
 
 """
   All of the available language names.
@@ -131,27 +134,26 @@ class BabelizerIOError(BabelizerError):
 
 def clean(text):
     #    return ' '.join(string.replace(text.strip(), "\n", ' ').split())
-    return ' '.join(text.strip().replace("\n", ' ')).split()
+    return " ".join(text.strip().replace("\n", " ")).split()
 
 
 def translate(phrase, from_lang, to_lang):
     phrase = clean(phrase)
     try:
-       from_code = __languages[from_lang.lower()]
+        from_code = __languages[from_lang.lower()]
     except KeyError:
         raise LanguageNotAvailableError(from_lang)
 
     try:
-       to_code = __languages[to_lang.lower()]
+        to_code = __languages[to_lang.lower()]
     except KeyError:
         raise LanguageNotAvailableError(to_lang)
 
-    params = urllib.urlencode( { 'BabelFishFrontPage' : 'yes',
-                                 'doit' : 'done',
-                                 'urltext' : phrase,
-                                 'lp' : from_code + '_' + to_code } )
+    params = urllib.urlencode(
+        {"BabelFishFrontPage": "yes", "doit": "done", "urltext": phrase, "lp": from_code + "_" + to_code}
+    )
     try:
-        what = 'http://babelfish.altavista.com/tr'
+        what = "http://babelfish.altavista.com/tr"
         response = urllib.urlopen(what, params)
     except IOError:
         raise BabelizerIOError("Couldn't talk to server: %s" % what)
@@ -161,38 +163,48 @@ def translate(phrase, from_lang, to_lang):
     html = response.read()
     for regex in __where:
         match = regex.search(html)
-        if match: break
-    if not match: raise BabelfishChangedError("Can't recognize translated string.")
+        if match:
+            break
+    if not match:
+        raise BabelfishChangedError("Can't recognize translated string.")
     return clean(match.group(1))
 
-def babelize(phrase, from_language, through_language, limit = 12, callback = None):
+
+def babelize(phrase, from_language, through_language, limit=12, callback=None):
     phrase = clean(phrase)
-    seen = { phrase: 1 }
+    seen = {phrase: 1}
     if callback:
         callback(phrase)
     else:
-        results = [ phrase ]
-    flip = { from_language: through_language, through_language: from_language }
+        results = [phrase]
+    flip = {from_language: through_language, through_language: from_language}
     next = from_language
     for i in range(limit):
         phrase = translate(phrase, next, flip[next])
-        if seen.has_key(phrase): break
+        if seen.has_key(phrase):
+            break
         seen[phrase] = 1
         if callback:
             callback(phrase)
         else:
             results.append(phrase)
         next = flip[next]
-    if not callback: return results
+    if not callback:
+        return results
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     def printer(x):
         print(x)
-        sys.stdout.flush();
+        sys.stdout.flush()
 
-
-##    babelize("I won't take that sort of treatment from you, or from your doggie!",
-##             'english', 'french', callback = printer)
-    babelize("F�r die Validierung der Ausgabedatei catalog.xml sollte ebenfalls ein Perl-Modul zur Anwendung kommen", 'German', 'English', callback = printer)
-
+    ##    babelize("I won't take that sort of treatment from you, or from your doggie!",
+    ##             'english', 'french', callback = printer)
+    babelize(
+        "F�r die Validierung der Ausgabedatei catalog.xml sollte ebenfalls ein Perl-Modul zur Anwendung kommen",
+        "German",
+        "English",
+        callback=printer,
+    )

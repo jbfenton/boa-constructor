@@ -97,23 +97,27 @@ __version__ = 1, 4, 0
 # is sent to stdout.  Or you can call main(args), passing what would
 # have been in sys.argv[1:] had the cmd-line form been used.
 
-import string
 from functools import reduce
+
 TRACE = 0
 
 # define what "junk" means
 import re
 
+
 def IS_LINE_JUNK(line, pat=re.compile(r"\s*#?\s*$").match):
     return pat(line) is not None
+
 
 def IS_CHARACTER_JUNK(ch, ws=" \t"):
     return ch in ws
 
+
 del re
 
+
 class SequenceMatcher:
-    def __init__(self, isjunk=None, a='', b=''):
+    def __init__(self, isjunk=None, a="", b=""):
         # Members:
         # a
         #      first sequence
@@ -213,7 +217,7 @@ class SequenceMatcher:
         if isjunk:
             for elt in list(b2j.keys()):
                 if isjunk(elt):
-                    junkdict[elt] = 1   # value irrelevant; it's a set
+                    junkdict[elt] = 1  # value irrelevant; it's a set
                     del b2j[elt]
 
         # Now for x in b, isjunk(x) == junkdict.has_key(x), but the
@@ -281,9 +285,9 @@ class SequenceMatcher:
                     continue
                 if j >= bhi:
                     break
-                k = newj2len[j] = j2lenget(j-1, 0) + 1
+                k = newj2len[j] = j2lenget(j - 1, 0) + 1
                 if k > bestsize:
-                    besti, bestj, bestsize = i-k+1, j-k+1, k
+                    besti, bestj, bestsize = i - k + 1, j - k + 1, k
             j2len = newj2len
 
         # Now that we have a wholly interesting match (albeit possibly
@@ -293,13 +297,14 @@ class SequenceMatcher:
         # figuring out what to do with it.  In the case of an empty
         # interesting match, this is clearly the right thing to do,
         # because no other kind of match is possible in the regions.
-        while besti > alo and bestj > blo and \
-              isbjunk(b[bestj-1]) and \
-              a[besti-1] == b[bestj-1]:
-            besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
-        while besti+bestsize < ahi and bestj+bestsize < bhi and \
-              isbjunk(b[bestj+bestsize]) and \
-              a[besti+bestsize] == b[bestj+bestsize]:
+        while besti > alo and bestj > blo and isbjunk(b[bestj - 1]) and a[besti - 1] == b[bestj - 1]:
+            besti, bestj, bestsize = besti - 1, bestj - 1, bestsize + 1
+        while (
+            besti + bestsize < ahi
+            and bestj + bestsize < bhi
+            and isbjunk(b[bestj + bestsize])
+            and a[besti + bestsize] == b[bestj + bestsize]
+        ):
             bestsize = bestsize + 1
 
         if TRACE:
@@ -313,9 +318,9 @@ class SequenceMatcher:
         self.matching_blocks = []
         la, lb = len(self.a), len(self.b)
         self.__helper(0, la, 0, lb, self.matching_blocks)
-        self.matching_blocks.append( (la, lb, 0) )
+        self.matching_blocks.append((la, lb, 0))
         if TRACE:
-            print('*** matching blocks', self.matching_blocks)
+            print("*** matching blocks", self.matching_blocks)
         return self.matching_blocks
 
     # builds list of matching blocks covering a[alo:ahi] and
@@ -330,8 +335,8 @@ class SequenceMatcher:
             if alo < i and blo < j:
                 self.__helper(alo, i, blo, j, answer)
             answer.append(x)
-            if i+k < ahi and j+k < bhi:
-                self.__helper(i+k, ahi, j+k, bhi, answer)
+            if i + k < ahi and j + k < bhi:
+                self.__helper(i + k, ahi, j + k, bhi, answer)
 
     def ratio(self):
         """Return a measure of the sequences' similarity (float in [0,1]).
@@ -342,8 +347,7 @@ class SequenceMatcher:
         they have nothing in common.
         """
 
-        matches = reduce(lambda sum, triple: sum + triple[-1],
-                         self.get_matching_blocks(), 0)
+        matches = reduce(lambda sum, triple: sum + triple[-1], self.get_matching_blocks(), 0)
         return 2.0 * matches / (len(self.a) + len(self.b))
 
     def quick_ratio(self):
@@ -388,61 +392,63 @@ class SequenceMatcher:
             # a[ai:ai+size] == b[bj:bj+size].  So we need to pump
             # out a diff to change a[i:ai] into b[j:bj], pump out
             # the matching block, and move (i,j) beyond the match
-            tag = ''
+            tag = ""
             if i < ai and j < bj:
-                tag = 'replace'
+                tag = "replace"
             elif i < ai:
-                tag = 'delete'
+                tag = "delete"
             elif j < bj:
-                tag = 'insert'
+                tag = "insert"
             if tag:
-                answer.append( (tag, i, ai, j, bj) )
-            i, j = ai+size, bj+size
+                answer.append((tag, i, ai, j, bj))
+            i, j = ai + size, bj + size
             # the list of matching blocks is terminated by a
             # sentinel with size 0
             if size:
-                answer.append( ('equal', ai, i, bj, j) )
+                answer.append(("equal", ai, i, bj, j))
         return answer
+
 
 # meant for dumping lines
 def dump(tag, x, lo, hi):
     for i in range(lo, hi):
-        print(tag, x[i], end=' ')
+        print(tag, x[i], end=" ")
+
 
 # figure out which mark to stick under characters in lines that
 # have changed (blank = same, - = deleted, + = inserted, ^ = replaced)
-_combine = { '  ': ' ',
-             '. ': '-',
-             ' .': '+',
-             '..': '^' }
+_combine = {"  ": " ", ". ": "-", " .": "+", "..": "^"}
+
 
 def plain_replace(a, alo, ahi, b, blo, bhi):
     assert alo < ahi and blo < bhi
     # dump the shorter block first -- reduces the burden on short-term
     # memory if the blocks are of very different sizes
     if bhi - blo < ahi - alo:
-        dump('+', b, blo, bhi)
-        dump('-', a, alo, ahi)
+        dump("+", b, blo, bhi)
+        dump("-", a, alo, ahi)
     else:
-        dump('-', a, alo, ahi)
-        dump('+', b, blo, bhi)
+        dump("-", a, alo, ahi)
+        dump("+", b, blo, bhi)
+
 
 # When replacing one block of lines with another, this guy searches
 # the blocks for *similar* lines; the best-matching pair (if any) is
 # used as a synch point, and intraline difference marking is done on
 # the similar pair.  Lots of work, but often worth it.
 
+
 def fancy_replace(a, alo, ahi, b, blo, bhi):
     if TRACE:
-        print('*** fancy_replace', alo, ahi, blo, bhi)
-        dump('>', a, alo, ahi)
-        dump('<', b, blo, bhi)
+        print("*** fancy_replace", alo, ahi, blo, bhi)
+        dump(">", a, alo, ahi)
+        dump("<", b, blo, bhi)
 
     # don't synch up unless the lines have a similarity score of at
     # least cutoff; best_ratio tracks the best score seen so far
     best_ratio, cutoff = 0.74, 0.75
     cruncher = SequenceMatcher(IS_CHARACTER_JUNK)
-    eqi, eqj = None, None   # 1st indices of equal lines (if any)
+    eqi, eqj = None, None  # 1st indices of equal lines (if any)
 
     # search for the pair that matches best without being identical
     # (identical lines must be junk lines, & we don't want to synch up
@@ -463,9 +469,11 @@ def fancy_replace(a, alo, ahi, b, blo, bhi):
             # note that ratio() is only expensive to compute the first
             # time it's called on a sequence pair; the expensive part
             # of the computation is cached by cruncher
-            if cruncher.real_quick_ratio() > best_ratio and \
-                  cruncher.quick_ratio() > best_ratio and \
-                  cruncher.ratio() > best_ratio:
+            if (
+                cruncher.real_quick_ratio() > best_ratio
+                and cruncher.quick_ratio() > best_ratio
+                and cruncher.ratio() > best_ratio
+            ):
                 best_ratio, best_i, best_j = cruncher.ratio(), i, j
     if best_ratio < cutoff:
         # no non-identical "pretty close" pair
@@ -482,9 +490,9 @@ def fancy_replace(a, alo, ahi, b, blo, bhi):
     # a[best_i] very similar to b[best_j]; eqi is None iff they're not
     # identical
     if TRACE:
-        print('*** best_ratio', best_ratio, best_i, best_j)
-        dump('>', a, best_i, best_i+1)
-        dump('<', b, best_j, best_j+1)
+        print("*** best_ratio", best_ratio, best_i, best_j)
+        dump(">", a, best_i, best_i + 1)
+        dump("<", b, best_j, best_j + 1)
 
     # pump out diffs from before the synch point
     fancy_helper(a, alo, best_i, b, blo, best_j)
@@ -497,56 +505,60 @@ def fancy_replace(a, alo, ahi, b, blo, bhi):
         cruncher.set_seqs(aelt, belt)
         for tag, ai1, ai2, bj1, bj2 in cruncher.get_opcodes():
             la, lb = ai2 - ai1, bj2 - bj1
-            if tag == 'replace':
-                atags = atags + '.' * la
-                btags = btags + '.' * lb
-            elif tag == 'delete':
-                atags = atags + '.' * la
-            elif tag == 'insert':
-                btags = btags + '.' * lb
-            elif tag == 'equal':
-                atags = atags + ' ' * la
-                btags = btags + ' ' * lb
+            if tag == "replace":
+                atags = atags + "." * la
+                btags = btags + "." * lb
+            elif tag == "delete":
+                atags = atags + "." * la
+            elif tag == "insert":
+                btags = btags + "." * lb
+            elif tag == "equal":
+                atags = atags + " " * la
+                btags = btags + " " * lb
             else:
-                raise ValueError('unknown tag ' + repr(tag))
+                raise ValueError("unknown tag " + repr(tag))
         la, lb = len(atags), len(btags)
         if la < lb:
-            atags = atags + ' ' * (lb - la)
+            atags = atags + " " * (lb - la)
         elif lb < la:
-            btags = btags + ' ' * (la - lb)
-        combined = list(map(lambda x,y: _combine[x+y], atags, btags))
-        print('-', aelt, '+', belt, '?', \
-              ''.join(combined).rstrip())
+            btags = btags + " " * (la - lb)
+        combined = list(map(lambda x, y: _combine[x + y], atags, btags))
+        print("-", aelt, "+", belt, "?", "".join(combined).rstrip())
     else:
         # the synch pair is identical
-        print(' ', aelt, end=' ')
+        print(" ", aelt, end=" ")
 
     # pump out diffs from after the synch point
-    fancy_helper(a, best_i+1, ahi, b, best_j+1, bhi)
+    fancy_helper(a, best_i + 1, ahi, b, best_j + 1, bhi)
+
 
 def fancy_helper(a, alo, ahi, b, blo, bhi):
     if alo < ahi:
         if blo < bhi:
             fancy_replace(a, alo, ahi, b, blo, bhi)
         else:
-            dump('-', a, alo, ahi)
+            dump("-", a, alo, ahi)
     elif blo < bhi:
-        dump('+', b, blo, bhi)
+        dump("+", b, blo, bhi)
+
 
 def fail(msg):
     import sys
+
     out = sys.stderr.write
     out(msg + "\n\n")
     out(__doc__)
     return 0
 
+
 # open a file & return the file object; gripe and return 0 if it
 # couldn't be opened
 def fopen(fname):
     try:
-        return open(fname, 'r')
+        return open(fname, "r")
     except IOError as detail:
         return fail("couldn't open " + fname + ": " + str(detail))
+
 
 # open two files & spray the diff to stdout; return false iff a problem
 def fcompare(f1name, f2name):
@@ -555,29 +567,34 @@ def fcompare(f1name, f2name):
     if not f1 or not f2:
         return 0
 
-    a = f1.readlines(); f1.close()
-    b = f2.readlines(); f2.close()
+    a = f1.readlines()
+    f1.close()
+    b = f2.readlines()
+    f2.close()
 
     cruncher = SequenceMatcher(IS_LINE_JUNK, a, b)
     for tag, alo, ahi, blo, bhi in cruncher.get_opcodes():
-        if tag == 'replace':
+        if tag == "replace":
             fancy_replace(a, alo, ahi, b, blo, bhi)
-        elif tag == 'delete':
-            dump('-', a, alo, ahi)
-        elif tag == 'insert':
-            dump('+', b, blo, bhi)
-        elif tag == 'equal':
-            dump(' ', a, alo, ahi)
+        elif tag == "delete":
+            dump("-", a, alo, ahi)
+        elif tag == "insert":
+            dump("+", b, blo, bhi)
+        elif tag == "equal":
+            dump(" ", a, alo, ahi)
         else:
-            raise ValueError('unknown tag ' + repr(tag))
+            raise ValueError("unknown tag " + repr(tag))
 
     return 1
+
 
 # crack args (sys.argv[1:] is normal) & compare;
 # return false iff a problem
 
+
 def main(args):
     import getopt
+
     try:
         opts, args = getopt.getopt(args, "qr:")
     except getopt.error as detail:
@@ -604,27 +621,33 @@ def main(args):
         return fail("need 2 filename args")
     f1name, f2name = args
     if noisy:
-        print('-:', f1name)
-        print('+:', f2name)
+        print("-:", f1name)
+        print("+:", f2name)
     return fcompare(f1name, f2name)
+
 
 def restore(which):
     import sys
+
     tag = {"1": "- ", "2": "+ "}[which]
     prefixes = ("  ", tag)
     for line in sys.stdin.readlines():
         if line[:2] in prefixes:
-            print(line[2:], end=' ')
+            print(line[2:], end=" ")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     args = sys.argv[1:]
     if "-profile" in args:
-        import profile, pstats
+        import profile
+        import pstats
+
         args.remove("-profile")
         statf = "ndiff.pro"
         profile.run("main(args)", statf)
         stats = pstats.Stats(statf)
-        stats.strip_dirs().sort_stats('time').print_stats()
+        stats.strip_dirs().sort_stats("time").print_stats()
     else:
         main(args)

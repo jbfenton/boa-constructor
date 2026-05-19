@@ -16,15 +16,17 @@
 
 print('importing Models.EditorModels')
 
-import os, sys, tempfile
+import os
+import tempfile
 from io import StringIO
 
 import wx
 
-import Preferences, Utils
-from . import EditorHelper
-from Preferences import keyDefs
+import Preferences
+import Utils
 from Utils import _
+
+from . import EditorHelper
 
 _vc_hook = None
 
@@ -222,7 +224,7 @@ class BasePersistentModel(EditorModel):
         """ Saves contents of data to file specified by filename.
             Override this to catch name changes. """
         # Catch transport changes
-        from Explorers.Explorer import splitURI, getTransport
+        from Explorers.Explorer import getTransport, splitURI
         protO, catO, resO, uriO = splitURI(self.filename)
         protN, catN, resN, uriN = splitURI(filename)
 
@@ -260,7 +262,7 @@ class BasePersistentModel(EditorModel):
 
         if filename is None:
             filename = self.filename
-        from Explorers.Explorer import splitURI, TransportError
+        from Explorers.Explorer import TransportError, splitURI
         prot, cat, filename, uri = splitURI(filename)
         if prot != 'file':
             raise TransportError(_('Operation only supported on the filesystem.'))

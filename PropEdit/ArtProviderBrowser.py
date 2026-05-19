@@ -1,40 +1,56 @@
-#Boa:Dialog:ArtProviderBrowser
+# Boa:Dialog:ArtProviderBrowser
 
 import wx
 
+import PaletteStore
 from Utils import _
 
-import PaletteStore
+ClientIds = [
+    "wx.ART_TOOLBAR",
+    "wx.ART_MENU",
+    "wx.ART_FRAME_ICON",
+    "wx.ART_CMN_DIALOG",
+    "wx.ART_HELP_BROWSER",
+    "wx.ART_MESSAGE_BOX",
+    "wx.ART_BUTTON",
+    "wx.ART_OTHER",
+]
 
-ClientIds = ['wx.ART_TOOLBAR', 'wx.ART_MENU', 'wx.ART_FRAME_ICON', 'wx.ART_CMN_DIALOG', 
-             'wx.ART_HELP_BROWSER', 'wx.ART_MESSAGE_BOX', 'wx.ART_BUTTON', 'wx.ART_OTHER']
 
 def attachStandardArtIds():
     clids = [c[3:] for c in ClientIds]
     for n in wx.__dict__.keys():
-        if n.startswith('ART_') and n not in clids:
+        if n.startswith("ART_") and n not in clids:
             val = wx.__dict__[n]
-            if isinstance(val, basestring):
+            if isinstance(val, str):
                 PaletteStore.artProviderArtIds.append(val)
 
+
 attachStandardArtIds()
+
 
 def create(parent):
     return ArtProviderBrowser(parent)
 
-[wxID_ARTPROVIDERBROWSER, wxID_ARTPROVIDERBROWSERARTID, 
- wxID_ARTPROVIDERBROWSERBTNCANCEL, wxID_ARTPROVIDERBROWSERBTNFILEDLG, 
- wxID_ARTPROVIDERBROWSERBTNOK, wxID_ARTPROVIDERBROWSERCLIENTID, 
- wxID_ARTPROVIDERBROWSERIMGSIZE, wxID_ARTPROVIDERBROWSERLISTCTRL, 
+
+[
+    wxID_ARTPROVIDERBROWSER,
+    wxID_ARTPROVIDERBROWSERARTID,
+    wxID_ARTPROVIDERBROWSERBTNCANCEL,
+    wxID_ARTPROVIDERBROWSERBTNFILEDLG,
+    wxID_ARTPROVIDERBROWSERBTNOK,
+    wxID_ARTPROVIDERBROWSERCLIENTID,
+    wxID_ARTPROVIDERBROWSERIMGSIZE,
+    wxID_ARTPROVIDERBROWSERLISTCTRL,
 ] = [wx.NewIdRef(count=1) for _init_ctrls in range(8)]
+
 
 class ArtProviderBrowser(wx.Dialog):
     def _init_coll_boxSizer3_Items(self, parent):
         # generated method, don't edit
 
         parent.AddWindow(self.artId, 0, border=8, flag=wx.TOP)
-        parent.AddSizer(self.boxSizer4, 0, border=8,
-              flag=wx.GROW | wx.BOTTOM | wx.TOP)
+        parent.AddSizer(self.boxSizer4, 0, border=8, flag=wx.GROW | wx.BOTTOM | wx.TOP)
 
     def _init_coll_boxSizer4_Items(self, parent):
         # generated method, don't edit
@@ -46,20 +62,16 @@ class ArtProviderBrowser(wx.Dialog):
     def _init_coll_boxSizer1_Items(self, parent):
         # generated method, don't edit
 
-        parent.AddWindow(self.listCtrl, 1, border=15,
-              flag=wx.GROW | wx.RIGHT | wx.LEFT | wx.TOP)
+        parent.AddWindow(self.listCtrl, 1, border=15, flag=wx.GROW | wx.RIGHT | wx.LEFT | wx.TOP)
         parent.AddSizer(self.boxSizer2, 0, border=0, flag=0)
 
     def _init_coll_boxSizer2_Items(self, parent):
         # generated method, don't edit
 
         parent.AddSizer(self.boxSizer3, 0, border=15, flag=wx.LEFT)
-        parent.AddWindow(self.btnOK, 0, border=15,
-              flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
-        parent.AddWindow(self.btnCancel, 0, border=15,
-              flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
-        parent.AddWindow(self.btnFileDlg, 0, border=15,
-              flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
+        parent.AddWindow(self.btnOK, 0, border=15, flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
+        parent.AddWindow(self.btnCancel, 0, border=15, flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
+        parent.AddWindow(self.btnFileDlg, 0, border=15, flag=wx.LEFT | wx.TOP | wx.BOTTOM | wx.ALIGN_RIGHT)
 
     def _init_utils(self):
         # generated method, don't edit
@@ -84,52 +96,91 @@ class ArtProviderBrowser(wx.Dialog):
 
     def _init_ctrls(self, prnt):
         # generated method, don't edit
-        wx.Dialog.__init__(self, id=wxID_ARTPROVIDERBROWSER,
-              name='ArtProviderBrowser', parent=prnt, pos=wx.Point(515, 325),
-              size=wx.Size(598, 416),
-              style=wx.RESIZE_BORDER | wx.DEFAULT_DIALOG_STYLE,
-              title=_('ArtProvider Browser'))
+        wx.Dialog.__init__(
+            self,
+            id=wxID_ARTPROVIDERBROWSER,
+            name="ArtProviderBrowser",
+            parent=prnt,
+            pos=wx.Point(515, 325),
+            size=wx.Size(598, 416),
+            style=wx.RESIZE_BORDER | wx.DEFAULT_DIALOG_STYLE,
+            title=_("ArtProvider Browser"),
+        )
         self._init_utils()
         self.SetClientSize(wx.Size(590, 389))
         self.Center(wx.BOTH)
 
-        self.btnOK = wx.Button(id=wx.ID_OK, label=_('OK'), name='btnOK',
-              parent=self, pos=wx.Point(318, 338), size=wx.Size(75, 23),
-              style=0)
+        self.btnOK = wx.Button(
+            id=wx.ID_OK, label=_("OK"), name="btnOK", parent=self, pos=wx.Point(318, 338), size=wx.Size(75, 23), style=0
+        )
 
-        self.btnCancel = wx.Button(id=wx.ID_CANCEL, label=_('Cancel'),
-              name='btnCancel', parent=self, pos=wx.Point(408, 338),
-              size=wx.Size(75, 23), style=0)
+        self.btnCancel = wx.Button(
+            id=wx.ID_CANCEL,
+            label=_("Cancel"),
+            name="btnCancel",
+            parent=self,
+            pos=wx.Point(408, 338),
+            size=wx.Size(75, 23),
+            style=0,
+        )
 
-        self.btnFileDlg = wx.Button(id=wxID_ARTPROVIDERBROWSERBTNFILEDLG,
-              label=_('File Dialog...'), name='btnFileDlg', parent=self,
-              pos=wx.Point(498, 338), size=wx.Size(75, 23), style=0)
-        self.btnFileDlg.Bind(wx.EVT_BUTTON, self.OnBtnfiledlgButton,
-              id=wxID_ARTPROVIDERBROWSERBTNFILEDLG)
+        self.btnFileDlg = wx.Button(
+            id=wxID_ARTPROVIDERBROWSERBTNFILEDLG,
+            label=_("File Dialog..."),
+            name="btnFileDlg",
+            parent=self,
+            pos=wx.Point(498, 338),
+            size=wx.Size(75, 23),
+            style=0,
+        )
+        self.btnFileDlg.Bind(wx.EVT_BUTTON, self.OnBtnfiledlgButton, id=wxID_ARTPROVIDERBROWSERBTNFILEDLG)
 
-        self.listCtrl = wx.ListCtrl(id=wxID_ARTPROVIDERBROWSERLISTCTRL,
-              name='listCtrl', parent=self, pos=wx.Point(15, 15),
-              size=wx.Size(560, 308), style=wx.LC_SMALL_ICON | wx.LC_ALIGN_TOP)
+        self.listCtrl = wx.ListCtrl(
+            id=wxID_ARTPROVIDERBROWSERLISTCTRL,
+            name="listCtrl",
+            parent=self,
+            pos=wx.Point(15, 15),
+            size=wx.Size(560, 308),
+            style=wx.LC_SMALL_ICON | wx.LC_ALIGN_TOP,
+        )
         self.listCtrl.SetImageList(self.imageList, wx.IMAGE_LIST_SMALL)
-        self.listCtrl.Bind(wx.EVT_LIST_ITEM_SELECTED,
-              self.OnListCtrlListItemSelected,
-              id=wxID_ARTPROVIDERBROWSERLISTCTRL)
+        self.listCtrl.Bind(
+            wx.EVT_LIST_ITEM_SELECTED, self.OnListCtrlListItemSelected, id=wxID_ARTPROVIDERBROWSERLISTCTRL
+        )
 
-        self.clientId = wx.Choice(choices=self.clientIdChoices,
-              id=wxID_ARTPROVIDERBROWSERCLIENTID, name='clientId', parent=self,
-              pos=wx.Point(15, 360), size=wx.Size(177, 21), style=0)
-        self.clientId.SetToolTip(_('Client id'))
+        self.clientId = wx.Choice(
+            choices=self.clientIdChoices,
+            id=wxID_ARTPROVIDERBROWSERCLIENTID,
+            name="clientId",
+            parent=self,
+            pos=wx.Point(15, 360),
+            size=wx.Size(177, 21),
+            style=0,
+        )
+        self.clientId.SetToolTip(_("Client id"))
 
-        self.artId = wx.TextCtrl(id=wxID_ARTPROVIDERBROWSERARTID, name='artId',
-              parent=self, pos=wx.Point(15, 331), size=wx.Size(288, 21),
-              style=0, value='')
-        self.artId.SetToolTip(_('Art id for bitmap'))
+        self.artId = wx.TextCtrl(
+            id=wxID_ARTPROVIDERBROWSERARTID,
+            name="artId",
+            parent=self,
+            pos=wx.Point(15, 331),
+            size=wx.Size(288, 21),
+            style=0,
+            value="",
+        )
+        self.artId.SetToolTip(_("Art id for bitmap"))
 
-        self.imgSize = wx.ComboBox(choices=['wx.DefaultSize', '(16, 16)',
-              '(32, 32)'], id=wxID_ARTPROVIDERBROWSERIMGSIZE, name='imgSize',
-              parent=self, pos=wx.Point(200, 360), size=wx.Size(103, 21),
-              style=0, value='wx.DefaultSize')
-        self.imgSize.SetToolTip(_('Image size'))
+        self.imgSize = wx.ComboBox(
+            choices=["wx.DefaultSize", "(16, 16)", "(32, 32)"],
+            id=wxID_ARTPROVIDERBROWSERIMGSIZE,
+            name="imgSize",
+            parent=self,
+            pos=wx.Point(200, 360),
+            size=wx.Size(103, 21),
+            style=0,
+            value="wx.DefaultSize",
+        )
+        self.imgSize.SetToolTip(_("Image size"))
 
         self._init_sizers()
 
@@ -138,7 +189,7 @@ class ArtProviderBrowser(wx.Dialog):
         self.clientIdChoices = ClientIds
 
         self._init_ctrls(parent)
-        
+
         # used for selection, match if possible
         if artId:
             if artId[0] in ('"', "'"):
@@ -147,7 +198,7 @@ class ArtProviderBrowser(wx.Dialog):
                 artIdVal = artId[2:-1]
             else:
                 artIdVal = artId
-        
+
         self.artId.SetValue(artId)
         if clientId.strip():
             if not self.clientId.SetStringSelection(clientId):
@@ -158,7 +209,7 @@ class ArtProviderBrowser(wx.Dialog):
         if size.strip():
             self.imgSize.SetValue(size)
         else:
-            self.imgSize.SetValue('wx.DefaultSize')
+            self.imgSize.SetValue("wx.DefaultSize")
 
         idx = 0
         selIdx = -1
@@ -170,17 +221,17 @@ class ArtProviderBrowser(wx.Dialog):
                 selIdx = idx
         if selIdx != -1:
             self.listCtrl.EnsureVisible(selIdx)
-            
+
             idx += 1
 
     def OnBtnfiledlgButton(self, event):
         self.EndModal(wx.ID_YES)
 
     def OnListCtrlListItemSelected(self, event):
-        self.artId.SetValue("'"+event.GetText()+"'")
+        self.artId.SetValue("'" + event.GetText() + "'")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = wx.App()
     dlg = create(None)
     try:
