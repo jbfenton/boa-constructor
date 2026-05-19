@@ -1,18 +1,18 @@
 ## rc-version: 9 ##
 # RCS-ID:      $Id$
 
-#-Miscellaneous-----------------------------------------------------------------
+# -Miscellaneous-----------------------------------------------------------------
 
 # Style of the Error/Output window's notebook.
 ## options: 'text', 'full', 'side'
-eoErrOutNotebookStyle = 'full'
+eoErrOutNotebookStyle = "full"
 
-#-Explorer----------------------------------------------------------------------
+# -Explorer----------------------------------------------------------------------
 
 # Should sorting in the explorer be case insensitive
 exCaseInsensitiveSorting = True
 
-#-Editor------------------------------------------------------------------------
+# -Editor------------------------------------------------------------------------
 # Should there be submenu with all the items from the New palete under the
 # Editor's File menu.
 edShowFileNewMenu = True
@@ -22,10 +22,10 @@ edUseCustomSTCPaintEvtHandler = True
 # There is a problem with folding on GTK
 edSTCFolding = True
 
-#-Window settings---------------------------------------------------------------
+# -Window settings---------------------------------------------------------------
 
 # Height of the Palette window. Adjust if you use big fonts
-paletteHeights = {'tabs': 120, 'menu': 74}
+paletteHeights = {"tabs": 120, "menu": 74}
 # Used my Mac toplevel main menu
 topMenuHeight = 0
 
@@ -50,12 +50,12 @@ braceHighLight = True
 # Minimize the IDE while running applications
 minimizeOnRun = True
 
-# Minimize the IDE when using Debug/Continue while debugging 
+# Minimize the IDE when using Debug/Continue while debugging
 minimizeOnDebug = True
 
-explorerFileSysRootDefault = ('DRIVE:\\', 'C:\\')
+explorerFileSysRootDefault = ("DRIVE:\\", "C:\\")
 
-#-Designer----------------------------------------------------------------------
+# -Designer----------------------------------------------------------------------
 
 # Draw grid in designer
 drawDesignerGrid = True
@@ -63,17 +63,29 @@ drawDesignerGrid = True
 drawDesignerGridForSubWindows = True
 # Grid drawing method
 ## options: 'lines', 'dots', 'grid'
-drawGridMethod = 'grid'
+drawGridMethod = "grid"
 
 # Grayout (blueout actually) source while designer is open
 grayoutSource = True
 
 # Editable preferences
-exportedProperties2 = ['exCaseInsensitiveSorting', 'eoErrOutNotebookStyle',
- 'edShowFileNewMenu', 'edSTCFolding', 'verticalTaskbarWidth',
- 'horizontalTaskbarHeight', 'editorScreenWidthPerc',
- 'windowManagerTop', 'windowManagerBottom', 'windowManagerSide',
- 'braceHighLight', 'minimizeOnRun', 'minimizeOnDebug', 'inspStatBarFontSize', 
- 'drawDesignerGrid', 'drawDesignerGridForSubWindows',  'drawGridMethod', 
- 'grayoutSource',
+exportedProperties2 = [
+    "exCaseInsensitiveSorting",
+    "eoErrOutNotebookStyle",
+    "edShowFileNewMenu",
+    "edSTCFolding",
+    "verticalTaskbarWidth",
+    "horizontalTaskbarHeight",
+    "editorScreenWidthPerc",
+    "windowManagerTop",
+    "windowManagerBottom",
+    "windowManagerSide",
+    "braceHighLight",
+    "minimizeOnRun",
+    "minimizeOnDebug",
+    "inspStatBarFontSize",
+    "drawDesignerGrid",
+    "drawDesignerGridForSubWindows",
+    "drawGridMethod",
+    "grayoutSource",
 ]

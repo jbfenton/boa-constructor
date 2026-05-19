@@ -11,13 +11,15 @@
 #
 
 
-import string, sys, traceback, linecache
+import linecache
+import sys
+import traceback
 
 sys.ps1 = ">>> "
 sys.ps2 = "... "
 
-class PythonInterpreter:
 
+class PythonInterpreter:
     def __init__(self, name="<console>"):
 
         self.name = name
@@ -40,15 +42,15 @@ class PythonInterpreter:
             if not line:
                 return 0
             else:
-                line = line.rstrip() + '\n'
+                line = line.rstrip() + "\n"
 
         #
         # compile what we've got this far
         try:
             if sys.version_info[:2] >= (2, 2):
                 import __future__
-                code = compile(line, self.name, "single",
-                               __future__.generators.compiler_flag, 1)
+
+                code = compile(line, self.name, "single", __future__.generators.compiler_flag, 1)
             else:
                 code = compile(line, self.name, "single")
             self.lines = []
@@ -61,14 +63,14 @@ class PythonInterpreter:
             else:
                 self.showtraceback()
 
-        except:
+        except (Exception, KeyboardInterrupt, SystemExit):
             self.showtraceback()
 
         else:
             # execute
             try:
                 exec(code, self.locals)
-            except:
+            except (Exception, KeyboardInterrupt, SystemExit):
                 self.showtraceback()
 
         return 0
@@ -78,7 +80,7 @@ class PythonInterpreter:
         self.lines = []
 
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        if exc_type == SyntaxError:  # and len(sys.exc_value) == 2:
+        if exc_type is SyntaxError:  # and len(sys.exc_value) == 2:
             # emulate interpreter behaviour
             if len(exc_value.args) == 2:
                 fn, ln, indent = exc_value[1][:3]
@@ -87,33 +89,28 @@ class PythonInterpreter:
                 if fn is not None:
                     src = linecache.getline(fn, ln)
                     if src:
-                        src = src.rstrip() + '\n'
-                        sys.stderr.write('  File "%s", line %d\n%s%s' % (
-                                         fn, ln, pad, src))
+                        src = src.rstrip() + "\n"
+                        sys.stderr.write('  File "%s", line %d\n%s%s' % (fn, ln, pad, src))
                 sys.stderr.write(pad + "^\n")
-            sys.stderr.write("''' %s '''\n" % (str(exc_type) + \
-                str(exc_value.args and (" : " + exc_value[0]) or '')))
+            sys.stderr.write("''' %s '''\n" % (str(exc_type) + str(exc_value.args and (" : " + exc_value[0]) or "")))
         else:
             traceback.print_tb(exc_traceback.tb_next, None)
-            sys.stderr.write("''' %s '''\n" % (str(exc_type) + " : " + \
-                                            str(exc_value)))
+            sys.stderr.write("''' %s '''\n" % (str(exc_type) + " : " + str(exc_value)))
 
 
 # --------------------------------------------------------------------
 # test stuff
 
 if __name__ == "__main__":
-
     #
     # simple console interpreter simulation
 
-    print('Python', sys.version, "(PythonInterpreter)")
+    print("Python", sys.version, "(PythonInterpreter)")
     print(sys.copyright)
 
     interp = PythonInterpreter()
 
     try:
-
         sys.stdout.write(sys.ps1)
 
         while True:

@@ -4,11 +4,10 @@ getBreakpointList()).
 """
 
 import os
-# import trace
 
+# import trace
 # try: from cPickle import Pickler, Unpickler
 # except: from pickle import Pickler, Unpickler
-
 # Now at Python 3.11, just use pickle.
 from pickle import Pickler, Unpickler
 
@@ -20,7 +19,7 @@ class FileBreakpointList:
     def loadBreakpoints(self, fn):
         try:
             if os.path.exists(fn):
-                f = open(fn, 'rb')
+                f = open(fn, "rb")
                 u = Unpickler(f)
                 newlines = u.load()
                 # The following line isn't quite correct
@@ -30,7 +29,7 @@ class FileBreakpointList:
                 return 1
             else:
                 return 0
-        except:
+        except Exception:
             self.lines = {}
             return 0
 
@@ -42,35 +41,33 @@ class FileBreakpointList:
                 for lineno, linebreaks in self.lines.items():
                     savelines[lineno] = saveline = []
                     for brk in linebreaks:
-                        if not brk['temporary']:
+                        if not brk["temporary"]:
                             saveline.append(brk)
-                f = open(fn, 'wb')
+                f = open(fn, "wb")
                 p = Pickler(f)
                 p.dump(savelines)
             else:
                 os.remove(fn)
-        except:
+        except Exception:
             pass
 
-    def addBreakpoint(self, lineno, temp=0, cond='', ignore=0):
+    def addBreakpoint(self, lineno, temp=0, cond="", ignore=0):
         import trace
+
         trace.trace_is_on = True
-        newbrk = {'temporary':temp, 'cond':cond, 'enabled':1, 'ignore':ignore}
-
-
+        newbrk = {"temporary": temp, "cond": cond, "enabled": 1, "ignore": ignore}
 
         if lineno in self.lines.keys():
             linebreaks = self.lines[lineno]
             for brk in linebreaks:
-                if brk['temporary'] == temp and brk['cond'] == cond:
+                if brk["temporary"] == temp and brk["cond"] == cond:
                     # Already added.
                     return
             linebreaks.append(newbrk)
         else:
             self.lines[lineno] = linebreaks = [newbrk]
 
-        trace.trace_is_on=False
-
+        trace.trace_is_on = False
 
     def deleteBreakpoints(self, lineno):
         if lineno in self.lines.keys():
@@ -87,9 +84,9 @@ class FileBreakpointList:
         # traverse list twice, first deleting then re-adding to avoid stepping
         # on our own toes
         for brklineno, breaks in self.lines.items():
-            if lineno < brklineno-1:
+            if lineno < brklineno - 1:
                 del self.lines[brklineno]
-                set_breaks.append( (brklineno+delta, breaks) )
+                set_breaks.append((brklineno + delta, breaks))
         for brklineno, breaks in set_breaks:
             self.lines[brklineno] = breaks
 
@@ -97,32 +94,32 @@ class FileBreakpointList:
         if lineno in self.lines.keys():
             linebreaks = self.lines[lineno]
             for brk in linebreaks:
-                brk['enabled'] = enable
+                brk["enabled"] = enable
 
     def ignoreBreakpoints(self, lineno, ignore=0):
         if lineno in self.lines.keys():
             linebreaks = self.lines[lineno]
             for brk in linebreaks:
-                brk['ignore'] = ignore
+                brk["ignore"] = ignore
 
-    def conditionalBreakpoints(self, lineno, cond=''):
+    def conditionalBreakpoints(self, lineno, cond=""):
         if lineno in self.lines.keys():
             linebreaks = self.lines[lineno]
             for brk in linebreaks:
-                brk['cond'] = cond
+                brk["cond"] = cond
 
     def listBreakpoints(self):
         rval = []
         for lineno, linebreaks in self.lines.items():
             for brk in linebreaks:
-                brkinfo = {'lineno':lineno}
+                brkinfo = {"lineno": lineno}
                 brkinfo.update(brk)
                 rval.append(brkinfo)
         return rval
 
     def hasBreakpoint(self, lineno, endlineno=-1):
         if endlineno < 0:
-            return (lineno in self.lines.keys())
+            return lineno in self.lines.keys()
         else:
             for line in self.lines.keys():
                 if line >= lineno and line <= endlineno:
@@ -136,7 +133,7 @@ class FileBreakpointList:
             idx = 0
             while idx < len(linebreaks):
                 brk = linebreaks[idx]
-                if brk['temporary']:
+                if brk["temporary"]:
                     del linebreaks[idx]
                 else:
                     idx = idx + 1
@@ -150,11 +147,11 @@ class BreakpointList:
         self.files = {}  # filename -> FileBreakpointList
 
     def normalize(self, filename):
-        if filename.find('://') < 0:
-            filename = 'file://' + filename
+        if filename.find("://") < 0:
+            filename = "file://" + filename
         return filename
 
-    def addBreakpoint(self, filename, lineno, temp=0, cond='', ignore=0):
+    def addBreakpoint(self, filename, lineno, temp=0, cond="", ignore=0):
         filename = self.normalize(filename)
         filelist = self.getFileBreakpoints(filename)
         filelist.addBreakpoint(lineno, temp, cond, ignore)
@@ -189,7 +186,7 @@ class BreakpointList:
             filelist = self.files[filename]
             filelist.ignoreBreakpoints(lineno, ignore)
 
-    def conditionalBreakpoints(self, filename, lineno, cond=''):
+    def conditionalBreakpoints(self, filename, lineno, cond=""):
         filename = self.normalize(filename)
         if filename in self.files.keys():
             filelist = self.files[filename]
@@ -238,8 +235,7 @@ class BreakpointList:
             if fn is None or filename == fn:
                 for lineno, linebreaks in filelist.lines.items():
                     for brk in linebreaks:
-                        brkinfo = {'filename': filename,
-                                   'lineno': lineno}
+                        brkinfo = {"filename": filename, "lineno": lineno}
                         brkinfo.update(brk)
                         rval.append(brkinfo)
         return rval

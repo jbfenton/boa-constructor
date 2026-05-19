@@ -1,6 +1,6 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        I18NWrap.plug-in.py
-# Purpose:     
+# Purpose:
 #
 # Author:      Riaan Booysen
 #
@@ -8,59 +8,63 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2007
 # Licence:     Python
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # msgfmt_* written by Martin v. Lowis from Python/Tools/i18n/msgfmt.py
 
-import os, sys, struct, array
+import array
+import os
+import struct
+import sys
 
 import wx
 
-from Models import EditorModels, Controllers
-from ModRunner import ProcessModuleRunner
-
+import Plugins
 import Preferences
+from Models import Controllers, EditorModels
 from Utils import _
+from Views import PySourceView
 
-Preferences.keyDefs['I18NWrap'] = (wx.ACCEL_ALT, ord('I'), 'Alt-I')
+Preferences.keyDefs["I18NWrap"] = (wx.ACCEL_ALT, ord("I"), "Alt-I")
+
 
 class I18NWrapViewPlugin:
     def __init__(self, model, view, actions):
         self.model = model
         self.view = view
-        actions.extend( (
-         (_('Wrap selection with _()'), self.OnI18NWrapSelection, '-', 'I18NWrap'), 
-        ) )
+        actions.extend(((_("Wrap selection with _()"), self.OnI18NWrapSelection, "-", "I18NWrap"),))
 
     def OnI18NWrapSelection(self, event):
         first, last = self.view.GetSelection()
         if first and last:
             sel = self.view.GetText()[first:last]
-            self.view.ReplaceSelection('_(%s)'%sel)
+            self.view.ReplaceSelection("_(%s)" % sel)
+
 
 wxID_POCOMPILE = wx.NewIdRef(count=1)
+
+
 class POFileController(Controllers.TextController):
     Model = EditorModels.TextModel
 
-    compileBmp = 'Images/Debug/Compile.png'
+    compileBmp = "Images/Debug/Compile.png"
 
     def actions(self, model):
-        return Controllers.TextController.actions(self, model) + [
-              (_('Compile to MO'), self.OnCompile, '-', '')]
+        return Controllers.TextController.actions(self, model) + [(_("Compile to MO"), self.OnCompile, "-", "")]
 
     def OnCompile(self, event):
         model = self.getModel()
         if not model.savedAs:
-            wx.LogError(_('Cannot compile an unsaved module'))
+            wx.LogError(_("Cannot compile an unsaved module"))
             return
-        
+
         filename = model.assertLocalFile()
-        outfile = os.path.splitext(filename)[0] + '.mo'
+        outfile = os.path.splitext(filename)[0] + ".mo"
         MESSAGES = {}
         if msgfmt_make(filename, outfile, MESSAGES):
-            wx.LogMessage(_('%s created')%outfile)
+            wx.LogMessage(_("%s created") % outfile)
         else:
-            wx.LogError(_('MO file not created'))
+            wx.LogError(_("MO file not created"))
 
 
 def msgfmt_add(id, str, fuzzy, MESSAGES):
@@ -68,24 +72,26 @@ def msgfmt_add(id, str, fuzzy, MESSAGES):
     if not fuzzy and str:
         MESSAGES[id] = str
 
+
 def msgfmt_generate(MESSAGES):
     "Return the generated output."
-    keys = MESSAGES.keys()
-    # the keys are sorted in the .mo file
-    keys.sort()
+    # The .mo index must be written in sorted msgid order.
+    keys = sorted(MESSAGES)
     offsets = []
-    ids = strs = ''
+    ids = b""
+    strs = b""
     for id in keys:
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
-        offsets.append((len(ids), len(id), len(strs), len(MESSAGES[id])))
-        ids += id + '\0'
-        strs += MESSAGES[id] + '\0'
-    output = ''
+        msgid = id.encode("utf-8")
+        msgstr = MESSAGES[id].encode("utf-8")
+        offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
+        ids += msgid + b"\0"
+        strs += msgstr + b"\0"
     # The header is 7 32-bit unsigned integers.  We don't use hash tables, so
     # the keys start right after the index tables.
     # translated string.
-    keystart = 7*4+16*len(keys)
+    keystart = 7 * 4 + 16 * len(keys)
     # and the values start after the keys
     valuestart = keystart + len(ids)
     koffsets = []
@@ -93,17 +99,20 @@ def msgfmt_generate(MESSAGES):
     # The string table first has the list of keys, then the list of values.
     # Each entry has first the size of the string, then the file offset.
     for o1, l1, o2, l2 in offsets:
-        koffsets += [l1, o1+keystart]
-        voffsets += [l2, o2+valuestart]
+        koffsets += [l1, o1 + keystart]
+        voffsets += [l2, o2 + valuestart]
     offsets = koffsets + voffsets
-    output = struct.pack("Iiiiiii",
-                         0x950412deL,       # Magic
-                         0,                 # Version
-                         len(keys),         # # of entries
-                         7*4,               # start of key index
-                         7*4+len(keys)*8,   # start of value index
-                         0, 0)              # size and offset of hash table
-    output += array.array("i", offsets).tostring()
+    output = struct.pack(
+        "Iiiiiii",
+        0x950412DE,  # Magic
+        0,  # Version
+        len(keys),  # # of entries
+        7 * 4,  # start of key index
+        7 * 4 + len(keys) * 8,  # start of value index
+        0,
+        0,
+    )  # size and offset of hash table
+    output += array.array("i", offsets).tobytes()
     output += ids
     output += strs
     return output
@@ -114,43 +123,45 @@ def msgfmt_make(filename, outfile, MESSAGES):
     STR = 2
 
     # Compute .mo name from .po name and arguments
-    if filename.endswith('.po'):
+    if filename.endswith(".po"):
         infile = filename
     else:
-        infile = filename + '.po'
+        infile = filename + ".po"
 
     if outfile is None:
-        outfile = os.path.splitext(infile)[0] + '.mo'
+        outfile = os.path.splitext(infile)[0] + ".mo"
 
     lines = open(infile).readlines()
 
     section = None
     fuzzy = 0
+    msgid = ""
+    msgstr = ""
 
     # Parse the catalog
     lno = 0
     for l in lines:
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
-        if l[0] == '#' and section == STR:
+        if l[0] == "#" and section == STR:
             msgfmt_add(msgid, msgstr, fuzzy, MESSAGES)
             section = None
             fuzzy = 0
         # Record a fuzzy mark
-        if l[:2] == '#,' and l.find('fuzzy'):
+        if l[:2] == "#," and l.find("fuzzy"):
             fuzzy = 1
         # Skip comments
-        if l[0] == '#':
+        if l[0] == "#":
             continue
         # Now we are in a msgid section, output previous section
-        if l.startswith('msgid'):
+        if l.startswith("msgid"):
             if section == STR:
                 msgfmt_add(msgid, msgstr, fuzzy, MESSAGES)
             section = ID
             l = l[5:]
-            msgid = msgstr = ''
+            msgid = msgstr = ""
         # Now we are in a msgstr section
-        elif l.startswith('msgstr'):
+        elif l.startswith("msgstr"):
             section = STR
             l = l[6:]
         # Skip empty lines
@@ -164,9 +175,8 @@ def msgfmt_make(filename, outfile, MESSAGES):
         elif section == STR:
             msgstr += l
         else:
-            print >> sys.stderr, 'Syntax error on %s:%d' % (infile, lno), \
-                  'before:'
-            print >> sys.stderr, l
+            print("Syntax error on %s:%d before:" % (infile, lno), file=sys.stderr)
+            print(l, file=sys.stderr)
             return
     # Add last entry
     if section == STR:
@@ -176,22 +186,21 @@ def msgfmt_make(filename, outfile, MESSAGES):
     output = msgfmt_generate(MESSAGES)
 
     try:
-        open(outfile,"wb").write(output)
-    except IOError,msg:
-        print >> sys.stderr, msg
+        open(outfile, "wb").write(output)
+    except IOError as msg:
+        print(msg, file=sys.stderr)
         return False
     else:
         return True
 
 
-Plugins.registerFileType(POFileController, aliasExts=('.po'))
-    
-from Views import PySourceView
+Plugins.registerFileType(POFileController, aliasExts=(".po"))
+
 PySourceView.PythonSourceView.plugins += (I18NWrapViewPlugin,)
 
 ###-------------------------------------------------------------------------------
 ##def showGeneratePOTFromSourceDlg(editor):
-##    dlg = wx.DirDialog(editor, 
+##    dlg = wx.DirDialog(editor,
 ##          _('Select directory to recursively scan source for strings'),
 ##          _('Generate POT from source'))
 ##    try:
@@ -202,4 +211,3 @@ PySourceView.PythonSourceView.plugins += (I18NWrapViewPlugin,)
 ##        dlg.Destroy()
 ##
 ##Plugins.registerTool(_('Generate POT from source'), showGeneratePOTFromSourceDlg)
-

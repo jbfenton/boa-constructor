@@ -8,6 +8,4 @@
 ##title=MailHost
 ##
 ctx = context.aq_parent.aq_parent
-return {'title': ctx.title,
-        'smtp_host': ctx.smtp_host,
-        'smtp_port': ctx.smtp_port}
+return {"title": ctx.title, "smtp_host": ctx.smtp_host, "smtp_port": ctx.smtp_port}

@@ -11,8 +11,8 @@ obj = context.aq_parent
 for subobj in obj.objectValues():
     try:
         name = subobj.id
-    except:
+    except Exception:
         continue
     if name == objname:
         return subobj
-raise 'Method not found in %s'%obj.id
+raise "Method not found in %s" % obj.id

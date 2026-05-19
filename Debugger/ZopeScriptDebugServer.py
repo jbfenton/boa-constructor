@@ -3,13 +3,13 @@ from IsolatedDebugger import DebugServer
 __traceable__ = 0
 
 
-TAL_INTERP_MODULE_NAME = 'TAL.TALInterpreter'
-TALES_MODULE_NAME = 'Products.PageTemplates.TALES'
+TAL_INTERP_MODULE_NAME = "TAL.TALInterpreter"
+TALES_MODULE_NAME = "Products.PageTemplates.TALES"
 
 
 isAPythonScriptMetaType = {
-    'Script (Python)': 1,
-    }.has_key
+    "Script (Python)": 1,
+}.has_key
 
 
 def isATALInterpeterFrame(frame):
@@ -19,12 +19,11 @@ def isATALInterpeterFrame(frame):
     do_useMacro(), or do_defineSlot() methods.  This depends a lot
     on specific code in TAL. :-(
     """
-    if (frame.f_code.co_name == 'interpret' and
-        frame.f_globals.get('__name__') == TAL_INTERP_MODULE_NAME):
+    if frame.f_code.co_name == "interpret" and frame.f_globals.get("__name__") == TAL_INTERP_MODULE_NAME:
         caller = frame.f_back
-        if caller.f_globals.get('__name__') == TAL_INTERP_MODULE_NAME:
+        if caller.f_globals.get("__name__") == TAL_INTERP_MODULE_NAME:
             caller_name = caller.f_code.co_name
-            if caller_name in ('__call__', 'do_useMacro', 'do_defineSlot'):
+            if caller_name in ("__call__", "do_useMacro", "do_defineSlot"):
                 return 1
     return 0
 
@@ -56,16 +55,16 @@ class ZopeScriptDebugServer(DebugServer):
         if isAPythonScriptMetaType(filename):
             meta_type = filename
             # XXX This assumes the user never changes the "script" binding.
-            script = frame.f_globals.get('script', None)
+            script = frame.f_globals.get("script", None)
             if script is not None:
                 url = script.absolute_url()
-                url = url.split('://', 1)[-1]
-                filename = 'zopedebug://%s/%s' % (url, meta_type)
+                url = url.split("://", 1)[-1]
+                filename = "zopedebug://%s/%s" % (url, meta_type)
                 # Offset for Boa's purposes
                 lineno = lineno + 1
                 return filename, lineno
 
-        if code.co_name == 'interpret' and isATALInterpeterFrame(frame):
+        if code.co_name == "interpret" and isATALInterpeterFrame(frame):
             source_file, ln = self.getTALPosition(frame)
             if source_file:
                 return self.TALSourceToURL(source_file, frame), ln
@@ -73,22 +72,22 @@ class ZopeScriptDebugServer(DebugServer):
         return self.canonic(filename), lineno
 
     def TALSourceToURL(self, source_file, frame):
-        if source_file.startswith('traversal:'):
+        if source_file.startswith("traversal:"):
             path = source_file[10:]
-            if path.startswith('/'):
+            if path.startswith("/"):
                 path = path[1:]
-            meta_type = 'Page Template'
-            host = 'localhost:8080'  # XXX XXX!
-            return 'zopedebug://%s/%s/%s' % (host, path, meta_type)
-        elif source_file.startswith('/'):
-            meta_type = 'Page Template'
-            interp = frame.f_locals.get('self')
+            meta_type = "Page Template"
+            host = "localhost:8080"  # XXX XXX!
+            return "zopedebug://%s/%s/%s" % (host, path, meta_type)
+        elif source_file.startswith("/"):
+            meta_type = "Page Template"
+            interp = frame.f_locals.get("self")
             if interp is not None:
-                global_vars = getattr(interp.engine, 'global_vars', {})
-                template = global_vars.get('template', None)
+                global_vars = getattr(interp.engine, "global_vars", {})
+                template = global_vars.get("template", None)
                 if template:
-                    url = template.absolute_url().split('://', 1)[-1]
-                    return 'zopedebug://%s/Page Template'%url
+                    url = template.absolute_url().split("://", 1)[-1]
+                    return "zopedebug://%s/Page Template" % url
         return source_file  # TODO: something better
 
     def getTALPosition(self, frame):
@@ -105,7 +104,7 @@ class ZopeScriptDebugServer(DebugServer):
                 return source_file, lineno
 
         # Inspect TAL frames.  XXX brittle in many ways.
-        interp = frame.f_locals.get('self', None)
+        interp = frame.f_locals.get("self", None)
         source_file = interp.sourceFile
         position = interp.position
         if position:
@@ -115,12 +114,11 @@ class ZopeScriptDebugServer(DebugServer):
         return source_file, lineno
 
     def getFrameNames(self, frame):
-        """Returns the module and function name for the frame.
-        """
+        """Returns the module and function name for the frame."""
         if isATALInterpeterFrame(frame):
             source_file, ln = self.getTALPosition(frame)
             if source_file:
-                return '', source_file.split('/')[-1]
+                return "", source_file.split("/")[-1]
         return DebugServer.getFrameNames(self, frame)
 
     def isTraceable(self, frame):
@@ -132,8 +130,8 @@ class ZopeScriptDebugServer(DebugServer):
             code = frame.f_code
             if isAPythonScriptMetaType(code.co_filename):
                 return 1
-            if code.co_name == 'setPosition':
-                if frame.f_globals.get('__name__') == TALES_MODULE_NAME:
+            if code.co_name == "setPosition":
+                if frame.f_globals.get("__name__") == TALES_MODULE_NAME:
                     # Trace calls to PageTemplate.TALES.Context.setPosition().
                     # Avoid stopping more than once per call.
                     if frame.f_lineno == frame.f_code.co_firstlineno:
@@ -142,8 +140,7 @@ class ZopeScriptDebugServer(DebugServer):
         return DebugServer.isTraceable(self, frame)
 
     def isAScriptFrame(self, frame):
-        """Indicates whether the given frame is a high-level script frame.
-        """
+        """Indicates whether the given frame is a high-level script frame."""
         if isAPythonScriptMetaType(frame.f_code.co_filename):
             return 1
         if isATALInterpeterFrame(frame):
@@ -151,10 +148,8 @@ class ZopeScriptDebugServer(DebugServer):
         return 0
 
     def getStackInfo(self):
-        """Returns a tuple describing the current stack.
-        """
-        exc_type, exc_value, stack, frame_stack_len = (
-            DebugServer.getStackInfo(self))
+        """Returns a tuple describing the current stack."""
+        exc_type, exc_value, stack, frame_stack_len = DebugServer.getStackInfo(self)
 
         if self.scripts_only_mode:
             # Filter non-script frames out of the stack.
@@ -181,15 +176,15 @@ class ZopeScriptDebugServer(DebugServer):
             if isATALInterpeterFrame(frame):
                 caller = frame.f_back
                 caller_name = caller.f_code.co_name
-                interp = frame.f_locals.get('self', None)
+                interp = frame.f_locals.get("self", None)
                 if last_interp is interp:
                     self.stack_extra[frame] = (saved_source, saved_lineno)
-                if caller_name in ('do_useMacro', 'do_defineSlot'):
+                if caller_name in ("do_useMacro", "do_defineSlot"):
                     # Using a macro or slot.
                     # Expect to find saved_source and saved_position in
                     # locals.
-                    saved_source = caller.f_locals.get('prev_source') #saved_source
-                    position = 0#caller.f_locals.get('saved_position')
+                    saved_source = caller.f_locals.get("prev_source")  # saved_source
+                    position = 0  # caller.f_locals.get('saved_position')
                     if position:
                         saved_lineno = position[0] or 0
                     else:
@@ -209,15 +204,14 @@ class ZopeScriptDebugServer(DebugServer):
             self.scripts_only_mode = 0
 
     def getFrameNamespaces(self, frame):
-        """Returns the locals and globals for a frame.
-        """
+        """Returns the locals and globals for a frame."""
         if isATALInterpeterFrame(frame):
             # This is a TAL interpret() frame.  Use special locals
             # and globals.
-            interp = frame.f_locals.get('self')
+            interp = frame.f_locals.get("self")
             if interp is not None:
-                local_vars = getattr(interp.engine, 'local_vars', {})
-                global_vars = getattr(interp.engine, 'global_vars', {})
+                local_vars = getattr(interp.engine, "local_vars", {})
+                global_vars = getattr(interp.engine, "global_vars", {})
                 return global_vars, local_vars
 
         return frame.f_globals, frame.f_locals

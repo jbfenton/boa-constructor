@@ -11,7 +11,7 @@ try:
         binascii.crc32
     except AttributeError:
         binascii.crc32 = zlib.crc32
-except:
+except Exception:
     zlib = None
 
 class _BadZipfile(Exception):
@@ -42,7 +42,7 @@ Will not accept a ZIP archive with an ending comment."""
         fpin.close()
         if endrec[0:4] == "PK\005\006" and endrec[-2:] == "\000\000":
             return 1    # file has correct magic number
-    except:
+    except Exception:
         pass
 
 class ZipInfo:
@@ -210,7 +210,7 @@ class ZipFile:
         for zinfo in self.filelist:
             try:
                 self.read(zinfo.filename)       # Check CRC-32
-            except:
+            except Exception:
                 return zinfo.filename
 
     def getinfo(self, name):

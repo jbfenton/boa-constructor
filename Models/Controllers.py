@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        Controllers.py
 # Purpose:     Controller classes for the MVC pattern
 #
@@ -8,38 +8,38 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2001 - 2007 Riaan Booysen
 # Licence:     GPL
-#-----------------------------------------------------------------------------
-print('importing Models.Controllers')
+# -----------------------------------------------------------------------------
+print("importing Models.Controllers")
 
-import os, codecs
+import codecs
+import os
 
 import wx
 
-import Preferences, Utils
-from Preferences import keyDefs, IS
-from Utils import _
-
-from . import EditorHelper
-from . import EditorModels
-
-from Views import EditorViews, SourceViews, DiffView
-
+import Preferences
+import Utils
 from Explorers import ExplorerNodes
+from Preferences import keyDefs
+from Utils import _
+from Views import DiffView, EditorViews, SourceViews
+
+from . import EditorHelper, EditorModels
 
 addTool = Utils.AddToolButtonBmpIS
 
 
 class BaseEditorController:
-    """ Between user and model operations
+    """Between user and model operations
 
     Provides interface to add new and open existing models
     Manages toolbar and menu actions
     Custom classes should define Model operations as events
     """
+
     docked = True
 
-    Model           = None
-    DefaultViews    = []
+    Model = None
+    DefaultViews = []
     AdditionalViews = []
 
     plugins = ()
@@ -64,7 +64,8 @@ class BaseEditorController:
 
     def newFileTransport(self, name, filename):
         from Explorers.FileExplorer import FileSysNode
-        return FileSysNode(name, filename, None, -1, None, None, properties = {})
+
+        return FileSysNode(name, filename, None, -1, None, None, properties={})
 
     def addEvt(self, wId, meth):
         self.editor.Bind(wx.EVT_MENU, meth, id=wId)
@@ -75,14 +76,14 @@ class BaseEditorController:
             self.editor.Disconnect(wId)
         self.evts = []
 
-    def addMenu(self, menu, wId, label, accls, code=(), bmp=''):
+    def addMenu(self, menu, wId, label, accls, code=(), bmp=""):
         Utils.appendMenuItem(menu, wId, label, code, bmp)
         if code:
-            accls.append( (code[0], code[1], wId) )
+            accls.append((code[0], code[1], wId))
 
-#-------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------
     def actions(self, model):
-        """ Override to define Controller/Model actions
+        """Override to define Controller/Model actions
 
         Should return a list of tuples in this form:
         [('Name', self.OnEvent, 'BmpPath', 'KeyDef'), ...]
@@ -97,63 +98,64 @@ class BaseEditorController:
         accls = []
 
         for name, event, bmp, key in actions:
-            if name != '-':
+            if name != "-":
                 wId = wx.NewIdRef(count=1)
                 self.addEvt(wId, event)
-                if key: code = keyDefs[key]
-                else:   code = ()
+                if key:
+                    code = keyDefs[key]
+                else:
+                    code = ()
                 self.addMenu(menu, wId, name, accls, code, bmp)
             else:
                 menu.AppendSeparator()
 
             if bmp:
-                if bmp != '-':
+                if bmp != "-":
                     addTool(self.editor, toolbar, bmp, name, event)
-                elif name == '-' and bmp == '-':
+                elif name == "-" and bmp == "-":
                     toolbar.AddSeparator()
 
         return accls
 
 
 class EditorController(BaseEditorController):
-    closeBmp = 'Images/Editor/Close.png'
+    closeBmp = "Images/Editor/Close.png"
 
     def actions(self, model):
-        return BaseEditorController.actions(self, model) + \
-               [(_('Close'), self.OnClose, self.closeBmp, 'Close')]
+        return BaseEditorController.actions(self, model) + [(_("Close"), self.OnClose, self.closeBmp, "Close")]
 
     def OnClose(self, event):
         self.editor.closeModulePage(self.editor.getActiveModulePage())
 
+
 class PersistentController(EditorController):
-    saveBmp = 'Images/Editor/Save.png'
-    saveAsBmp = 'Images/Editor/SaveAs.png'
+    saveBmp = "Images/Editor/Save.png"
+    saveAsBmp = "Images/Editor/SaveAs.png"
 
     def actions(self, model):
-        return EditorController.actions(self, model) + \
-               [(_('Reload'), self.OnReload, '-', ''),
-                (_('Save'), self.OnSave, self.saveBmp, 'Save'),
-                (_('Save as...'), self.OnSaveAs, self.saveAsBmp, 'SaveAs'),
-                ('-', None, '', ''),
-                (_('Toggle read-only'), self.OnToggleReadOnly, '-', ''),
-                (_('NDiff files...'), self.OnNDiffFile, '-', '')]
+        return EditorController.actions(self, model) + [
+            (_("Reload"), self.OnReload, "-", ""),
+            (_("Save"), self.OnSave, self.saveBmp, "Save"),
+            (_("Save as..."), self.OnSaveAs, self.saveAsBmp, "SaveAs"),
+            ("-", None, "", ""),
+            (_("Toggle read-only"), self.OnToggleReadOnly, "-", ""),
+            (_("NDiff files..."), self.OnNDiffFile, "-", ""),
+        ]
 
     def createModel(self, source, filename, main, saved, modelParent=None):
         return self.Model(source, filename, self.editor, saved)
 
     def createNewModel(self, modelParent=None):
         name = self.editor.getValidName(self.Model)
-        model = self.createModel('', name, '', False)
-        model.transport = self.newFileTransport('', name)
+        model = self.createModel("", name, "", False)
+        model.transport = self.newFileTransport("", name)
         model.new()
 
         return model, name
 
     def checkUnsaved(self, model, checkModified=False):
-        if not model.savedAs or checkModified and (model.modified or \
-              len(model.viewsModified)):
-            wx.LogError(_('Cannot perform this action on an unsaved%s module')%(
-                  checkModified and '/modified' or '') )
+        if not model.savedAs or checkModified and (model.modified or len(model.viewsModified)):
+            wx.LogError(_("Cannot perform this action on an unsaved%s module") % (checkModified and "/modified" or ""))
             return True
         else:
             return False
@@ -163,9 +165,9 @@ class PersistentController(EditorController):
             self.editor.activeModSaveOrSaveAs()
         except ExplorerNodes.TransportModifiedSaveError as err:
             errStr = err.args[0]
-            if errStr == 'Reload':
+            if errStr == "Reload":
                 self.OnReload(event)
-            elif errStr == 'Cancel':
+            elif errStr == "Cancel":
                 pass
             else:
                 wx.LogError(str(err))
@@ -177,9 +179,9 @@ class PersistentController(EditorController):
             self.editor.activeModSaveOrSaveAs(forceSaveAs=True)
         except ExplorerNodes.TransportModifiedSaveError as err:
             errStr = err.args[0]
-            if errStr == 'Reload':
+            if errStr == "Reload":
                 self.OnReload(event)
-            elif errStr == 'Cancel':
+            elif errStr == "Cancel":
                 pass
             else:
                 wx.LogError(str(err))
@@ -190,14 +192,18 @@ class PersistentController(EditorController):
         model = self.getModel()
         if model:
             if not model.savedAs:
-                wx.MessageBox(_('Cannot reload, this file has not been saved yet.'),
-                             _('Reload'), wx.OK | wx.ICON_ERROR)
+                wx.MessageBox(_("Cannot reload, this file has not been saved yet."), _("Reload"), wx.OK | wx.ICON_ERROR)
                 return
 
-            if model.hasUnsavedChanges() and \
-                  wx.MessageBox(_('There are unsaved changes.\n'\
-                                  'Are you sure you want to reload?'),
-                                _('Confirm reload'), wx.YES_NO | wx.ICON_WARNING) != wx.YES:
+            if (
+                model.hasUnsavedChanges()
+                and wx.MessageBox(
+                    _("There are unsaved changes.\nAre you sure you want to reload?"),
+                    _("Confirm reload"),
+                    wx.YES_NO | wx.ICON_WARNING,
+                )
+                != wx.YES
+            ):
                 return
             try:
                 model.load()
@@ -208,30 +214,30 @@ class PersistentController(EditorController):
 
     def OnToggleReadOnly(self, event):
         model = self.getModel()
-        if model and model.transport and 'read-only' in model.transport.stdAttrs:
+        if model and model.transport and "read-only" in model.transport.stdAttrs:
             model.transport.updateStdAttrs()
-            ro = model.transport.stdAttrs['read-only']
-            model.transport.setStdAttr('read-only', not ro)
+            ro = model.transport.stdAttrs["read-only"]
+            model.transport.setStdAttr("read-only", not ro)
 
-            if 'Source' in model.views:
-                model.views['Source'].updateFromAttrs()
+            if "Source" in model.views:
+                model.views["Source"].updateFromAttrs()
 
             self.editor.updateModuleState(model)
         else:
-            wx.LogError(_('Read-only not supported on this transport'))
+            wx.LogError(_("Read-only not supported on this transport"))
 
-    def OnNDiffFile(self, event=None, filename=''):
+    def OnNDiffFile(self, event=None, filename=""):
         model = self.getModel()
         model.refreshFromViews()
         if model:
-            if self.checkUnsaved(model): return
+            if self.checkUnsaved(model):
+                return
             if not filename:
                 filename = self.editor.openFileDlg(curfile=os.path.basename(model.filename))
             if filename:
-                tbName = 'Diff with : '+filename
+                tbName = "Diff with : " + filename
                 if tbName not in model.views:
-                    resultView = self.editor.addNewView(tbName,
-                          DiffView.PythonSourceDiffView)
+                    resultView = self.editor.addNewView(tbName, DiffView.PythonSourceDiffView)
                 else:
                     resultView = model.views[tbName]
 
@@ -244,49 +250,57 @@ class PersistentController(EditorController):
 class SourceController(PersistentController):
     AdditionalViews = [EditorViews.CVSConflictsView]
 
-    def OnDiffFile(self, event, diffWithFilename=''):
+    def OnDiffFile(self, event, diffWithFilename=""):
         model = self.getModel()
         if model:
-            if self.checkUnsaved(model): return
+            if self.checkUnsaved(model):
+                return
             if not diffWithFilename:
                 diffWithFilename = self.editor.openFileDlg()
             # filename = model.assertLocalFile(filename)    # PRUNE unclear why this is necessary.
 
-    def OnPatchFile(self, event, patchFilename=''):
+    def OnPatchFile(self, event, patchFilename=""):
         model = self.getModel()
         if model:
-            if self.checkUnsaved(model): return
+            if self.checkUnsaved(model):
+                return
             if not patchFilename:
                 patchFilename = self.editor.openFileDlg()
             # filename = model.assertLocalFile(filename)     # PRUNE unclear why this is necessary.
 
+
 class TextController(PersistentController):
-    Model           = EditorModels.TextModel
-    DefaultViews    = [SourceViews.TextView]
+    Model = EditorModels.TextModel
+    DefaultViews = [SourceViews.TextView]
     AdditionalViews = []
 
+
 class UndockedController(BaseEditorController):
-    docked          = False
+    docked = False
+
     def createModel(self, source, filename, main, saved, modelParent=None):
         return self.Model(source, filename, self.editor, saved)
 
     def display(self, model):
-        """ Override to display undocked interface """
+        """Override to display undocked interface"""
+
 
 class BitmapFileController(UndockedController):
-    Model           = EditorModels.BitmapFileModel
-    DefaultViews    = []
+    Model = EditorModels.BitmapFileModel
+    DefaultViews = []
     AdditionalViews = []
 
     def display(self, model):
         from ZopeLib import ImageViewer
+
         ImageViewer.create(self.editor).showImage(model.filename, model.transport)
+
 
 # XXX move to a new module PythonComControllers
 class MakePyController(BaseEditorController):
-    docked          = False
-    Model           = None
-    DefaultViews    = []
+    docked = False
+    Model = None
+    DefaultViews = []
     AdditionalViews = []
 
     def createNewModel(self, modelParent=None):
@@ -294,6 +308,7 @@ class MakePyController(BaseEditorController):
 
     def display(self, model):
         import makepydialog
+
         dlg = makepydialog.create(self.editor)
         try:
             if dlg.ShowModal() == wx.ID_OK and dlg.generatedFilename:
@@ -301,7 +316,9 @@ class MakePyController(BaseEditorController):
         finally:
             dlg.Destroy()
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def identifyFilename(filename):
     dummy, name = os.path.split(filename)
@@ -311,16 +328,17 @@ def identifyFilename(filename):
     if name in fullnameTypes:
         return fullnameTypes[name]
     if not ext and base.upper() == base:
-        return EditorModels.TextModel, '', lext
+        return EditorModels.TextModel, "", lext
     if lext in EditorHelper.extMap:
-        return EditorHelper.extMap[lext], '', lext
+        return EditorHelper.extMap[lext], "", lext
     if lext in EditorHelper.internalFilesReg:
-        return EditorModels.InternalFileModel, '', lext
-    return None, '', lext
+        return EditorModels.InternalFileModel, "", lext
+    return None, "", lext
+
 
 def identifyFile(filename, source=None, localfs=True):
-    """ Return appropriate model for given source file.
-        Assumes header will be part of the first continious comment block """
+    """Return appropriate model for given source file.
+    Assumes header will be part of the first continious comment block"""
     Model, main, lext = identifyFilename(filename)
     if Model is not None:
         return Model, main
@@ -329,42 +347,41 @@ def identifyFile(filename, source=None, localfs=True):
         BaseModel = DefaultModel
     else:
         BaseModel = EditorModels.UnknownFileModel
-    import codecs
     if source is None and not localfs:
         if lext in list(EditorHelper.inspectableFilesReg.keys()):
-            return EditorHelper.inspectableFilesReg[lext], ''
+            return EditorHelper.inspectableFilesReg[lext], ""
         else:
-            return BaseModel, ''
+            return BaseModel, ""
     elif lext in list(EditorHelper.inspectableFilesReg.keys()):
         BaseModel = EditorHelper.inspectableFilesReg[lext]
         if source is not None:
-            return identifySource[lext](source.split('\n'))
+            return identifySource[lext](source.split("\n"))
         elif not Preferences.exInspectInspectableFiles:
-            return BaseModel, ''
+            return BaseModel, ""
         if os.path.exists(filename):
             f = open(filename)
             try:
                 while True:
                     line = f.readline()
-                    if not line: break
+                    if not line:
+                        break
                     line = line.strip()
-                    if line.startswith(codecs.BOM_UTF8.decode('UTF-8')):
-                        line = line[len(codecs.BOM_UTF8):]
+                    if line.startswith(codecs.BOM_UTF8.decode("UTF-8")):
+                        line = line[len(codecs.BOM_UTF8) :]
                     if line and lext in headerStartChar:
                         if line[0] != headerStartChar[lext]:
-                            return BaseModel, ''
+                            return BaseModel, ""
                         headerInfo = identifyHeader[lext](line)
                         if headerInfo[0] != BaseModel:
                             return headerInfo
-                return BaseModel, ''
+                return BaseModel, ""
             finally:
                 f.close()
-    return BaseModel, ''
+    return BaseModel, ""
 
 
-#-Registration of this modules classes---------------------------------------
-modelControllerReg = {EditorModels.TextModel: TextController,
-                      EditorModels.BitmapFileModel: BitmapFileController}
+# -Registration of this modules classes---------------------------------------
+modelControllerReg = {EditorModels.TextModel: TextController, EditorModels.BitmapFileModel: BitmapFileController}
 
 # Default filetype
 DefaultController = TextController

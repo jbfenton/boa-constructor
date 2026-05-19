@@ -1,35 +1,51 @@
-#Boa:PyWizardPage:wxPyWizardPage2
+# Boa:PyWizardPage:wxPyWizardPage2
 
 import wx
 import wx.adv
-from wx.adv import Wizard
 
-[wxID_WXPYWIZARDPAGE2, wxID_WXPYWIZARDPAGE2BUTTON1, 
- wxID_WXPYWIZARDPAGE2BUTTON2, 
+[
+    wxID_WXPYWIZARDPAGE2,
+    wxID_WXPYWIZARDPAGE2BUTTON1,
+    wxID_WXPYWIZARDPAGE2BUTTON2,
 ] = [wx.NewId() for _init_ctrls in range(3)]
+
 
 class wxPyWizardPage2(wx.adv.WizardPage):
     def _init_ctrls(self, prnt):
         # generated method, don't edit
         wx.adv.WizardPage.__init__(self, bitmap=wx.NullBitmap, parent=prnt)
-        self.SetName('wxPyWizardPage2')
+        self.SetName("wxPyWizardPage2")
         self.SetBackgroundColour(wx.Colour(128, 128, 255))
 
-        self.button1 = wx.Button(id=wxID_WXPYWIZARDPAGE2BUTTON1,
-              label='button1', name='button1', parent=self, pos=wx.Point(8, 8),
-              size=wx.Size(75, 23), style=0)
+        self.button1 = wx.Button(
+            id=wxID_WXPYWIZARDPAGE2BUTTON1,
+            label="button1",
+            name="button1",
+            parent=self,
+            pos=wx.Point(8, 8),
+            size=wx.Size(75, 23),
+            style=0,
+        )
 
-        self.button2 = wx.Button(id=wxID_WXPYWIZARDPAGE2BUTTON2,
-              label='button2', name='button2', parent=self, pos=wx.Point(184,
-              224), size=wx.Size(75, 23), style=0)
+        self.button2 = wx.Button(
+            id=wxID_WXPYWIZARDPAGE2BUTTON2,
+            label="button2",
+            name="button2",
+            parent=self,
+            pos=wx.Point(184, 224),
+            size=wx.Size(75, 23),
+            style=0,
+        )
 
     def __init__(self, parent):
         self._init_ctrls(parent)
 
     _next = None
+
     def GetNext(self):
         return self._next
 
     _prev = None
+
     def GetPrev(self):
         return self._prev

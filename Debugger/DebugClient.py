@@ -1,14 +1,14 @@
 import sys
 
-from Debugger.Tasks import ThreadedTaskHandler
-
 import wx
 
-'''wxPython debugging client code.  This runs in the IDE.
+from Debugger.Tasks import ThreadedTaskHandler
+
+"""wxPython debugging client code.  This runs in the IDE.
 A debug client connects to a debug server, generally in a different
 process.  The debug server does the dirty work of stepping and
 stopping at breakpoints.
-'''
+"""
 
 wxEVT_DEBUGGER_OK = wx.NewIdRef(count=1)
 wxEVT_DEBUGGER_EXC = wx.NewIdRef(count=1)
@@ -21,7 +21,7 @@ EVT_DEBUGGER_START = wx.PyEventBinder(wxEVT_DEBUGGER_START)
 EVT_DEBUGGER_STOPPED = wx.PyEventBinder(wxEVT_DEBUGGER_STOPPED)
 
 
-class EmptyResponseError (Exception):
+class EmptyResponseError(Exception):
     """Empty debugger response"""
 
 
@@ -32,8 +32,7 @@ class DebuggerCommEvent(wx.PyCommandEvent):
     task = None
     t = None
     v = None
-    tb = ('', 0)
-
+    tb = ("", 0)
 
     def __init__(self, evtType, id):
         wx.PyCommandEvent.__init__(self, evtType, id)
@@ -51,7 +50,7 @@ class DebuggerCommEvent(wx.PyCommandEvent):
 
     def GetTask(self):
         # return self.task
-        return DebuggerCommEvent.task # orig
+        return DebuggerCommEvent.task  # orig
 
     def SetReceiverName(self, name):
         # self.receiver_name = name
@@ -79,8 +78,8 @@ class DebuggerCommEvent(wx.PyCommandEvent):
 
 
 class DebugClient:
-    """The base class expected to be used by all DebugClients.
-    """
+    """The base class expected to be used by all DebugClients."""
+
     def __init__(self, win):
         self.win_id = win.GetId()
         self.event_handler = win.GetEventHandler()
@@ -109,13 +108,13 @@ class DebugClient:
 
     def pollStreams(self):
         """Returns the data sent to stdout and stderr."""
-        return ('', '')
+        return ("", "")
 
 
 class DebuggerTask:
-    """Calls invoke() on a debug client then posts an event on return.
-    """
-    def __init__(self, client, m_name, m_args=(), r_name='', r_args=()):
+    """Calls invoke() on a debug client then posts an event on return."""
+
+    def __init__(self, client, m_name, m_args=(), r_name="", r_args=()):
         self.client = client
         self.m_name = m_name
         self.m_args = m_args
@@ -123,17 +122,15 @@ class DebuggerTask:
         self.r_args = r_args
 
     def __repr__(self):
-        return '<DebuggerTask: %s:%s:%s:%s>'%(self.m_name, self.m_args,
-                                              self.r_name, self.r_args)
+        return "<DebuggerTask: %s:%s:%s:%s>" % (self.m_name, self.m_args, self.r_name, self.r_args)
 
     def __call__(self):
         evt = None
         try:
-
             # result = self.client.invoke(b'proceedAndRequestStatus', self.m_args)   # orig
             result = self.client.invoke(self.m_name, self.m_args)
 
-        except:
+        except Exception:
             t, v = sys.exc_info()[:2]
             evt = self.client.createEvent(wxEVT_DEBUGGER_EXC)
             evt.SetExc(t, v)
@@ -147,8 +144,7 @@ class DebuggerTask:
             self.client.postEvent(evt)
 
 
-class MultiThreadedDebugClient (DebugClient):
-
+class MultiThreadedDebugClient(DebugClient):
     taskHandler = ThreadedTaskHandler()
 
     def invoke(self, m_name, m_args):

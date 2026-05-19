@@ -1,30 +1,33 @@
-import math
-import os, time, threading, socket
+import os
+import socket
+import threading
+import time
 
 import wx
 
-import Preferences, Utils
+import Preferences
+import Utils
 from Utils import _
 
-#-----Toolbar-------------------------------------------------------------------
+# -----Toolbar-------------------------------------------------------------------
+
 
 class MyToolBar(wx.ToolBar):
     def __init__(self, *_args, **_kwargs):
-        wx.ToolBar.__init__(self, _kwargs['parent'], _kwargs['id'],
-          style=wx.TB_HORIZONTAL | wx.NO_BORDER|Preferences.flatTools)
+        wx.ToolBar.__init__(
+            self, _kwargs["parent"], _kwargs["id"], style=wx.TB_HORIZONTAL | wx.NO_BORDER | Preferences.flatTools
+        )
         self.toolLst = []
         self.toolCount = 0
         self.SetToolBitmapSize((16, 16))
 
-    def AddTool(self, id, bitmap, toggleBitmap=wx.NullBitmap, shortHelpString='', isToggle=False):
-        if isToggle==False:
-            wx.ToolBar.AddTool(self, id, '', bitmap,
-            shortHelpString,wx.ITEM_NORMAL)
+    def AddTool(self, id, bitmap, toggleBitmap=wx.NullBitmap, shortHelpString="", isToggle=False):
+        if not isToggle:
+            wx.ToolBar.AddTool(self, id, "", bitmap, shortHelpString, wx.ITEM_NORMAL)
         else:
-            wx.ToolBar.AddTool(self, id, '', bitmap, toggleBitmap, toggleBitmap,wx.ITEM_NORMAL,
-                               shortHelpString, '', None)
-
-
+            wx.ToolBar.AddTool(
+                self, id, "", bitmap, toggleBitmap, toggleBitmap, wx.ITEM_NORMAL, shortHelpString, "", None
+            )
 
         # wx.ToolBar.AddTool(1, "New",wx.NullBitmap,
         #                 wx.NullBitmap, wx.ITEM_NORMAL, 'New', "Long help for 'New'.", None)
@@ -34,7 +37,7 @@ class MyToolBar(wx.ToolBar):
         self.toolLst.append(id)
         self.toolCount = self.toolCount + 1
 
-    def AddTool2(self, id, bitmapname, shortHelpString='', toggleBitmap=wx.NullBitmap, isToggle=False):
+    def AddTool2(self, id, bitmapname, shortHelpString="", toggleBitmap=wx.NullBitmap, isToggle=False):
         self.AddTool(id, Preferences.IS.load(bitmapname), toggleBitmap, shortHelpString, isToggle)
 
     def AddSeparator(self):
@@ -81,6 +84,7 @@ class MyToolBar(wx.ToolBar):
             if wid != -1:
                 self.GetParent().Disconnect(wid)
 
+
 class EditorToolBar(MyToolBar):
     pass
 
@@ -88,14 +92,17 @@ class EditorToolBar(MyToolBar):
 # fields
 sbfIcon, sbfBrwsBtns, sbfStatus, sbfCrsInfo, sbfProgress = list(range(5))
 
+
 class EditorStatusBar(wx.StatusBar):
-    """ Displays information about the current view. Also global stats/
-        progress bar etc. """
+    """Displays information about the current view. Also global stats/
+    progress bar etc."""
+
     maxHistorySize = 250
+
     def __init__(self, *_args, **_kwargs):
-        wx.StatusBar.__init__(self, _kwargs['parent'], _kwargs['id'], style=wx.STB_SIZEGRIP)
+        wx.StatusBar.__init__(self, _kwargs["parent"], _kwargs["id"], style=wx.STB_SIZEGRIP)
         self.SetFieldsCount(6)
-        if wx.Platform == '__WXGTK__':
+        if wx.Platform == "__WXGTK__":
             imgWidth = 21
         else:
             imgWidth = 16
@@ -103,23 +110,26 @@ class EditorStatusBar(wx.StatusBar):
         self.SetStatusWidths([imgWidth, 36, 400, 25, 150, -1])
 
         rect = self.GetFieldRect(sbfIcon)
-        self.img = wx.StaticBitmap(self, -1,
-            Preferences.IS.load('Images/Shared/BoaLogo.png'),
-            (rect.x+1, rect.y+1), (16, 16))
+        self.img = wx.StaticBitmap(
+            self, -1, Preferences.IS.load("Images/Shared/BoaLogo.png"), (rect.x + 1, rect.y + 1), (16, 16)
+        )
         self.img.Bind(wx.EVT_LEFT_DCLICK, self.OnShowHistory)
 
         rect = self.GetFieldRect(sbfBrwsBtns)
 
-
-        self.historyBtnBack = wx.BitmapButton(self, -1,
-              Preferences.IS.load('Images/Shared/PreviousSmall.png'),
-                  wx.Point(rect.x+1, rect.y+1), wx.Size(20, 20))
-        self.historyBtnFwd = wx.BitmapButton(self, -1,
-              Preferences.IS.load('Images/Shared/NextSmall.png'),
-              (rect.x+1+16, rect.y+1), (20,20))
+        self.historyBtnBack = wx.BitmapButton(
+            self,
+            -1,
+            Preferences.IS.load("Images/Shared/PreviousSmall.png"),
+            wx.Point(rect.x + 1, rect.y + 1),
+            wx.Size(20, 20),
+        )
+        self.historyBtnFwd = wx.BitmapButton(
+            self, -1, Preferences.IS.load("Images/Shared/NextSmall.png"), (rect.x + 1 + 16, rect.y + 1), (20, 20)
+        )
 
         # self.historyBtns.SetToolTip('Browse the Traceback/Error/Output window history.')
-        tip = _('Browse the Traceback/Error/Output window history.')
+        tip = _("Browse the Traceback/Error/Output window history.")
         self.historyBtnBack.SetToolTip(tip)
 
         self.historyBtnBack.Bind(wx.EVT_BUTTON, self.OnErrOutHistoryBack, id=self.historyBtnBack.GetId())
@@ -130,17 +140,19 @@ class EditorStatusBar(wx.StatusBar):
         self.progress = wx.Gauge(self, -1, 100)
         self.linkProgressToStatusBar()
 
-        self.images = {'Info': Preferences.IS.load('Images/Shared/Info.png'),
-                       'Warning': Preferences.IS.load('Images/Shared/Warning.png'),
-                       'Error': Preferences.IS.load('Images/Shared/Error.png')}
+        self.images = {
+            "Info": Preferences.IS.load("Images/Shared/Info.png"),
+            "Warning": Preferences.IS.load("Images/Shared/Warning.png"),
+            "Error": Preferences.IS.load("Images/Shared/Error.png"),
+        }
         self.history = []
         self._histcnt = 0
 
     def destroy(self):
         self.images = None
 
-    def setHint(self, hint, msgType='Info', ringBell=False):
-        """ Show a status message in the statusbar, optionally rings a bell.
+    def setHint(self, hint, msgType="Info", ringBell=False):
+        """Show a status message in the statusbar, optionally rings a bell.
 
         msgType can be 'Info', 'Warning' or 'Error'
         """
@@ -148,29 +160,28 @@ class EditorStatusBar(wx.StatusBar):
             return
         self._histcnt = self._histcnt - 1
         if hint.strip():
-            self.history.append( (msgType, time.strftime('%H:%M:%S',
-              time.localtime(time.time())), hint, ringBell) )
+            self.history.append((msgType, time.strftime("%H:%M:%S", time.localtime(time.time())), hint, ringBell))
         if len(self.history) > self.maxHistorySize:
             del self.history[0]
 
         self.SetStatusText(hint, sbfStatus)
         self.img.SetToolTip(hint)
         self.img.SetBitmap(self.images[msgType])
-        if ringBell: wx.Bell()
+        if ringBell:
+            wx.Bell()
 
     def OnEditorNotification(self, event):
         self.setHint(event.message)
 
-    logDlgs = {'Info': wx.LogMessage,
-               'Warning': wx.LogWarning,
-               'Error': wx.LogError}
+    logDlgs = {"Info": wx.LogMessage, "Warning": wx.LogWarning, "Error": wx.LogError}
+
     def OnShowHistory(self, event):
         hist = self.history[:]
-        hp = HistoryPopup(self.GetParent(), hist, self.images)
+        HistoryPopup(self.GetParent(), hist, self.images)
 
     def linkProgressToStatusBar(self):
         rect = self.GetFieldRect(sbfProgress)
-        self.progress.SetSize(rect.x+1, rect.y+1, rect.width -2, rect.height -2)
+        self.progress.SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2)
 
     def setColumnPos(self, value):
         self.SetStatusText(str(value), sbfCrsInfo)
@@ -185,19 +196,21 @@ class EditorStatusBar(wx.StatusBar):
 
 
 def HistoryPopup(parent, hist, imgs):
-    f = wx.MiniFrame(parent,
-                     -1,
-                     title = _('Editor status history'),
-                     size = (350, 200),
-                     style=(wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.DEFAULT_FRAME_STYLE))
+    f = wx.MiniFrame(
+        parent,
+        -1,
+        title=_("Editor status history"),
+        size=(350, 200),
+        style=(wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.DEFAULT_FRAME_STYLE),
+    )
     lc = wx.ListCtrl(f, style=wx.LC_REPORT | wx.LC_VRULES | wx.LC_NO_HEADER)
     lc.il = wx.ImageList(16, 16)
     idxs = {}
     for tpe, img in list(imgs.items()):
         idxs[tpe] = lc.il.Add(img)
     lc.SetImageList(lc.il, wx.IMAGE_LIST_SMALL)
-    lc.InsertColumn(0, _('Time'))
-    lc.InsertColumn(1, _('Message'))
+    lc.InsertColumn(0, _("Time"))
+    lc.InsertColumn(1, _("Message"))
     lc.SetColumnWidth(0, 75)
     lc.SetColumnWidth(1, 750)
     for tpe, tme, msg, _bell in hist:
@@ -209,14 +222,16 @@ def HistoryPopup(parent, hist, imgs):
     return f
 
 
-#-----Model hoster--------------------------------------------------------------
+# -----Model hoster--------------------------------------------------------------
 
 
 wxID_MODULEPAGEVIEWCHANGE, wxID_MODULEPAGECLOSEVIEW = Utils.wxNewIds(2)
 
+
 class ModulePage:
-    """ Represents a notebook on a page of the top level notebook hosting
-        the model instance. """
+    """Represents a notebook on a page of the top level notebook hosting
+    the model instance."""
+
     def __init__(self, parent, model, defViews, views, idx, editor):
         self.editor = editor
         self.defViews = [(v, wx.NewIdRef(count=1)) for v in defViews]
@@ -230,17 +245,15 @@ class ModulePage:
         self.updatePageName()
 
         self.windowId = wx.NewIdRef(count=1)
-        self.editor.winMenu.Append(self.windowId, self.getMenuLabel(),
-              _('Switch to highlighted file'))
+        self.editor.winMenu.Append(self.windowId, self.getMenuLabel(), _("Switch to highlighted file"))
         self.editor.Bind(wx.EVT_MENU, self.editor.OnGotoModulePage, id=self.windowId)
         self.notebook.Bind(wx.EVT_MENU, self.OnDirectActionClose, id=wxID_MODULEPAGECLOSEVIEW)
         self.notebook.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
 
-        Class = model.__class__
-##        if not editor.defaultAdtViews.has_key(cls):
-##            cls = model.__class__.__bases__[0]
+        ##        if not editor.defaultAdtViews.has_key(cls):
+        ##            cls = model.__class__.__bases__[0]
 
-        tot = len(defViews) ##+ len(editor.defaultAdtViews.get(Class, []))
+        tot = len(defViews)  ##+ len(editor.defaultAdtViews.get(Class, []))
         if tot:
             stepsDone = 50.0
             editor.statusBar.progress.SetValue(int(stepsDone))
@@ -250,10 +263,10 @@ class ModulePage:
                 stepsDone = stepsDone + step
                 editor.statusBar.progress.SetValue(int(stepsDone))
 
-##            for View in editor.defaultAdtViews.get(Class, []):
-##                self.addView(View)
-##                stepsDone = stepsDone + step
-##                editor.statusBar.progress.SetValue(int(stepsDone))
+        ##            for View in editor.defaultAdtViews.get(Class, []):
+        ##                self.addView(View)
+        ##                stepsDone = stepsDone + step
+        ##                editor.statusBar.progress.SetValue(int(stepsDone))
 
         if defViews:
             self.default = defViews[0].viewName
@@ -265,7 +278,7 @@ class ModulePage:
         editor.statusBar.progress.SetValue(0)
 
     def destroy(self):
-        """ Destroy all views, notepad pages and the view notebook."""
+        """Destroy all views, notepad pages and the view notebook."""
         self.disconnectEvts()
         self.editor.Disconnect(self.windowId)
 
@@ -283,38 +296,47 @@ class ModulePage:
 
         self.notebook.Destroy()
 
-##    def __del__(self):
-##        print '__del__', self.__class__.__name__
+    ##    def __del__(self):
+    ##        print '__del__', self.__class__.__name__
 
     def __repr__(self):
-        return '<%s: %s, %d>' %(self.__class__.__name__, os.path.basename(self.model.filename), self.tIdx)
+        return "<%s: %s, %d>" % (self.__class__.__name__, os.path.basename(self.model.filename), self.tIdx)
 
     def updatePageName(self):
-        """ Return a name that is decorated with () meaning never been saved
-            and/or * meaning model modified ~ meaning view modified. """
+        """Return a name that is decorated with () meaning never been saved
+        and/or * meaning model modified ~ meaning view modified."""
 
         pageName = self.model.getPageName()
 
-        if not self.model.savedAs: sa1, sa2 = '(', ')'
-        else: sa1 = sa2 = ''
+        if not self.model.savedAs:
+            sa1, sa2 = "(", ")"
+        else:
+            sa1 = sa2 = ""
 
-        if len(self.model.viewsModified): vm = '~'
-        else: vm = ''
+        if len(self.model.viewsModified):
+            vm = "~"
+        else:
+            vm = ""
 
-        if self.model.modified: m = '*'
-        else: m = ''
+        if self.model.modified:
+            m = "*"
+        else:
+            m = ""
 
-        if self.model.transport and self.model.transport.stdAttrs['read-only']:
-            ro = ' (read only)'
-        else: ro = ''
+        if self.model.transport and self.model.transport.stdAttrs["read-only"]:
+            ro = " (read only)"
+        else:
+            ro = ""
 
-        self.pageName = '%s%s%s%s%s%s%s%s' % (m, vm, sa1, pageName, ro, sa2, vm, m)
+        self.pageName = "%s%s%s%s%s%s%s%s" % (m, vm, sa1, pageName, ro, sa2, vm, m)
 
         return self.pageName
 
     def getActiveView(self, idx=None):
-        if idx is None: idx = self.notebook.GetSelection()
-        if idx == -1: return None
+        if idx is None:
+            idx = self.notebook.GetSelection()
+        if idx == -1:
+            return None
 
         for name, view in list(self.model.views.items()):
             if view.pageIdx == idx:
@@ -322,12 +344,12 @@ class ModulePage:
 
         return None
 
-##        name = self.notebook.GetPageText(idx)
-##        if name and name[0] == '~': name = name[1:-1]
-##        try:
-##            return self.model.views[name]
-##        except KeyError:
-##            return None
+    ##        name = self.notebook.GetPageText(idx)
+    ##        if name and name[0] == '~': name = name[1:-1]
+    ##        try:
+    ##            return self.model.views[name]
+    ##        except KeyError:
+    ##            return None
 
     def viewSelectionMenu(self):
         menu = wx.Menu()
@@ -335,7 +357,7 @@ class ModulePage:
             menu.Append(wId, Utils.getViewTitle(View))
         menu.AppendSeparator()
         for View, wId in self.adtViews:
-            menu.Append(wId, Utils.getViewTitle(View), '', View not in self.adtViews)
+            menu.Append(wId, Utils.getViewTitle(View), "", View not in self.adtViews)
 
         return menu
 
@@ -355,21 +377,20 @@ class ModulePage:
         for view, wId in self.adtViews:
             self.viewMenu.Check(wId, view in viewClss)
 
-    def addView(self, View, viewName=''):
-        """ Add a view to the model and display it as a page in the notebook
-            of view instances."""
+    def addView(self, View, viewName=""):
+        """Add a view to the model and display it as a page in the notebook
+        of view instances."""
         if not viewName:
             viewName = View.viewName
             viewTitle = Utils.getViewTitle(View)
         else:
             viewTitle = viewName
 
-        if wx.Platform == '__WXGTK__':
+        if wx.Platform == "__WXGTK__":
             panel, view = Utils.wxProxyPanel(self.notebook, View, self.model)
             self.model.views[viewName] = view
             if View.docked:
-                self.model.views[viewName].addToNotebook(self.notebook, viewTitle,
-                        panel=panel)
+                self.model.views[viewName].addToNotebook(self.notebook, viewTitle, panel=panel)
         else:
             view = View(self.notebook, self.model)
             self.model.views[viewName] = view
@@ -383,12 +404,12 @@ class ModulePage:
         # self.notebook.Refresh()
 
     def focus(self):
-        """ Make this model page the currently selected page. """
+        """Make this model page the currently selected page."""
         self.parent.SetSelection(self.tIdx)
 
     def removedPage(self, idx):
-        """ Called on all ModulePages after a sibling ModulePage deletion.
-            Decrements tIdx if bigger than idx. """
+        """Called on all ModulePages after a sibling ModulePage deletion.
+        Decrements tIdx if bigger than idx."""
         if idx < self.tIdx:
             self.tIdx = self.tIdx - 1
 
@@ -412,36 +433,41 @@ class ModulePage:
             if self.saveAs(oldName) and (oldName != model.filename):
                 self.rename(oldName, model.filename)
 
-                editor.statusBar.setHint(_('%s saved.')%\
-                      os.path.basename(model.filename))
+                editor.statusBar.setHint(_("%s saved.") % os.path.basename(model.filename))
         else:
             from Explorers.ExplorerNodes import TransportModifiedSaveError
+
             try:
                 model.save()
             except TransportModifiedSaveError as err:
-                choice = wx.MessageBox(_('%s\nDo you want to overwrite these '
-                  'changes (Yes), reload your file (No) or cancel this operation '
-                  '(Cancel)?')%str(err), _('Overwrite newer file warning'),
-                  wx.YES_NO | wx.CANCEL | wx.ICON_WARNING)
+                choice = wx.MessageBox(
+                    _(
+                        "%s\nDo you want to overwrite these "
+                        "changes (Yes), reload your file (No) or cancel this operation "
+                        "(Cancel)?"
+                    )
+                    % str(err),
+                    _("Overwrite newer file warning"),
+                    wx.YES_NO | wx.CANCEL | wx.ICON_WARNING,
+                )
                 if choice == wx.YES:
                     model.save(overwriteNewer=True)
                 elif choice == wx.NO:
-                    raise TransportModifiedSaveError('Reload')
+                    raise TransportModifiedSaveError("Reload")
                 elif choice == wx.CANCEL:
-                    raise TransportModifiedSaveError('Cancel')
+                    raise TransportModifiedSaveError("Cancel")
 
             editor.updateModulePage(model)
             editor.updateTitle()
 
-            editor.statusBar.setHint(_('%s saved.')%\
-                  os.path.basename(model.filename))
+            editor.statusBar.setHint(_("%s saved.") % os.path.basename(model.filename))
 
     def OnPageChange(self, event):
         viewIdx = event.GetSelection()
-        if event.GetOldSelection() != viewIdx or wx.Platform == '__WXGTK__':
+        if event.GetOldSelection() != viewIdx or wx.Platform == "__WXGTK__":
             self.editor.setupToolBar(viewIdx=viewIdx)
             view = self.getActiveView(viewIdx)
-            if hasattr(view, 'OnPageActivated'):
+            if hasattr(view, "OnPageActivated"):
                 view.OnPageActivated(event)
         event.Skip()
 
@@ -456,12 +482,13 @@ class ModulePage:
 
         if not doDirectMenuPopup:
             from Views.EditorViews import CloseableViewMix
+
             if isinstance(actView, CloseableViewMix):
                 doDirectMenuPopup = True
 
         if doDirectMenuPopup:
             directMenu = wx.Menu()
-            directMenu.Append(wxID_MODULEPAGECLOSEVIEW, _('Close active view'))
+            directMenu.Append(wxID_MODULEPAGECLOSEVIEW, _("Close active view"))
 
             self.notebook.PopupMenu(directMenu, event.GetPosition())
             directMenu.Destroy()
@@ -478,6 +505,7 @@ class ModulePage:
                 return
 
         from Views.EditorViews import CloseableViewMix
+
         if isinstance(actView, CloseableViewMix):
             actView.OnClose(None)
 
@@ -490,27 +518,28 @@ class ModulePage:
         self.editor.editorUpdateNotify()
 
     def getMenuLabel(self):
-        return '%s (%s)'%(os.path.basename(self.model.filename),
-                          self.model.filename)
+        return "%s (%s)" % (os.path.basename(self.model.filename), self.model.filename)
 
 
 socketPort = 50007
 selectTimeout = 0.25
+
+
 class Listener(threading.Thread):
     def __init__(self, editor, closed):
-        #self.queue = queue
+        # self.queue = queue
         self.editor = editor
         self.closed = closed
         threading.Thread.__init__(self)
 
-    def run(self, host='127.0.0.1', port=socketPort):
-        import socket
+    def run(self, host="127.0.0.1", port=socketPort):
         from select import select
+
         # Open a socket and listen.
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.bind((host, port))
-        except socket.error as err:
+        except socket.error:
             self.closed.set()
             return
 
@@ -519,7 +548,7 @@ class Listener(threading.Thread):
             while True:
                 # Listen for 0.25 s, then check if closed is set. In that case,
                 # end thread by returning.
-                ready, dummy, dummy = select([s],[],[], selectTimeout)
+                ready, dummy, dummy = select([s], [], [], selectTimeout)
                 if self.closed.isSet():
                     return
                 if ready:
@@ -530,9 +559,10 @@ class Listener(threading.Thread):
             l = []
             while True:
                 data = conn.recv(1024)
-                if not data: break
+                if not data:
+                    break
                 l.append(data)
-            name = ''.join(l)
+            name = "".join(l)
             if name.strip():
                 wx.CallAfter(self.editor.openOrGotoModule, name)
             conn.close()
@@ -545,7 +575,7 @@ def socketFileOpenServerListen(editor):
     return closed, listener
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # app = wx.PySimpleApp()
     app = wx.App()
     frame = HistoryPopup(None, (), {})

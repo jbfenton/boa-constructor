@@ -60,3 +60,53 @@ This command will:
 3. Install the required dependencies
 4. Launch Boa Constructor.
 
+## Contributing
+
+Contributions are welcome. The easiest way to contribute is to set up the project locally, make a focused change, run the project checks, and then open a pull request.
+
+### Suggested contributor workflow
+
+1. Clone the repository.
+2. Run `make bootstrap` from the repository root. This runs the platform bootstrap script, installs `uv`, and then installs the project's `pre-commit` hooks.
+3. Start Boa locally with `run.bat`, `run.sh`, or `uv run Boa.py`.
+4. Make your code changes.
+5. Review `git status` before running any formatting commands so you know what is already modified.
+6. Run `make format` to apply the project's Ruff formatting and safe autofixes.
+7. Run `make check` to confirm formatting and linting pass.
+8. Review the final diff and open a pull request.
+
+If you need to install the hooks manually, run `uv run pre-commit install`.
+
+To run the hooks manually across the repository, run `uv run pre-commit run --all-files`.
+
+## Code Quality Checks
+
+This project uses Ruff for formatting and linting.
+
+### Format the code
+
+```bash
+make format
+```
+
+This runs Ruff's autofix pass first and then applies Ruff formatting.
+
+### Check formatting and linting
+
+```bash
+make check
+```
+
+This runs Ruff in check-only mode and should pass before you open a pull request.
+
+### Important note about scope
+
+Both `make format` and `make check` run across the repository, not just the files you changed. On a large or older branch, `make format` may update many files at once. Check `git status` before and after running it so you can tell which changes are yours.
+
+## Preparing a Pull Request
+
+Before opening a pull request:
+
+1. Run `make check` and confirm it passes.
+2. Review the diff to make sure broad formatting changes did not accidentally get mixed with unrelated work.
+3. If you are changing Ruff configuration or other shared tooling, prefer to keep that change separate from large formatting-only updates when practical. Splitting those changes makes review easier.

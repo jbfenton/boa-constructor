@@ -87,68 +87,73 @@ ConfigParser -- responsible for for parsing a list of
 
 # Removed unicode check for 1.5.2 compatibility
 
-import sys
-import string
 import re
+import string
 
 DEFAULTSECT = "DEFAULT"
 
+
 # exception classes
 class Error:
-    def __init__(self, msg=''):
+    def __init__(self, msg=""):
         self._msg = msg
+
     def __repr__(self):
         return self._msg
 
+
 class NoSectionError(Error):
     def __init__(self, section):
-        Error.__init__(self, 'No section: %s' % section)
+        Error.__init__(self, "No section: %s" % section)
         self.section = section
+
 
 class DuplicateSectionError(Error):
     def __init__(self, section):
         Error.__init__(self, "Section %s already exists" % section)
         self.section = section
 
+
 class NoOptionError(Error):
     def __init__(self, option, section):
-        Error.__init__(self, "No option `%s' in section: %s" %
-                       (option, section))
+        Error.__init__(self, "No option `%s' in section: %s" % (option, section))
         self.option = option
         self.section = section
 
+
 class InterpolationError(Error):
     def __init__(self, reference, option, section, rawval):
-        Error.__init__(self,
-                       "Bad value substitution:\n"
-                       "\tsection: [%s]\n"
-                       "\toption : %s\n"
-                       "\tkey    : %s\n"
-                       "\trawval : %s\n"
-                       % (section, option, reference, rawval))
+        Error.__init__(
+            self,
+            "Bad value substitution:\n"
+            "\tsection: [%s]\n"
+            "\toption : %s\n"
+            "\tkey    : %s\n"
+            "\trawval : %s\n" % (section, option, reference, rawval),
+        )
         self.reference = reference
         self.option = option
         self.section = section
 
+
 class MissingSectionHeaderError(Error):
     def __init__(self, filename, lineno, line):
-        Error.__init__(
-            self,
-            'File contains no section headers.\nfile: %s, line: %d\n%s' %
-            (filename, lineno, line))
+        Error.__init__(self, "File contains no section headers.\nfile: %s, line: %d\n%s" % (filename, lineno, line))
         self.filename = filename
         self.lineno = lineno
         self.line = line
 
+
 class ParsingError(Error):
     def __init__(self, filename):
-        Error.__init__(self, 'File contains parsing errors: %s' % filename)
+        Error.__init__(self, "File contains parsing errors: %s" % filename)
         self.filename = filename
         self.errors = []
 
     def append(self, lineno, line):
         self.errors.append((lineno, line))
-        self._msg = self._msg + '\n\t[line %2d]: %s' % (lineno, line)
+        self._msg = self._msg + "\n\t[line %2d]: %s" % (lineno, line)
+
 
 class ConfigParser:
     def __init__(self, defaults=None):
@@ -182,7 +187,7 @@ class ConfigParser:
 
         The DEFAULT section is not acknowledged.
         """
-        return (section in self.__sections)
+        return section in self.__sections
 
     def options(self, section):
         """Return a list of option names for the given section name."""
@@ -212,7 +217,7 @@ class ConfigParser:
         configuration files in the list will be read.  A single
         filename may also be given.
         """
-        if type(filenames) == type(''):
+        if isinstance(filenames, str):
             filenames = [filenames]
         for filename in filenames:
             try:
@@ -235,7 +240,7 @@ class ConfigParser:
             try:
                 filename = fp.name
             except AttributeError:
-                filename = '<???>'
+                filename = "<???>"
         self.__read(fp, filename)
 
     def get(self, section, option, raw=0, vars=None):
@@ -270,14 +275,13 @@ class ConfigParser:
         if raw:
             return rawval
 
-        value = rawval                  # Make it a pretty variable name
+        value = rawval  # Make it a pretty variable name
         depth = 0
-        while depth < 10:               # Loop through this until it's done
+        while depth < 10:  # Loop through this until it's done
             depth = depth + 1
             if str.find(value, "%(") >= 0:
                 key = value
                 try:
-
                     value = value % d
                 except (KeyError, key):
                     raise InterpolationError(key, option, section, rawval)
@@ -297,13 +301,11 @@ class ConfigParser:
         v = self.get(section, option)
         val = int(v)
         if val not in (0, 1):
-            raise ValueError ('Not a boolean: %s' % v)
+            raise ValueError("Not a boolean: %s" % v)
         return val
 
     def optionxform(self, optionstr):
         return str.lower(optionstr)
-
-
 
     def set(self, section, option, value):
         """Set an option."""
@@ -320,13 +322,13 @@ class ConfigParser:
         """Write an .ini-format representation of the configuration state."""
         if self.__defaults:
             fp.write("[DEFAULT]\n")
-            for (key, value) in self.__defaults.items():
+            for key, value in self.__defaults.items():
                 fp.write("%s = %s\n" % (key, value))
             fp.write("\n")
         for section in self.sections():
             fp.write("[" + section + "]\n")
             sectdict = self.__sections[section]
-            for (key, value) in sectdict.items():
+            for key, value in sectdict.items():
                 if key == "__name__":
                     continue
                 fp.write("%s = %s\n" % (key, value))
@@ -359,18 +361,18 @@ class ConfigParser:
     # slight semantic change from the previous version, because of the use
     # of \w, _ is allowed in section header names.
     SECTCRE = re.compile(
-        r'\['                                 # [
-        r'(?P<header>[-\w_.*,(){}]+)'         # a lot of stuff found by IvL
-        r'\]'                                 # ]
-        )
+        r"\["  # [
+        r"(?P<header>[-\w_.*,(){}]+)"  # a lot of stuff found by IvL
+        r"\]"  # ]
+    )
     OPTCRE = re.compile(
-        r'(?P<option>[-\w_.*,(){}]+)'         # a lot of stuff found by IvL
-        r'[ \t]*(?P<vi>[:=])[ \t]*'           # any number of space/tab,
-                                              # followed by separator
-                                              # (either : or =), followed
-                                              # by any # space/tab
-        r'(?P<value>.*)$'                     # everything up to eol
-        )
+        r"(?P<option>[-\w_.*,(){}]+)"  # a lot of stuff found by IvL
+        r"[ \t]*(?P<vi>[:=])[ \t]*"  # any number of space/tab,
+        # followed by separator
+        # (either : or =), followed
+        # by any # space/tab
+        r"(?P<value>.*)$"  # everything up to eol
+    )
 
     def __read(self, fp, fpname):
         """Parse a sectioned setup file.
@@ -382,38 +384,37 @@ class ConfigParser:
         leading whitespace.  Blank lines, lines beginning with a '#',
         and just about everything else is ignored.
         """
-        cursect = None                            # None, or a dictionary
+        cursect = None  # None, or a dictionary
         optname = None
         lineno = 0
-        e = None                                  # None, or an exception
+        e = None  # None, or an exception
         while 1:
             line = fp.readline()
             if not line:
                 break
             lineno = lineno + 1
             # comment or blank line?
-            if line.strip() == '' or line[0] in '#;':
+            if line.strip() == "" or line[0] in "#;":
                 continue
-            if str.lower(str.split(line)[0]) == 'rem' \
-               and line[0] in "rR":      # no leading whitespace
+            if str.lower(str.split(line)[0]) == "rem" and line[0] in "rR":  # no leading whitespace
                 continue
             # continuation line?
-            if line[0] in ' \t' and cursect is not None and optname:
+            if line[0] in " \t" and cursect is not None and optname:
                 value = line.strip()
                 if value:
-                    cursect[optname] = cursect[optname] + '\n ' + value
+                    cursect[optname] = cursect[optname] + "\n " + value
             # a section header or option header?
             else:
                 # is it a section header?
                 mo = self.SECTCRE.match(line)
                 if mo:
-                    sectname = mo.group('header')
+                    sectname = mo.group("header")
                     if sectname in self.__sections:
                         cursect = self.__sections[sectname]
                     elif sectname == DEFAULTSECT:
                         cursect = self.__defaults
                     else:
-                        cursect = {'__name__': sectname}
+                        cursect = {"__name__": sectname}
                         self.__sections[sectname] = cursect
                     # So sections can't start with a continuation line
                     optname = None
@@ -424,18 +425,18 @@ class ConfigParser:
                 else:
                     mo = self.OPTCRE.match(line)
                     if mo:
-                        optname, vi, optval = mo.group('option', 'vi', 'value')
-                        if vi in ('=', ':') and ';' in optval:
+                        optname, vi, optval = mo.group("option", "vi", "value")
+                        if vi in ("=", ":") and ";" in optval:
                             # ';' is a comment delimiter only if it follows
                             # a spacing character
                             # pos = string.find(optval, ';')
-                            pos = optval.find(';')
-                            if pos and optval[pos-1] in string.whitespace:
+                            pos = optval.find(";")
+                            if pos and optval[pos - 1] in string.whitespace:
                                 optval = optval[:pos]
                         optval = optval.strip()
                         # allow empty values
                         if optval == '""':
-                            optval = ''
+                            optval = ""
                         cursect[optname] = optval
                     else:
                         # a non-fatal parsing error occurred.  set up the

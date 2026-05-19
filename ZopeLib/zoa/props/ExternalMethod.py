@@ -9,6 +9,4 @@
 ##
 obj = context.aq_parent.aq_parent
 meth = obj.zoa.subobj_(name)
-return {'title':    meth.title,
-        'function': meth.function(),
-        'module':   meth.module()}
+return {"title": meth.title, "function": meth.function(), "module": meth.module()}

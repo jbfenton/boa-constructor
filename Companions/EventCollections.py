@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        EventCollections.py
 # Purpose:
 #
@@ -8,7 +8,7 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 1999 - 2007 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # XXX Add another type of event:
 # XXX   Old style method overriding
 # XXX   These methods would be picked up from the methods of the class in module
@@ -146,130 +146,126 @@
 ##def EVT_SPLITTER_DOUBLECLICKED(win, id, func):
 
 
-class wxMiscEvent :
+class wxMiscEvent:
     pass
 
+
 """ Collections of event class macros """
-EventCategories = {'ActivateEvent': ('wx.EVT_ACTIVATE', 'wx.EVT_ACTIVATE_APP'),
-'MiscEvent':   ('wx.EVT_SIZE',
-                'wx.EVT_MOVE',
-                'wx.EVT_PAINT',
-                'wx.EVT_ERASE_BACKGROUND'),
-
-'FocusEvent' : ('wx.EVT_SET_FOCUS',
-                'wx.EVT_KILL_FOCUS'),
-
-'KeyEvent' : (  'wx.EVT_CHAR',
-                'wx.EVT_CHAR_HOOK',
-                'wx.EVT_KEY_DOWN',
-                'wx.EVT_KEY_UP'),
-
-'MouseEvent' : ('wx.EVT_LEFT_DOWN',
-                'wx.EVT_LEFT_UP',
-                'wx.EVT_MIDDLE_DOWN',
-                'wx.EVT_MIDDLE_UP',
-                'wx.EVT_RIGHT_UP',
-                'wx.EVT_RIGHT_DOWN',
-                'wx.EVT_MOTION',
-                'wx.EVT_LEFT_DCLICK',
-                'wx.EVT_MIDDLE_DCLICK',
-                'wx.EVT_RIGHT_DCLICK',
-                'wx.EVT_LEAVE_WINDOW',
-                'wx.EVT_ENTER_WINDOW',
-                'wx.EVT_MOUSEWHEEL',
-                'wx.EVT_MOUSE_EVENTS'),
-
-'ScrollEvent' :('wx.EVT_SCROLL',
-                'wx.EVT_SCROLL_TOP',
-                'wx.EVT_SCROLL_BOTTOM',
-                'wx.EVT_SCROLL_LINEUP',
-                'wx.EVT_SCROLL_LINEDOWN',
-                'wx.EVT_SCROLL_PAGEUP',
-                'wx.EVT_SCROLL_PAGEDOWN',
-                'wx.EVT_SCROLL_THUMBTRACK',
-                'wx.EVT_SCROLL_THUMBRELEASE'),
-
-'CmdScrollEvent' : ('wx.EVT_COMMAND_SCROLL',
-                    'wx.EVT_COMMAND_SCROLL_TOP',
-                    'wx.EVT_COMMAND_SCROLL_BOTTOM',
-                    'wx.EVT_COMMAND_SCROLL_LINEUP',
-                    'wx.EVT_COMMAND_SCROLL_LINEDOWN',
-                    'wx.EVT_COMMAND_SCROLL_PAGEUP',
-                    'wx.EVT_COMMAND_SCROLL_PAGEDOWN',
-                    'wx.EVT_COMMAND_SCROLL_THUMBTRACK',
-                    'wx.EVT_COMMAND_SCROLL_THUMBRELEASE'),
-
-'ScrollWinEvent' :('wx.EVT_SCROLLWIN',
-                   'wx.EVT_SCROLLWIN_TOP',
-                   'wx.EVT_SCROLLWIN_BOTTOM',
-                   'wx.EVT_SCROLLWIN_LINEUP',
-                   'wx.EVT_SCROLLWIN_LINEDOWN',
-                   'wx.EVT_SCROLLWIN_PAGEUP',
-                   'wx.EVT_SCROLLWIN_PAGEDOWN',
-                   'wx.EVT_SCROLLWIN_THUMBTRACK',
-                   'wx.EVT_SCROLLWIN_THUMBRELEASE'),
-
-'FrameEvent' : ('wx.EVT_ACTIVATE',
-                'wx.EVT_CLOSE',
-                'wx.EVT_DROP_FILES',
-                'wx.EVT_MAXIMIZE',
-                'wx.EVT_ICONIZE',
-                'wx.EVT_NAVIGATION_KEY',
-                'wx.EVT_IDLE'),
-
-'ListEvent' : ( 'wx.EVT_LIST_BEGIN_DRAG',
-                'wx.EVT_LIST_BEGIN_RDRAG',
-                'wx.EVT_LIST_BEGIN_LABEL_EDIT',
-                'wx.EVT_LIST_END_LABEL_EDIT',
-                'wx.EVT_LIST_DELETE_ITEM',
-                'wx.EVT_LIST_DELETE_ALL_ITEMS',
-                'wx.EVT_LIST_ITEM_SELECTED',
-                'wx.EVT_LIST_ITEM_ACTIVATED',
-                'wx.EVT_LIST_ITEM_DESELECTED',
-                'wx.EVT_LIST_KEY_DOWN',
-                'wx.EVT_LIST_INSERT_ITEM',
-                'wx.EVT_LIST_ITEM_RIGHT_CLICK',
-                'wx.EVT_LIST_COL_CLICK',
-                'wx.EVT_LIST_COL_RIGHT_CLICK',
-                'wx.EVT_LIST_COL_BEGIN_DRAG',
-                'wx.EVT_LIST_COL_DRAGGING',
-                'wx.EVT_LIST_COL_END_DRAG',
-                'wx.EVT_LIST_CACHE_HINT',),
-
-'TreeEvent' : ( 'wx.EVT_TREE_BEGIN_DRAG',
-                'wx.EVT_TREE_BEGIN_RDRAG',
-                'wx.EVT_TREE_BEGIN_LABEL_EDIT',
-                'wx.EVT_TREE_END_LABEL_EDIT',
-                'wx.EVT_TREE_GET_INFO',
-                'wx.EVT_TREE_SET_INFO',
-                'wx.EVT_TREE_ITEM_EXPANDED',
-                'wx.EVT_TREE_ITEM_EXPANDING',
-                'wx.EVT_TREE_ITEM_COLLAPSED',
-                'wx.EVT_TREE_ITEM_COLLAPSING',
-                'wx.EVT_TREE_ITEM_ACTIVATED',
-                'wx.EVT_TREE_ITEM_RIGHT_CLICK',
-                'wx.EVT_TREE_ITEM_MIDDLE_CLICK',
-                'wx.EVT_TREE_SEL_CHANGED',
-                'wx.EVT_TREE_SEL_CHANGING',
-                'wx.EVT_TREE_KEY_DOWN',
-                'wx.EVT_TREE_DELETE_ITEM'),
-
-'AppEvent' : (  'wx.EVT_ACTIVATE_APP',
-                'wx.EVT_END_SESSION',
-                'wx.EVT_QUERY_END_SESSION',
-                'wx.EVT_IDLE',
-                'wx.EVT_UPDATE_UI'),
-
-'SpinEvent' : ( 'wx.EVT_SPIN_UP',
-                'wx.EVT_SPIN_DOWN',
-                'wx.EVT_SPIN'),
-
-'HelpEvent': (  'wx.EVT_HELP', ),
-
+EventCategories = {
+    "ActivateEvent": ("wx.EVT_ACTIVATE", "wx.EVT_ACTIVATE_APP"),
+    "MiscEvent": ("wx.EVT_SIZE", "wx.EVT_MOVE", "wx.EVT_PAINT", "wx.EVT_ERASE_BACKGROUND"),
+    "FocusEvent": ("wx.EVT_SET_FOCUS", "wx.EVT_KILL_FOCUS"),
+    "KeyEvent": ("wx.EVT_CHAR", "wx.EVT_CHAR_HOOK", "wx.EVT_KEY_DOWN", "wx.EVT_KEY_UP"),
+    "MouseEvent": (
+        "wx.EVT_LEFT_DOWN",
+        "wx.EVT_LEFT_UP",
+        "wx.EVT_MIDDLE_DOWN",
+        "wx.EVT_MIDDLE_UP",
+        "wx.EVT_RIGHT_UP",
+        "wx.EVT_RIGHT_DOWN",
+        "wx.EVT_MOTION",
+        "wx.EVT_LEFT_DCLICK",
+        "wx.EVT_MIDDLE_DCLICK",
+        "wx.EVT_RIGHT_DCLICK",
+        "wx.EVT_LEAVE_WINDOW",
+        "wx.EVT_ENTER_WINDOW",
+        "wx.EVT_MOUSEWHEEL",
+        "wx.EVT_MOUSE_EVENTS",
+    ),
+    "ScrollEvent": (
+        "wx.EVT_SCROLL",
+        "wx.EVT_SCROLL_TOP",
+        "wx.EVT_SCROLL_BOTTOM",
+        "wx.EVT_SCROLL_LINEUP",
+        "wx.EVT_SCROLL_LINEDOWN",
+        "wx.EVT_SCROLL_PAGEUP",
+        "wx.EVT_SCROLL_PAGEDOWN",
+        "wx.EVT_SCROLL_THUMBTRACK",
+        "wx.EVT_SCROLL_THUMBRELEASE",
+    ),
+    "CmdScrollEvent": (
+        "wx.EVT_COMMAND_SCROLL",
+        "wx.EVT_COMMAND_SCROLL_TOP",
+        "wx.EVT_COMMAND_SCROLL_BOTTOM",
+        "wx.EVT_COMMAND_SCROLL_LINEUP",
+        "wx.EVT_COMMAND_SCROLL_LINEDOWN",
+        "wx.EVT_COMMAND_SCROLL_PAGEUP",
+        "wx.EVT_COMMAND_SCROLL_PAGEDOWN",
+        "wx.EVT_COMMAND_SCROLL_THUMBTRACK",
+        "wx.EVT_COMMAND_SCROLL_THUMBRELEASE",
+    ),
+    "ScrollWinEvent": (
+        "wx.EVT_SCROLLWIN",
+        "wx.EVT_SCROLLWIN_TOP",
+        "wx.EVT_SCROLLWIN_BOTTOM",
+        "wx.EVT_SCROLLWIN_LINEUP",
+        "wx.EVT_SCROLLWIN_LINEDOWN",
+        "wx.EVT_SCROLLWIN_PAGEUP",
+        "wx.EVT_SCROLLWIN_PAGEDOWN",
+        "wx.EVT_SCROLLWIN_THUMBTRACK",
+        "wx.EVT_SCROLLWIN_THUMBRELEASE",
+    ),
+    "FrameEvent": (
+        "wx.EVT_ACTIVATE",
+        "wx.EVT_CLOSE",
+        "wx.EVT_DROP_FILES",
+        "wx.EVT_MAXIMIZE",
+        "wx.EVT_ICONIZE",
+        "wx.EVT_NAVIGATION_KEY",
+        "wx.EVT_IDLE",
+    ),
+    "ListEvent": (
+        "wx.EVT_LIST_BEGIN_DRAG",
+        "wx.EVT_LIST_BEGIN_RDRAG",
+        "wx.EVT_LIST_BEGIN_LABEL_EDIT",
+        "wx.EVT_LIST_END_LABEL_EDIT",
+        "wx.EVT_LIST_DELETE_ITEM",
+        "wx.EVT_LIST_DELETE_ALL_ITEMS",
+        "wx.EVT_LIST_ITEM_SELECTED",
+        "wx.EVT_LIST_ITEM_ACTIVATED",
+        "wx.EVT_LIST_ITEM_DESELECTED",
+        "wx.EVT_LIST_KEY_DOWN",
+        "wx.EVT_LIST_INSERT_ITEM",
+        "wx.EVT_LIST_ITEM_RIGHT_CLICK",
+        "wx.EVT_LIST_COL_CLICK",
+        "wx.EVT_LIST_COL_RIGHT_CLICK",
+        "wx.EVT_LIST_COL_BEGIN_DRAG",
+        "wx.EVT_LIST_COL_DRAGGING",
+        "wx.EVT_LIST_COL_END_DRAG",
+        "wx.EVT_LIST_CACHE_HINT",
+    ),
+    "TreeEvent": (
+        "wx.EVT_TREE_BEGIN_DRAG",
+        "wx.EVT_TREE_BEGIN_RDRAG",
+        "wx.EVT_TREE_BEGIN_LABEL_EDIT",
+        "wx.EVT_TREE_END_LABEL_EDIT",
+        "wx.EVT_TREE_GET_INFO",
+        "wx.EVT_TREE_SET_INFO",
+        "wx.EVT_TREE_ITEM_EXPANDED",
+        "wx.EVT_TREE_ITEM_EXPANDING",
+        "wx.EVT_TREE_ITEM_COLLAPSED",
+        "wx.EVT_TREE_ITEM_COLLAPSING",
+        "wx.EVT_TREE_ITEM_ACTIVATED",
+        "wx.EVT_TREE_ITEM_RIGHT_CLICK",
+        "wx.EVT_TREE_ITEM_MIDDLE_CLICK",
+        "wx.EVT_TREE_SEL_CHANGED",
+        "wx.EVT_TREE_SEL_CHANGING",
+        "wx.EVT_TREE_KEY_DOWN",
+        "wx.EVT_TREE_DELETE_ITEM",
+    ),
+    "AppEvent": (
+        "wx.EVT_ACTIVATE_APP",
+        "wx.EVT_END_SESSION",
+        "wx.EVT_QUERY_END_SESSION",
+        "wx.EVT_IDLE",
+        "wx.EVT_UPDATE_UI",
+    ),
+    "SpinEvent": ("wx.EVT_SPIN_UP", "wx.EVT_SPIN_DOWN", "wx.EVT_SPIN"),
+    "HelpEvent": ("wx.EVT_HELP",),
 }
 
 ##EventCategoryNames = {
-##    'ActivateEvent': ('Activate', 
+##    'ActivateEvent': ('Activate',
 ##                      'ActivateApp'),
 ##    'MiscEvent':   ('Size', 'Move', 'Paint', 'EraseBackground'),
 ##    'FocusEvent' : ('SetFocus', 'KillFocus'),
@@ -277,26 +273,51 @@ EventCategories = {'ActivateEvent': ('wx.EVT_ACTIVATE', 'wx.EVT_ACTIVATE_APP'),
 ##    'MouseEvent' : ('LeftDown', 'LeftUp', 'MiddleDown',
 ##                    'MiddleUp',
 
-normalCategories = ['MiscEvent','FocusEvent','KeyEvent','MouseEvent','AppEvent',
-'FrameEvent', 'ScrollEvent']
-commandCategories = ['ListEvent', 'TreeEvent', 'CmdScrollEvent', 'SpinEvent',
-'HelpEvent']
+normalCategories = ["MiscEvent", "FocusEvent", "KeyEvent", "MouseEvent", "AppEvent", "FrameEvent", "ScrollEvent"]
+commandCategories = ["ListEvent", "TreeEvent", "CmdScrollEvent", "SpinEvent", "HelpEvent"]
 
 reservedWxIds = [
- # std ids
- 'wx.ID_SEPARATOR',
- 'wx.ID_OK', 'wx.ID_CANCEL', 'wx.ID_APPLY', 'wx.ID_YES', 'wx.ID_NO', 'wx.ID_STATIC',
- 'wx.ID_CUT', 'wx.ID_COPY', 'wx.ID_PASTE', 'wx.ID_CLEAR', 'wx.ID_FIND',
- 'wx.ID_DUPLICATE', 'wx.ID_SELECTALL',
- # help ids
- 'wx.ID_CONTEXT_HELP', # this name is from wxPython.help
- 'wx.ID_HELP_COMMANDS', 'wxID_HELP_CONTENTS', 'wxID_HELP_CONTEXT', 'wxID_HELP_PROCEDURES',
- # doc view ids
- 'wx.ID_OPEN', 'wx.ID_CLOSE', 'wx.ID_NEW', 'wx.ID_SAVE', 'wx.ID_SAVEAS',
- 'wx.ID_REVERT', 'wx.ID_EXIT', 'wx.ID_UNDO', 'wx.ID_REDO', 'wx.ID_HELP', 'wx.ID_PRINT',
- 'wx.ID_PRINT_SETUP', 'wx.ID_PREVIEW', 'wx.ID_ABOUT',
- # misc ids
- 'wx.ID_BACKWARD', 'wx.ID_FORWARD', 'wx.ID_SETUP', 'wx.ID_MORE',
+    # std ids
+    "wx.ID_SEPARATOR",
+    "wx.ID_OK",
+    "wx.ID_CANCEL",
+    "wx.ID_APPLY",
+    "wx.ID_YES",
+    "wx.ID_NO",
+    "wx.ID_STATIC",
+    "wx.ID_CUT",
+    "wx.ID_COPY",
+    "wx.ID_PASTE",
+    "wx.ID_CLEAR",
+    "wx.ID_FIND",
+    "wx.ID_DUPLICATE",
+    "wx.ID_SELECTALL",
+    # help ids
+    "wx.ID_CONTEXT_HELP",  # this name is from wxPython.help
+    "wx.ID_HELP_COMMANDS",
+    "wxID_HELP_CONTENTS",
+    "wxID_HELP_CONTEXT",
+    "wxID_HELP_PROCEDURES",
+    # doc view ids
+    "wx.ID_OPEN",
+    "wx.ID_CLOSE",
+    "wx.ID_NEW",
+    "wx.ID_SAVE",
+    "wx.ID_SAVEAS",
+    "wx.ID_REVERT",
+    "wx.ID_EXIT",
+    "wx.ID_UNDO",
+    "wx.ID_REDO",
+    "wx.ID_HELP",
+    "wx.ID_PRINT",
+    "wx.ID_PRINT_SETUP",
+    "wx.ID_PREVIEW",
+    "wx.ID_ABOUT",
+    # misc ids
+    "wx.ID_BACKWARD",
+    "wx.ID_FORWARD",
+    "wx.ID_SETUP",
+    "wx.ID_MORE",
 ]
 
 # Other names that may clash in the 'id' namespace ;)
@@ -304,18 +325,41 @@ reservedWxIds = [
 
 # >>> print "reservedCursors = ['"+"', '".join([k for k in wx.__dict__ if k.startswith('wxCURSOR_')])+"']"
 
-reservedCursors = ['wx.CURSOR_LEFT_BUTTON', 'wx.CURSOR_PAINT_BRUSH', 
- 'wx.CURSOR_WATCH', 'wx.CURSOR_CROSS', 'wx.CURSOR_BLANK', 'wx.CURSOR_MAX',
- 'wx.CURSOR_CHAR', 'wx.CURSOR_RIGHT_ARROW', 'wx.CURSOR_POINT_RIGHT',
- 'wx.CURSOR_SIZENESW', 'wx.CURSOR_MIDDLE_BUTTON', 'wx.CURSOR_WAIT',
- 'wx.CURSOR_BULLSEYE', 'wx.CURSOR_SIZING', 'wx.CURSOR_POINT_LEFT',
- 'wx.CURSOR_IBEAM', 'wx.CURSOR_SIZENWSE', 'wx.CURSOR_MAGNIFIER',
- 'wx.CURSOR_SPRAYCAN', 'wx.CURSOR_SIZEWE',  'wx.CURSOR_RIGHT_BUTTON',
- 'wx.CURSOR_ARROWWAIT', 'wx.CURSOR_DEFAULT', 'wx.CURSOR_PENCIL',
- 'wx.CURSOR_NONE', 'wx.CURSOR_QUESTION_ARROW', 'wx.CURSOR_HAND',
- 'wx.CURSOR_ARROW', 'wx.CURSOR_NO_ENTRY', 'wx.CURSOR_SIZENS']
+reservedCursors = [
+    "wx.CURSOR_LEFT_BUTTON",
+    "wx.CURSOR_PAINT_BRUSH",
+    "wx.CURSOR_WATCH",
+    "wx.CURSOR_CROSS",
+    "wx.CURSOR_BLANK",
+    "wx.CURSOR_MAX",
+    "wx.CURSOR_CHAR",
+    "wx.CURSOR_RIGHT_ARROW",
+    "wx.CURSOR_POINT_RIGHT",
+    "wx.CURSOR_SIZENESW",
+    "wx.CURSOR_MIDDLE_BUTTON",
+    "wx.CURSOR_WAIT",
+    "wx.CURSOR_BULLSEYE",
+    "wx.CURSOR_SIZING",
+    "wx.CURSOR_POINT_LEFT",
+    "wx.CURSOR_IBEAM",
+    "wx.CURSOR_SIZENWSE",
+    "wx.CURSOR_MAGNIFIER",
+    "wx.CURSOR_SPRAYCAN",
+    "wx.CURSOR_SIZEWE",
+    "wx.CURSOR_RIGHT_BUTTON",
+    "wx.CURSOR_ARROWWAIT",
+    "wx.CURSOR_DEFAULT",
+    "wx.CURSOR_PENCIL",
+    "wx.CURSOR_NONE",
+    "wx.CURSOR_QUESTION_ARROW",
+    "wx.CURSOR_HAND",
+    "wx.CURSOR_ARROW",
+    "wx.CURSOR_NO_ENTRY",
+    "wx.CURSOR_SIZENS",
+]
 
 reservedWxNames = reservedWxIds + reservedCursors
+
 
 def renameCmdIdInDict(dct, name, newId):
     if dct[name] in reservedWxNames:

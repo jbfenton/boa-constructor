@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        EditorViews.py
 # Purpose:     Base view classes that are the visual plugins for models
 #
@@ -8,29 +8,28 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 1999 - 2007 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
-print('importing Views')
+# ----------------------------------------------------------------------
+print("importing Views")
 
-import os, sys
+import os
+import sys
 
 import wx
 import wx.html
 
-import Preferences, Utils
-from Preferences import IS, staticInfoPrefs, keyDefs
+import Preferences
+import Utils
+from Preferences import IS, keyDefs
 from Utils import _
-
-import Search
-from Models import EditorHelper
 
 # XXX Python specific views should probably move out to PythonViews
 
-wxwHeaderTemplate ='''<html> <head>
+wxwHeaderTemplate = """<html> <head>
    <title>%(Title)s</title>
 </head>
-<body bgcolor="#FFFFFF">'''
+<body bgcolor="#FFFFFF">"""
 
-wxwModuleTemplate = '''
+wxwModuleTemplate = """
 <h1>%(Module)s</h1>
 %(ModuleSynopsis)s
 <p><b><font color="#FF0000">Classes</font></b><br>
@@ -38,9 +37,9 @@ wxwModuleTemplate = '''
 <p><b><font color="#FF0000">Functions</font></b><br>
 <p>%(FunctionList)s
 <hr>
-'''
+"""
 
-wxwAppModuleTemplate = '''
+wxwAppModuleTemplate = """
 <h1>%(Module)s</h1>
 %(ModuleSynopsis)s
 <p><b><font color="#FF0000">Modules</font></b><br>
@@ -50,9 +49,9 @@ wxwAppModuleTemplate = '''
 <p><b><font color="#FF0000">Functions</font></b><br>
 <p>%(FunctionList)s
 <hr>
-'''
+"""
 
-wxwClassTemplate = '''
+wxwClassTemplate = """
 <a NAME="%(Class)s"></a>
 <h2>%(Class)s</h2>
 %(ClassSynopsis)s
@@ -66,39 +65,42 @@ wxwClassTemplate = '''
 <hr>
 <center>
 *</center>
-'''
+"""
 
-wxwMethodTemplate = '''
+wxwMethodTemplate = """
 <hr><a NAME="%(Class)s%(Method)s"></a>
 <h3>
 %(Class)s.%(Method)s</h3>
 <b>%(Method)s</b>(<i>%(Params)s</i>)
 <p>&nbsp;%(MethodSynopsis)s
 <p>
-'''
+"""
 
-wxwFunctionTemplate = '''
+wxwFunctionTemplate = """
 <hr><a NAME="%(Function)s"></a>
 <h3>
 %(Function)s</h3>
 <b>%(Function)s</b>(<i>%(Params)s</i>)
 <p>&nbsp;%(FunctionSynopsis)s
 <p>
-'''
+"""
 
-wxwFooterTemplate = '</body></html>'
+wxwFooterTemplate = "</body></html>"
+
 
 class EditorView:
-    viewName = 'viewName undefined'
-    viewTitle = 'viewTitle undefined'
-    
+    viewName = "viewName undefined"
+    viewTitle = "viewTitle undefined"
+
     plugins = ()
-    def __init__(self, model, actions=(), dclickActionIdx=-1,
-          editorIsWindow=True, overrideDClick=False):
+
+    def __init__(self, model, actions=(), dclickActionIdx=-1, editorIsWindow=True, overrideDClick=False):
         self.active = False
         self.model = model
-        try:self.editorDisconnect = self.model.editor.Disconnect
-        except: pass
+        try:
+            self.editorDisconnect = self.model.editor.Disconnect
+        except Exception:
+            pass
         self.modified = False
         if editorIsWindow:
             self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
@@ -129,12 +131,12 @@ class EditorView:
         self.methodsIds = None
         del self.actions
 
-#---Action management-----------------------------------------------------------
+    # ---Action management-----------------------------------------------------------
     def buildMethodIds(self):
         self.methodsIds = []
         for name, meth, bmp, accl in self.actions:
-            if name != '-':
-                self.methodsIds.append( (wx.NewIdRef(), meth) )
+            if name != "-":
+                self.methodsIds.append((wx.NewIdRef(), meth))
 
     def buildMenuDefn(self):
         self.accelLst = []
@@ -145,12 +147,12 @@ class EditorView:
 
         # Build Edit/popup menu and accelerator list
         for name, meth, bmp, accl in self.actions:
-            if name == '-':
+            if name == "-":
                 wId = -1
             else:
                 wId, _m = mIds.pop()
 
-            if name[0] == '+':
+            if name[0] == "+":
                 canCheck = True
                 name = name[1:]
             else:
@@ -161,17 +163,17 @@ class EditorView:
             else:
                 code = ()
 
-            #name = name + (keyDefs[accl][2] and ' \t'+keyDefs[accl][2] or '')
+            # name = name + (keyDefs[accl][2] and ' \t'+keyDefs[accl][2] or '')
 
-            self.menuDefn.append( (wId, name, code, bmp, canCheck) )
+            self.menuDefn.append((wId, name, code, bmp, canCheck))
 
             if accl:
-                self.accelLst.append( (code[0], code[1], wId) )
+                self.accelLst.append((code[0], code[1], wId))
 
     def generateMenu(self):
         menu = wx.Menu()
         for wId, name, code, bmp, canCheck in self.menuDefn:
-            if name != '-':
+            if name != "-":
                 Utils.appendMenuItem(menu, wId, name, code, bmp)
             else:
                 menu.AppendSeparator()
@@ -195,23 +197,23 @@ class EditorView:
     def addViewTools(self, toolbar):
         addedSep = False
         for name, meth, bmp, accls in self.actions:
-            if name == '-' and not bmp:
+            if name == "-" and not bmp:
                 toolbar.AddSeparator()
                 addedSep = True
-            elif bmp != '-':
-                if name[0] == '+':
+            elif bmp != "-":
+                if name[0] == "+":
                     # XXX Add toggle button
-                    name = name [1:]
+                    name = name[1:]
                 if not addedSep:
                     # this is the separator between File and Edit
                     toolbar.AddSeparator()
                     addedSep = True
-                Utils.AddToolButtonBmpObject(self.model.editor, toolbar,
-                      IS.load(bmp), name, meth)
+                Utils.AddToolButtonBmpObject(self.model.editor, toolbar, IS.load(bmp), name, meth)
 
-#---Page management-------------------------------------------------------------
+    # ---Page management-------------------------------------------------------------
     docked = True
-    def addToNotebook(self, notebook, viewTitle='', panel=None):
+
+    def addToNotebook(self, notebook, viewTitle="", panel=None):
         self.notebook = notebook
         if not viewTitle:
             viewTitle = Utils.getViewTitle(self)
@@ -222,15 +224,15 @@ class EditorView:
         else:
             notebook.AddPage(self, viewTitle)
 
-        self.modified =  False
+        self.modified = False
         self.readOnly = False
 
     def deleteFromNotebook(self, focusView, tabName):
         # set selection to source view
         # check that not already destroyed
-        if hasattr(self, 'model'):
+        if hasattr(self, "model"):
             if self.modified:
-                #if wx.MessageBox('View modified, apply changes?',
+                # if wx.MessageBox('View modified, apply changes?',
                 #  'Close View',
                 #  wx.OK | wxCANCEL | wx.ICON_EXCLAMATION) == wx.YES:
                 self.refreshModel()
@@ -243,15 +245,17 @@ class EditorView:
             self.destroy()
             self.notebook.DeletePage(self.pageIdx)
 
-#---Editor status updating------------------------------------------------------
+    # ---Editor status updating------------------------------------------------------
     def updatePageName(self):
-        if hasattr(self, 'notebook'):
+        if hasattr(self, "notebook"):
             currName = self.notebook.GetPageText(self.pageIdx)
 
             viewTitle = Utils.getViewTitle(self)
 
-            if self.isModified(): newName = '~%s~' % viewTitle
-            else: newName = viewTitle
+            if self.isModified():
+                newName = "~%s~" % viewTitle
+            else:
+                newName = viewTitle
 
             if currName != newName:
                 if newName == viewTitle:
@@ -269,10 +273,11 @@ class EditorView:
     def updateViewState(self):
         self.updatePageName()
 
-#---Standard interface----------------------------------------------------------
+    # ---Standard interface----------------------------------------------------------
     def activate(self):
         self.active = True
-        if self.modified: self.refresh()
+        if self.modified:
+            self.refresh()
 
     def deactivate(self):
         self.active = False
@@ -287,15 +292,15 @@ class EditorView:
         self.modified = False
 
     def refreshModel(self):
-        """ Override this to apply changes in your view to the model """
+        """Override this to apply changes in your view to the model"""
         self.model.update()
         self.model.notify()
 
     def focus(self, refresh=True):
-        if hasattr(self, 'notebook'):
+        if hasattr(self, "notebook"):
             self.notebook.SetSelection(self.pageIdx)
         if refresh:
-##            self.notebook.Refresh()
+            ##            self.notebook.Refresh()
             self.SetFocus()
 
     def saveNotification(self):
@@ -308,12 +313,12 @@ class EditorView:
         return self.modified
 
     def explore(self):
-        """ Return items for Explorer """
+        """Return items for Explorer"""
         return []
 
     def gotoBrowseMarker(self, marker):
-        """ Called by the browse history stack, children should override to
-        participate in the HistoryBrowser """
+        """Called by the browse history stack, children should override to
+        participate in the HistoryBrowser"""
         self.focus()
 
     def OnRightDown(self, event):
@@ -326,39 +331,46 @@ class EditorView:
         event.GetEventObject().PopupMenu(menu, wx.Point(event.GetX(), event.GetY()))
         menu.Destroy()
 
+
 class TestView(wx.TextCtrl, EditorView):
-    viewName = 'Test'
-    viewTitle = _('Test')
+    viewName = "Test"
+    viewTitle = _("Test")
+
     def __init__(self, parent, model):
-        wx.TextCtrl.__init__(self, parent, -1, '',
-              style=wx.TE_MULTILINE | wx.TE_RICH | wx.HSCROLL)
+        wx.TextCtrl.__init__(self, parent, -1, "", style=wx.TE_MULTILINE | wx.TE_RICH | wx.HSCROLL)
         EditorView.__init__(self, model, (), 5)
         self.active = True
 
     def refreshCtrl(self):
-        self.SetValue('')
+        self.SetValue("")
+
 
 class HTMLView(wx.html.HtmlWindow, EditorView):
-    prevBmp = 'Images/Shared/Previous.png'
-    nextBmp = 'Images/Shared/Next.png'
+    prevBmp = "Images/Shared/Previous.png"
+    nextBmp = "Images/Shared/Next.png"
 
-    viewName = 'HTML'
-    viewTitle = _('HTML')
-    def __init__(self, parent, model, actions = ()):
+    viewName = "HTML"
+    viewTitle = _("HTML")
+
+    def __init__(self, parent, model, actions=()):
         wx.html.HtmlWindow.__init__(self, parent, style=wx.SUNKEN_BORDER)
-        EditorView.__init__(self, model, ((_('Back'), self.OnPrev, self.prevBmp, ''),
-                      (_('Forward'), self.OnNext, self.nextBmp, '') )+ actions, -1)
-        #self.SetRelatedFrame(model.editor, _('Editor %s)')
-        #self.SetRelatedStatusBar(1)
+        EditorView.__init__(
+            self,
+            model,
+            ((_("Back"), self.OnPrev, self.prevBmp, ""), (_("Forward"), self.OnNext, self.nextBmp, "")) + actions,
+            -1,
+        )
+        # self.SetRelatedFrame(model.editor, _('Editor %s)')
+        # self.SetRelatedStatusBar(1)
 
-        model.editor.statusBar.setHint('')
+        model.editor.statusBar.setHint("")
 
-        self.title = 'HTML'
-        self.data = ''
+        self.title = "HTML"
+        self.data = ""
         self.active = True
 
     def generatePage(self):
-        return ''
+        return ""
 
     def refreshCtrl(self):
         self.data = self.generatePage()
@@ -370,44 +382,54 @@ class HTMLView(wx.html.HtmlWindow, EditorView):
     def OnNext(self, event):
         self.HistoryForward()
 
+
 class HTMLFileView(HTMLView):
-    viewName = 'View'
-    viewTitle = _('View')
+    viewName = "View"
+    viewTitle = _("View")
+
     def generatePage(self):
         return self.model.data
+
 
 # XXX Add structured text/wiki option for doc strings
 # XXX Option to only list documented methods
 class HTMLDocView(HTMLView):
-    viewName = 'Documentation'
-    viewTitle = _('Documentation')
+    viewName = "Documentation"
+    viewTitle = _("Documentation")
 
-    printBmp = 'Images/Shared/Print.png'
-    def __init__(self, parent, model, actions = ()):
-        HTMLView.__init__(self, parent, model, (
-              ('-', None, '', ''),
-              (_('Save HTML'), self.OnSaveHTML, '-', ''),
-              (_('Print'), self.OnPrintHTML, self.printBmp, ''), )+ actions)
-        self.title = 'Boa docs'
+    printBmp = "Images/Shared/Print.png"
+
+    def __init__(self, parent, model, actions=()):
+        HTMLView.__init__(
+            self,
+            parent,
+            model,
+            (
+                ("-", None, "", ""),
+                (_("Save HTML"), self.OnSaveHTML, "-", ""),
+                (_("Print"), self.OnPrintHTML, self.printBmp, ""),
+            )
+            + actions,
+        )
+        self.title = "Boa docs"
 
         self.printer = wx.html.HtmlEasyPrinting()
 
     def generatePage(self):
-        page = wxwHeaderTemplate % {'Title': self.title}
+        page = wxwHeaderTemplate % {"Title": self.title}
         page = self.genCustomPage(page) + wxwFooterTemplate
         return page
 
     def genCustomPage(self, page):
-        """ Override to make the page a little more interesting """
+        """Override to make the page a little more interesting"""
         return page
 
     def OnSaveHTML(self, event):
-        from FileDlg import wxFileDialog
-        dlg = wx.FileDialog(self, _('Save as...'), '.', '', '*.html',
-          wx.SAVE | wx.OVERWRITE_PROMPT)
+        dlg = wx.FileDialog(self, _("Save as..."), ".", "", "*.html", wx.SAVE | wx.OVERWRITE_PROMPT)
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 from Explorers.Explorer import openEx
+
                 trpt = openEx(dlg.GetPath())
                 trpt.save(trpt.currentFilename(), self.data)
         finally:
@@ -416,8 +438,8 @@ class HTMLDocView(HTMLView):
     def OnPrintHTML(self, event):
         self.printer.PrintText(self.generatePage())
 
-class ModuleDocView(HTMLDocView):
 
+class ModuleDocView(HTMLDocView):
     def genCustomPage(self, page):
         return self.genModuleSect(page)
 
@@ -425,21 +447,20 @@ class ModuleDocView(HTMLDocView):
         classList, classNames = self.genClassListSect()
         funcList, funcNames = self.genFuncListSect()
         module = self.model.getModule()
-        modBody = wxwModuleTemplate % { \
-          'ModuleSynopsis': module.getModuleDoc(),
-          'Module': self.model.moduleName,
-          'ClassList': classList,
-          'FunctionList': funcList,
+        modBody = wxwModuleTemplate % {
+            "ModuleSynopsis": module.getModuleDoc(),
+            "Module": self.model.moduleName,
+            "ClassList": classList,
+            "FunctionList": funcList,
         }
 
-        return self.genFunctionsSect(\
-            self.genClassesSect(page + modBody, classNames), funcNames)
+        return self.genFunctionsSect(self.genClassesSect(page + modBody, classNames), funcNames)
 
     def genListSect(self, names):
         lst = []
         for name in names:
-            lst.append('<a href="#%s">%s</a>' %(name, name))
-        return '<BR>'.join(lst)
+            lst.append('<a href="#%s">%s</a>' % (name, name))
+        return "<BR>".join(lst)
 
     def genClassListSect(self):
         classNames = self.model.getModule().class_order
@@ -450,33 +471,33 @@ class ModuleDocView(HTMLDocView):
         return self.genListSect(funcNames), funcNames
 
     def genClassesSect(self, page, classNames):
-        clsBody = ''
+        clsBody = ""
         classes = []
         module = self.model.getModule()
         for aclass in classNames:
             supers = []
             for super in module.classes[aclass].super:
                 try:
-                    supers.append('<a href="#%s">%s</a>'%(super.name, super.name))
-                except:
+                    supers.append('<a href="#%s">%s</a>' % (super.name, super.name))
+                except Exception:
                     supers.append(super)
             if len(supers) > 0:
-                supers = ', '.join(supers)
+                supers = ", ".join(supers)
             else:
-                supers = ''
+                supers = ""
 
             methlist, meths = self.genMethodSect(aclass)
 
-            clsBody = wxwClassTemplate % { \
-              'Class': aclass,
-              'ClassSuper': supers,
-              'ClassSynopsis': module.getClassDoc(aclass),
-              'MethodList': methlist,
-              'MethodDetails': meths,
+            clsBody = wxwClassTemplate % {
+                "Class": aclass,
+                "ClassSuper": supers,
+                "ClassSynopsis": module.getClassDoc(aclass),
+                "MethodList": methlist,
+                "MethodDetails": meths,
             }
             classes.append(clsBody)
 
-        return page + ' '.join(classes)
+        return page + " ".join(classes)
 
     def genMethodSect(self, aclass):
         methlist = []
@@ -485,72 +506,72 @@ class ModuleDocView(HTMLDocView):
         methods = list(module.classes[aclass].methods.keys())
         methods.sort()
         for ameth in methods:
-            methlist.append('<a href="#%(Class)s%(Method)s">%(Method)s</a><br>' % {\
-              'Class': aclass,
-              'Method': ameth})
-            methBody = wxwMethodTemplate % { \
-              'Class': aclass,
-              'Method': ameth,
-              'MethodSynopsis': module.getClassMethDoc(aclass, ameth),
-              'Params': module.classes[aclass].methods[ameth].signature,
+            methlist.append('<a href="#%(Class)s%(Method)s">%(Method)s</a><br>' % {"Class": aclass, "Method": ameth})
+            methBody = wxwMethodTemplate % {
+                "Class": aclass,
+                "Method": ameth,
+                "MethodSynopsis": module.getClassMethDoc(aclass, ameth),
+                "Params": module.classes[aclass].methods[ameth].signature,
             }
             meths.append(methBody)
 
-        return ' '.join(methlist), ' '.join(meths)
+        return " ".join(methlist), " ".join(meths)
 
     def genFunctionsSect(self, page, funcNames):
-        funcBody = ''
+        funcBody = ""
         functions = []
         module = self.model.getModule()
         for func in funcNames:
-            funcBody = wxwFunctionTemplate % { \
-              'Function': func,
-              'Params': module.functions[func].signature,
-              'FunctionSynopsis': module.getFunctionDoc(func),
+            funcBody = wxwFunctionTemplate % {
+                "Function": func,
+                "Params": module.functions[func].signature,
+                "FunctionSynopsis": module.getFunctionDoc(func),
             }
             functions.append(funcBody)
 
-        return page + ' '.join(functions)
+        return page + " ".join(functions)
+
 
 # XXX For editing views there should be a prompt before closing.
 class CloseableViewMix:
-    """ Defines a closing action for views like results.
-        Deletes page named tabName
+    """Defines a closing action for views like results.
+    Deletes page named tabName
     """
-    closeViewBmp = 'Images/Editor/CloseView.png'
 
-    def __init__(self, hint = _('results')):
-        self.closingActionItems = ( (_('Close %s')%hint, self.OnClose,
-                                     self.closeViewBmp, 'CloseView'), )
+    closeViewBmp = "Images/Editor/CloseView.png"
+
+    def __init__(self, hint=_("results")):
+        self.closingActionItems = ((_("Close %s") % hint, self.OnClose, self.closeViewBmp, "CloseView"),)
 
     def OnClose(self, event):
         del self.closingActionItems
-        self.deleteFromNotebook('Source', self.tabName)
+        self.deleteFromNotebook("Source", self.tabName)
+
 
 class CyclopsView(HTMLView, CloseableViewMix):
-    viewName = 'Cyclops report'
-    viewTitle = _('Cyclops report')
+    viewName = "Cyclops report"
+    viewTitle = _("Cyclops report")
+
     def __init__(self, parent, model):
         CloseableViewMix.__init__(self)
-        HTMLView.__init__(self, parent, model, ( ('-', -1, '', ''), ) +
-          self.closingActionItems)
+        HTMLView.__init__(self, parent, model, (("-", -1, "", ""),) + self.closingActionItems)
 
     def OnLinkClicked(self, linkinfo):
-        """ classlink, attriblink """
+        """classlink, attriblink"""
         url = linkinfo.GetHref()
 
-        if url[0] == '#':
+        if url[0] == "#":
             self.base_OnLinkClicked(linkinfo)
         else:
-            jumpType, jumpPath = url.split('://')
-            segs = jumpPath.split('.')
-            if jumpType == 'classlink':
+            jumpType, jumpPath = url.split("://")
+            segs = jumpPath.split(".")
+            if jumpType == "classlink":
                 mod, clss = segs[-2:]
                 if len(segs) > 2:
                     pack = segs[:-2]
                 else:
                     pack = []
-            elif jumpType == 'attrlink':
+            elif jumpType == "attrlink":
                 mod, clss, attr = segs[-3:]
                 if len(segs) > 3:
                     pack = segs[:-3]
@@ -558,24 +579,23 @@ class CyclopsView(HTMLView, CloseableViewMix):
                     pack = []
 
             for dirname in sys.path:
-                fullname = os.path.abspath(os.path.join(dirname, mod+'.py'))
+                fullname = os.path.abspath(os.path.join(dirname, mod + ".py"))
                 if os.path.exists(fullname):
-                    found = fullname
                     break
                 else:
-                    pckPth = '/'.join(pack)
-                    fullname = os.path.abspath(os.path.join(dirname, pckPth, mod+'.py'))
+                    pckPth = "/".join(pack)
+                    fullname = os.path.abspath(os.path.join(dirname, pckPth, mod + ".py"))
                     if os.path.exists(fullname):
-                        found = fullname
                         break
 
-            else: return
+            else:
+                return
 
             model, controller = self.model.editor.openOrGotoModule(fullname)
             module = model.getModule()
-            if jumpType == 'classlink':
+            if jumpType == "classlink":
                 lineno = module.classes[clss].block.start
-            elif jumpType == 'attrlink':
+            elif jumpType == "attrlink":
                 if attr in module.classes[clss].attributes:
                     lineno = module.classes[clss].attributes[attr][0].start
                 elif attr in module.classes[clss].methods:
@@ -589,38 +609,37 @@ class CyclopsView(HTMLView, CloseableViewMix):
                 else:
                     pack = []
 
-            model.views['Source'].focus()
-            model.views['Source'].SetFocus()
-            model.views['Source'].gotoLine(lineno - 1)
+            model.views["Source"].focus()
+            model.views["Source"].SetFocus()
+            model.views["Source"].gotoLine(lineno - 1)
 
     def generatePage(self):
         return self.report
 
     def OnSaveReport(self, event):
-        fn, ok = self.model.editor.saveAsDlg(\
-          os.path.splitext(self.model.filename)[0]+'.cycles', '*.cycles')
+        fn, ok = self.model.editor.saveAsDlg(os.path.splitext(self.model.filename)[0] + ".cycles", "*.cycles")
         if ok:
             from Explorers.Explorer import openEx
+
             transport = openEx(fn)
-            transport.save(transport.currentFilename(), self.report, 'w')
+            transport.save(transport.currentFilename(), self.report, "w")
 
 
 # XXX Add addReportColumns( list of name, width tuples) !
 class ListCtrlView(wx.ListView, EditorView, Utils.ListCtrlSelectionManagerMix):
-    viewName = 'List (abstract)'
-    viewTitle = 'List (abstract)'
+    viewName = "List (abstract)"
+    viewTitle = "List (abstract)"
+
     def __init__(self, parent, model, listStyle, actions, dclickActionIdx=-1):
-        wx.ListView.__init__(self, parent, -1,
-              style=listStyle | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
-        EditorView.__init__(self, model, actions, dclickActionIdx,
-              overrideDClick=True)
+        wx.ListView.__init__(self, parent, -1, style=listStyle | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
+        EditorView.__init__(self, model, actions, dclickActionIdx, overrideDClick=True)
         Utils.ListCtrlSelectionManagerMix.__init__(self)
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselect)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
         # To catch enter to emulate activated event (bug with notebook and key events on windows)
-        if wx.Platform == '__WXMSW__':
+        if wx.Platform == "__WXMSW__":
             self.Bind(wx.EVT_KEY_UP, self.OnKeyPressed)
         self.Bind(wx.EVT_LIST_COL_CLICK, self.OnColClick)
 
@@ -650,7 +669,7 @@ class ListCtrlView(wx.ListView, EditorView, Utils.ListCtrlSelectionManagerMix):
         self.DeleteAllItems()
         self.sortData = {}
 
-    def addReportItems(self, index, list, imgIdx = None):
+    def addReportItems(self, index, list, imgIdx=None):
         if list:
             if imgIdx is not None:
                 # self.InsertImageStringItem(index, list[0], imgIdx)
@@ -687,7 +706,7 @@ class ListCtrlView(wx.ListView, EditorView, Utils.ListCtrlSelectionManagerMix):
         item2 = self.sortData[itemIdx2][self.sortCol]
 
         # try to sort integer columns by int value
-        try: 
+        try:
             i1 = int(item1)
             i2 = int(item2)
         except (TypeError, ValueError):
@@ -697,8 +716,10 @@ class ListCtrlView(wx.ListView, EditorView, Utils.ListCtrlSelectionManagerMix):
 
         if self.flipDir:
             item1, item2 = item2, item1
-        if item1 < item2: return -1
-        if item1 > item2: return 1
+        if item1 < item2:
+            return -1
+        if item1 > item2:
+            return 1
         return 0
 
     def OnKeyPressed(self, event):
@@ -729,10 +750,13 @@ class ListCtrlView(wx.ListView, EditorView, Utils.ListCtrlSelectionManagerMix):
     def OnItemActivate(self, event):
         if self.defaultActionIdx < len(self.actions) and self.defaultActionIdx > -1:
             self.actions[self.defaultActionIdx][1](event)
+
+
 #            EVT_LEFT_DCLICK(self, self.actions[self.dclickActionIdx][1])
 
+
 class VirtualListCtrlView(wx.ListCtrl, EditorView):
-    """ Simple virtual list ctrl
+    """Simple virtual list ctrl
 
     Derived classes must implement
     def OnGetItemText(self, item, col):
@@ -740,12 +764,10 @@ class VirtualListCtrlView(wx.ListCtrl, EditorView):
     and call self.SetItemCount(<size>)
 
     """
-    def __init__(self, parent, model, listStyle, actions, dclickActionIdx=-1,
-          overrideDClick=True):
-        wx.ListCtrl.__init__(self, parent, -1,
-           style=listStyle | wx.LC_VIRTUAL | wx.SUNKEN_BORDER)
-        EditorView.__init__(self, model, actions, dclickActionIdx,
-           overrideDClick=overrideDClick)
+
+    def __init__(self, parent, model, listStyle, actions, dclickActionIdx=-1, overrideDClick=True):
+        wx.ListCtrl.__init__(self, parent, -1, style=listStyle | wx.LC_VIRTUAL | wx.SUNKEN_BORDER)
+        EditorView.__init__(self, model, actions, dclickActionIdx, overrideDClick=overrideDClick)
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselect)
@@ -757,6 +779,7 @@ class VirtualListCtrlView(wx.ListCtrl, EditorView):
         self.attrPL.SetBackgroundColour(Preferences.pastelLight)
 
     selected = -1
+
     def OnItemSelect(self, event):
         self.selected = event.GetIndex()
 
@@ -787,20 +810,23 @@ class VirtualListCtrlView(wx.ListCtrl, EditorView):
 
 
 idGotoLine = wx.NewIdRef(count=1)
+
+
 class ToDoView(ListCtrlView):
-    viewName = 'Todo'
-    viewTitle = _('Todo')
-    gotoLineBmp = 'Images/Editor/GotoLine.png'
+    viewName = "Todo"
+    viewTitle = _("Todo")
+    gotoLineBmp = "Images/Editor/GotoLine.png"
 
     def __init__(self, parent, model):
-        ListCtrlView.__init__(self, parent, model, wx.LC_REPORT,
-          ((_('Goto line'), self.OnGoto, self.gotoLineBmp, ''),), 0)
+        ListCtrlView.__init__(
+            self, parent, model, wx.LC_REPORT, ((_("Goto line"), self.OnGoto, self.gotoLineBmp, ""),), 0
+        )
 
         self.sortOnColumns = [0, 1]
 
-        self.InsertColumn(0, _('Line#'))
-        self.InsertColumn(1, _('Urgency'))
-        self.InsertColumn(2, _('Entry'))
+        self.InsertColumn(0, _("Line#"))
+        self.InsertColumn(1, _("Urgency"))
+        self.InsertColumn(2, _("Entry"))
         self.SetColumnWidth(0, 40)
         self.SetColumnWidth(1, 75)
         self.SetColumnWidth(2, 350)
@@ -822,9 +848,9 @@ class ToDoView(ListCtrlView):
         for todo in module.todos:
             todoStr = todo[1].rstrip()
             idx = -1
-            while todoStr and todoStr[idx] == '!':
-                idx = idx -1
-            urgency = repr(idx * -1 -1)
+            while todoStr and todoStr[idx] == "!":
+                idx = idx - 1
+            urgency = repr(idx * -1 - 1)
 
             if todo[0] - 1 != lastLine:
                 todoCnt = todoCnt + 1
@@ -837,60 +863,61 @@ class ToDoView(ListCtrlView):
 
         self.pastelise()
 
-
-##    def OnItemSelect(self, event):
-##        ListCtrlView.OnItemSelect(self, event)
-##        if not self.blockReentrant:
-##            self.blockReentrant = True
-##            try:
-##                selectedIdx = self.distinctTodos[self.selected]
-##                for idx in range(self.GetItemCount()):
-##                    item = self.GetItem(idx)
-##                    focusState = item.GetState() & wx.LIST_STATE_FOCUSED
-##                    if self.distinctTodos[idx] == selectedIdx:
-##                        selectState = wx.LIST_STATE_SELECTED
-##                    else:
-##                        selectState = 0
-##                    item.SetState(selectState | focusState)
-##                    self.SetItem(item)
-##            finally:
-##                self.blockReentrant = False
-##
-##    def OnItemDeselect(self, event):
-##        return
-###        ListCtrlView.OnItemDeselect(self, event)
-##        if not self.blockReentrant:
-##            self.blockReentrant = True
-##            try:
-##                selectedIdx = self.distinctTodos[self.selected]
-##                for idx in range(self.GetItemCount()):
-##                    item = self.GetItem(idx)
-##                    focusState = item.GetState() & wx.LIST_STATE_FOCUSED
-##                    if self.distinctTodos[idx] == selectedIdx:
-##                        selectState = wx.LIST_STATE_SELECTED
-##                    else:
-##                        selectState = 0
-##                    item.SetState(selectState | focusState)
-##                    self.SetItem(item)
-##            finally:
-##                self.blockReentrant = False
+    ##    def OnItemSelect(self, event):
+    ##        ListCtrlView.OnItemSelect(self, event)
+    ##        if not self.blockReentrant:
+    ##            self.blockReentrant = True
+    ##            try:
+    ##                selectedIdx = self.distinctTodos[self.selected]
+    ##                for idx in range(self.GetItemCount()):
+    ##                    item = self.GetItem(idx)
+    ##                    focusState = item.GetState() & wx.LIST_STATE_FOCUSED
+    ##                    if self.distinctTodos[idx] == selectedIdx:
+    ##                        selectState = wx.LIST_STATE_SELECTED
+    ##                    else:
+    ##                        selectState = 0
+    ##                    item.SetState(selectState | focusState)
+    ##                    self.SetItem(item)
+    ##            finally:
+    ##                self.blockReentrant = False
+    ##
+    ##    def OnItemDeselect(self, event):
+    ##        return
+    ###        ListCtrlView.OnItemDeselect(self, event)
+    ##        if not self.blockReentrant:
+    ##            self.blockReentrant = True
+    ##            try:
+    ##                selectedIdx = self.distinctTodos[self.selected]
+    ##                for idx in range(self.GetItemCount()):
+    ##                    item = self.GetItem(idx)
+    ##                    focusState = item.GetState() & wx.LIST_STATE_FOCUSED
+    ##                    if self.distinctTodos[idx] == selectedIdx:
+    ##                        selectState = wx.LIST_STATE_SELECTED
+    ##                    else:
+    ##                        selectState = 0
+    ##                    item.SetState(selectState | focusState)
+    ##                    self.SetItem(item)
+    ##            finally:
+    ##                self.blockReentrant = False
 
     def OnGoto(self, event):
-        if 'Source' in self.model.views and self.selected >= 0:
-            srcView = self.model.views['Source']
+        if "Source" in self.model.views and self.selected >= 0:
+            srcView = self.model.views["Source"]
             # XXX Implement an interface for views to talk
             srcView.focus()
             module = self.model.getModule()
-            srcView.gotoLine(int(module.todos[self.selected][0]) -1)
+            srcView.gotoLine(int(module.todos[self.selected][0]) - 1)
+
 
 class FindResultsAdderMixin:
     def addFindResults(self, pattern, mapResults):
-        """ mapResult is map of tuples where
-            Key - 'Module', file name
-            Value - ('Line no', 'Col', 'Text')
+        """mapResult is map of tuples where
+        Key - 'Module', file name
+        Value - ('Line no', 'Col', 'Text')
         """
         from FindResults import FindResults
-        name = _('Results: %s')%pattern
+
+        name = _("Results: %s") % pattern
         if name not in self.model.views:
             resultView = self.model.editor.addNewView(name, FindResults)
         else:
@@ -903,14 +930,22 @@ class FindResultsAdderMixin:
 
 
 class PackageView(ListCtrlView, FindResultsAdderMixin):
-    viewName = 'Package'
-    viewTitle = _('Package')
-    findBmp = 'Images/Shared/Find.png'
+    viewName = "Package"
+    viewTitle = _("Package")
+    findBmp = "Images/Shared/Find.png"
 
     def __init__(self, parent, model):
-        ListCtrlView.__init__(self, parent, model, wx.LC_LIST,
-          ((_('Open'), self.OnOpen, '-', ()),
-           (_('Find'), self.OnFind, self.findBmp, 'Find'),), 0)
+        ListCtrlView.__init__(
+            self,
+            parent,
+            model,
+            wx.LC_LIST,
+            (
+                (_("Open"), self.OnOpen, "-", ()),
+                (_("Find"), self.OnFind, self.findBmp, "Find"),
+            ),
+            0,
+        )
         self.SetImageList(model.editor.modelImageList, wx.IMAGE_LIST_SMALL)
 
     def refreshCtrl(self):
@@ -928,6 +963,7 @@ class PackageView(ListCtrlView, FindResultsAdderMixin):
             name = self.GetItemText(self.selected)
             item = self.filenames[name]
             from Models import PythonEditorModels
+
             if item.imgIdx == PythonEditorModels.PackageModel.imgIdx:
                 self.model.openPackage(name)
             else:
@@ -935,21 +971,23 @@ class PackageView(ListCtrlView, FindResultsAdderMixin):
 
     def OnFind(self, event):
         import FindReplaceDlg
+
         FindReplaceDlg.find(self, self.model.editor.finder, self)
 
+
 class InfoView(wx.TextCtrl, EditorView):
-    viewName = 'Info'
-    viewTitle = _('Info')
+    viewName = "Info"
+    viewTitle = _("Info")
 
     def __init__(self, parent, model):
-        wx.TextCtrl.__init__(self, parent, -1, '', style=wx.TE_MULTILINE | wx.TE_RICH | wx.HSCROLL)
-        EditorView.__init__(self, (_('Add comment block to code'), self.OnAddInfo, ''), 5)
+        wx.TextCtrl.__init__(self, parent, -1, "", style=wx.TE_MULTILINE | wx.TE_RICH | wx.HSCROLL)
+        EditorView.__init__(self, (_("Add comment block to code"), self.OnAddInfo, ""), 5)
         self.active = True
         self.model = model
-        self.SetFont(wx.Font(9,wx.MODERN,wx.NORMAL,wx.NORMAL, False))
+        self.SetFont(wx.Font(9, wx.MODERN, wx.NORMAL, wx.NORMAL, False))
 
     def refreshCtrl(self):
-        self.SetValue('')
+        self.SetValue("")
         module = self.model.getModule()
         info = module.getInfoBlock()
         self.WriteText(repr(info))
@@ -957,28 +995,30 @@ class InfoView(wx.TextCtrl, EditorView):
     def OnAddInfo(self, event):
         self.model.addInfoBlock()
 
+
 # XXX Add filter option to show only occurences of a method and it's overrides
 # XXX Could also expand all containers with bold items
 class ExploreView(wx.TreeCtrl, EditorView):
-    viewName = 'Explore'
-    viewTitle = _('Explore')
-    gotoLineBmp = 'Images/Editor/GotoLine.png'
+    viewName = "Explore"
+    viewTitle = _("Explore")
+    gotoLineBmp = "Images/Editor/GotoLine.png"
 
     def __init__(self, parent, model):
         wx.TreeCtrl.__init__(self, parent, -1, style=wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER)
-        EditorView.__init__(self, model, ((_('Goto line'), self.OnGoto, self.gotoLineBmp, ''),), 0)
+        EditorView.__init__(self, model, ((_("Goto line"), self.OnGoto, self.gotoLineBmp, ""),), 0)
 
         self.tokenImgLst = wx.ImageList(16, 16)
-        for exploreImg in ('Images/Views/Explore/class.png',
-                           'Images/Views/Explore/method.png',
-                           'Images/Views/Explore/event.png',
-                           'Images/Views/Explore/function.png',
-                           'Images/Views/Explore/attribute.png',
-                           'Images/Modules/'+self.model.bitmap,
-                           'Images/Views/Explore/global.png',
-                           'Images/Views/Explore/dottedline.png',
-                           'Images/Views/Explore/import.png',
-                           ):
+        for exploreImg in (
+            "Images/Views/Explore/class.png",
+            "Images/Views/Explore/method.png",
+            "Images/Views/Explore/event.png",
+            "Images/Views/Explore/function.png",
+            "Images/Views/Explore/attribute.png",
+            "Images/Modules/" + self.model.bitmap,
+            "Images/Views/Explore/global.png",
+            "Images/Views/Explore/dottedline.png",
+            "Images/Views/Explore/import.png",
+        ):
             self.tokenImgLst.Add(IS.load(exploreImg))
         self.SetImageList(self.tokenImgLst)
 
@@ -1003,7 +1043,7 @@ class ExploreView(wx.TreeCtrl, EditorView):
         if not load_now and not self.IsShown():
             self._populated_tree = 0
             return
-        self.AddRoot(_('Loading...'))
+        self.AddRoot(_("Loading..."))
 
         from moduleparse import CodeBlock
 
@@ -1014,20 +1054,27 @@ class ExploreView(wx.TreeCtrl, EditorView):
         breakLnNos.sort()
 
         self.DeleteAllItems()
-        rootItem = self.AddRoot(self.model.moduleName, 5, -1,
-
-              # wx.Tree(CodeBlock('', 0, 0)))
-            CodeBlock('', 0, 0))
+        rootItem = self.AddRoot(
+            self.model.moduleName,
+            5,
+            -1,
+            # wx.Tree(CodeBlock('', 0, 0)))
+            CodeBlock("", 0, 0),
+        )
         if module.imports or module.from_imports_names:
-            importsItem = self.AppendItem(rootItem, 'Imports', 8, data=CodeBlock('', 0, 0))
+            importsItem = self.AppendItem(rootItem, "Imports", 8, data=CodeBlock("", 0, 0))
             # for i in module.imports:
             #     self.AppendItem(importsItem, i, 6, data=wx.TreeItemData(CodeBlock('', module.imports[i][0], 0)))
             # for i in module.from_imports_names:
-            #     self.AppendItem(importsItem, i, 6, data=wx.TreeItemData(CodeBlock('', module.from_imports[module.from_imports_names[i]][0], 0)))
+            #     self.AppendItem(importsItem, i, 6, data=wx.TreeItemData(
+            #         CodeBlock('', module.from_imports[module.from_imports_names[i]][0], 0)
+            #     ))
             for i in module.imports:
-                self.AppendItem(importsItem, i, 6, data=CodeBlock('', module.imports[i][0], 0))
+                self.AppendItem(importsItem, i, 6, data=CodeBlock("", module.imports[i][0], 0))
             for i in module.from_imports_names:
-                self.AppendItem(importsItem, i, 6, data=CodeBlock('', module.from_imports[module.from_imports_names[i]][0], 0))
+                self.AppendItem(
+                    importsItem, i, 6, data=CodeBlock("", module.from_imports[module.from_imports_names[i]][0], 0)
+                )
 
         for className in module.class_order:
             # classItem = self.AppendItem(rootItem, className, 0, -1,
@@ -1036,8 +1083,7 @@ class ExploreView(wx.TreeCtrl, EditorView):
             for attrib in list(module.classes[className].attributes.keys()):
                 # attribItem = self.AppendItem(classItem, attrib, 4, -1,
                 #   wx.TreeItemData(module.classes[className].attributes[attrib]))
-                attribItem = self.AppendItem(classItem, attrib, 4, -1,
-                  module.classes[className].attributes[attrib])
+                self.AppendItem(classItem, attrib, 4, -1, module.classes[className].attributes[attrib])
             brkStrt = module.classes[className].block.start
             for method in module.classes[className].method_order:
                 methBlock = module.classes[className].methods[method]
@@ -1045,8 +1091,7 @@ class ExploreView(wx.TreeCtrl, EditorView):
                     if brkLnNo > brkStrt and brkLnNo < methBlock.start:
                         # brkItm = self.AppendItem(classItem, breaks[brkLnNo] , 7,
                         #     -1, wx.TreeItemData(CodeBlock('', brkLnNo, brkLnNo)))
-                        brkItm = self.AppendItem(classItem, breaks[brkLnNo] , 7,
-                            -1, CodeBlock('', brkLnNo, brkLnNo))
+                        brkItm = self.AppendItem(classItem, breaks[brkLnNo], 7, -1, CodeBlock("", brkLnNo, brkLnNo))
                         self.SetItemBold(brkItm)
                         self.SetItemTextColour(brkItm, Preferences.propValueColour)
                         del breaks[brkLnNo]
@@ -1056,15 +1101,13 @@ class ExploreView(wx.TreeCtrl, EditorView):
                     methodsItem = self.AppendItem(classItem, method, 2, -1, methBlock)
                     if methBlock.locals:
                         for l in methBlock.locals:
-                            methodLocalsItem = self.AppendItem(methodsItem, l, 6, -1,
-                                  CodeBlock('', methBlock.locals[l].lineno, 0))
+                            self.AppendItem(methodsItem, l, 6, -1, CodeBlock("", methBlock.locals[l].lineno, 0))
                 else:
                     # methodsItem = self.AppendItem(classItem, method, 1, -1, wx.TreeItemData(methBlock))
-                    methodsItem = self.AppendItem(classItem, method, 1, -1,methBlock)
+                    methodsItem = self.AppendItem(classItem, method, 1, -1, methBlock)
                     if methBlock.locals:
                         for l in methBlock.locals:
-                            methodLocalsItem = self.AppendItem(methodsItem, l, 6, -1,
-                                  CodeBlock('', methBlock.locals[l].lineno, 0))
+                            self.AppendItem(methodsItem, l, 6, -1, CodeBlock("", methBlock.locals[l].lineno, 0))
 
         functionList = list(module.functions.keys())
         functionList.sort()
@@ -1075,30 +1118,39 @@ class ExploreView(wx.TreeCtrl, EditorView):
             funcItem = self.AppendItem(rootItem, func, 3, -1, funcBlock)
             if funcBlock.locals:
                 for l in funcBlock.locals:
-                    funcLocalsItem = self.AppendItem(funcItem, l, 6, -1,
-                                                     # wx.TreeItemData(CodeBlock('', funcBlock.locals[l].lineno, 0)))
-                                                     CodeBlock('', funcBlock.locals[l].lineno, 0))
+                    self.AppendItem(
+                        funcItem,
+                        l,
+                        6,
+                        -1,
+                        # wx.TreeItemData(CodeBlock('', funcBlock.locals[l].lineno, 0)))
+                        CodeBlock("", funcBlock.locals[l].lineno, 0),
+                    )
 
         for globalName in module.global_order:
-            globalItem = self.AppendItem(rootItem, globalName, 6, -1,
-                                         # wx.TreeItemData(module.globals[globalName]))
-                                         module.globals[globalName])
-
+            self.AppendItem(
+                rootItem,
+                globalName,
+                6,
+                -1,
+                # wx.TreeItemData(module.globals[globalName]))
+                module.globals[globalName],
+            )
 
         self.Expand(rootItem)
 
     def OnGoto(self, event):
-        if 'Source' in self.model.views:
-            srcView = self.model.views['Source']
+        if "Source" in self.model.views:
+            srcView = self.model.views["Source"]
             idx = self.GetSelection()
             if idx.IsOk():
                 srcView.focus()
                 self.model.editor.addBrowseMarker(srcView.GetCurrentLine())
                 dat = self.GetItemData(idx)
                 if isinstance(dat, type([])):
-                    srcView.gotoLine(dat[0].start -1)
+                    srcView.gotoLine(dat[0].start - 1)
                 else:
-                    srcView.gotoLine(dat.start -1)
+                    srcView.gotoLine(dat.start - 1)
 
     def OnKeyPressed(self, event):
         key = event.GetKeyCode()
@@ -1107,9 +1159,11 @@ class ExploreView(wx.TreeCtrl, EditorView):
                 self.actions[self.defaultActionIdx][1](event)
         event.Skip()
 
+
 class ExplorePythonExtensionView(ExploreView):
-    viewName = 'Explore'
-    viewTitle = _('Explore')
+    viewName = "Explore"
+    viewTitle = _("Explore")
+
     def refreshCtrl(self, load_now=0):
         self.DeleteAllItems()
 
@@ -1123,21 +1177,21 @@ class ExplorePythonExtensionView(ExploreView):
         for className, classData in classes:
             classItem = self.AppendItem(item, className, 0, -1)
             for meth in classData.methods:
-                methItem = self.AppendItem(classItem, meth, 2, -1)
+                self.AppendItem(classItem, meth, 2, -1)
             attrs = list(classData.attrs.items())
             attrs.sort()
             for name, attr in attrs:
-                attrItem = self.AppendItem(classItem, '%s: %s'%(name, attr), 6, -1)
+                self.AppendItem(classItem, "%s: %s" % (name, attr), 6, -1)
 
         functions = list(moduleData.functions.items())
         functions.sort()
         for funcName, func in functions:
-            funcItem = self.AppendItem(item, funcName, 3, -1)
+            self.AppendItem(item, funcName, 3, -1)
 
         attrs = list(moduleData.attrs.items())
         attrs.sort()
         for name, attr in attrs:
-            attrItem = self.AppendItem(item, '%s: %s'%(name, attr), 6, -1)
+            self.AppendItem(item, "%s: %s" % (name, attr), 6, -1)
 
         modules = list(moduleData.modules.items())
         modules.sort()
@@ -1145,29 +1199,30 @@ class ExplorePythonExtensionView(ExploreView):
             modItem = self.AppendItem(item, name, 5, -1)
             self.populateItemFromModuleData(modItem, module)
 
+
 class ExploreEventsView(ExploreView):
-    viewName = 'Events'
-    viewTitle = _('Events')
+    viewName = "Events"
+    viewTitle = _("Events")
+
     def __init__(self, parent, model):
         ExploreView.__init__(self, parent, model)
         self.objectColls = {}
 
-    stdCollMeths = {'_init_ctrls': 'Controls',
-                    '_init_utils': 'Utilities'}
+    stdCollMeths = {"_init_ctrls": "Controls", "_init_utils": "Utilities"}
+
     def refreshCtrl(self, load_now=0):
         model = self.model
         self.DeleteAllItems()
         if not load_now and not self.IsShown():
             self._populated_tree = 0
             return
-        self.AddRoot(_('Loading...'))
+        self.AddRoot(_("Loading..."))
 
         from moduleparse import CodeBlock
 
         module = model.getModule()
         self.DeleteAllItems()
-        rootItem = self.AddRoot(model.main, 5, -1,
-              CodeBlock('', 0, 0))
+        rootItem = self.AddRoot(model.main, 5, -1, CodeBlock("", 0, 0))
         self.Expand(rootItem)
 
         evtMeths = []
@@ -1179,29 +1234,27 @@ class ExploreEventsView(ExploreView):
         main = module.classes[self.model.main]
         collMeths = model.identifyCollectionMethods()
 
-##        stdMeths = []
-##        for sm in self.stdCollMeths.keys():
-##            if sm in collMeths:
-##                stdMeths.append(sm)
-##                collMeths.remove(sm)
+        ##        stdMeths = []
+        ##        for sm in self.stdCollMeths.keys():
+        ##            if sm in collMeths:
+        ##                stdMeths.append(sm)
+        ##                collMeths.remove(sm)
 
-        objs = {}
         for oc in collMeths:
             codeSpan = main.methods[oc]
             codeBody = module.source[codeSpan.start : codeSpan.end]
-            #self.objectColls[oc]
+            # self.objectColls[oc]
             objColl = model.readDesignerMethod(oc, codeBody)
             objColl.indexOnCtrlName()
             if oc in self.stdCollMeths:
                 name = self.stdCollMeths[oc]
             else:
                 collName = oc[11:]
-                pv = collName.rfind('_')
-                obj, prop = collName[:pv], collName[pv+1:]
-                name = self.stdCollMeths.get(oc, 'Collection: %s.%s'%(obj, prop))
-            collMethItem = self.AppendItem(rootItem, name, 1, -1,
-                  main.methods[oc])
-            #self.Expand(collMethItem)
+                pv = collName.rfind("_")
+                obj, prop = collName[:pv], collName[pv + 1 :]
+                name = self.stdCollMeths.get(oc, "Collection: %s.%s" % (obj, prop))
+            collMethItem = self.AppendItem(rootItem, name, 1, -1, main.methods[oc])
+            # self.Expand(collMethItem)
 
             idEvtMeths = {}
             ctrlEvtMeths = {}
@@ -1223,25 +1276,25 @@ class ExploreEventsView(ExploreView):
                     name = crt.comp_name
                     if name in ctrlEvtMeths:
                         evts.extend(ctrlEvtMeths[name])
-##                        if not name:
-##                            cb = main.block
+                        ##                        if not name:
+                        ##                            cb = main.block
                         if name:
                             cb = main.attributes[name]
-                    if 'id' in crt.params and crt.params['id'] in idEvtMeths:
-                        evts.extend(idEvtMeths[crt.params['id']])
+                    if "id" in crt.params and crt.params["id"] in idEvtMeths:
+                        evts.extend(idEvtMeths[crt.params["id"]])
 
                     if evts:
                         attrItem = self.AppendItem(collMethItem, name, 4, -1, cb)
-                        #self.Expand(attrItem)
+                        # self.Expand(attrItem)
                         for evtMeth in evts:
-                            evtItem = self.AppendItem(attrItem, evtMeth, 2, -1, main.methods[evtMeth])
+                            self.AppendItem(attrItem, evtMeth, 2, -1, main.methods[evtMeth])
 
-                elif 'id' in crt.params:
-                    name = crt.params['id']
+                elif "id" in crt.params:
+                    name = crt.params["id"]
                     if name in idEvtMeths:
                         evts = idEvtMeths[name]
                         for evtMeth in evts:
-                            evtItem = self.AppendItem(collMethItem, evtMeth, 2, -1, main.methods[evtMeth])
+                            self.AppendItem(collMethItem, evtMeth, 2, -1, main.methods[evtMeth])
 
         Utils.traverseTreeCtrl(self, rootItem, self.expandNode)
 
@@ -1250,21 +1303,22 @@ class ExploreEventsView(ExploreView):
 
 
 class HierarchyView(wx.TreeCtrl, EditorView):
-    viewName = 'Hierarchy'
-    viewTitle = _('Hierarchy')
-    gotoLineBmp = 'Images/Editor/GotoLine.png'
+    viewName = "Hierarchy"
+    viewTitle = _("Hierarchy")
+    gotoLineBmp = "Images/Editor/GotoLine.png"
 
     def __init__(self, parent, model):
         id = wx.NewIdRef(count=1)
         wx.TreeCtrl.__init__(self, parent, id, style=wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER)
-        EditorView.__init__(self, model,
-          ((_('Goto line'), self.OnGoto, self.gotoLineBmp, ''),), 0)
+        EditorView.__init__(self, model, ((_("Goto line"), self.OnGoto, self.gotoLineBmp, ""),), 0)
 
         self.tokenImgLst = wx.ImageList(16, 16)
-        for hierImg in ('Images/Views/Hierarchy/inherit.png',
-                        'Images/Views/Hierarchy/inherit_base.png',
-                        'Images/Views/Hierarchy/inherit_outside.png',
-                        'Images/Modules/'+self.model.bitmap):
+        for hierImg in (
+            "Images/Views/Hierarchy/inherit.png",
+            "Images/Views/Hierarchy/inherit_base.png",
+            "Images/Views/Hierarchy/inherit_outside.png",
+            "Images/Modules/" + self.model.bitmap,
+        ):
             self.tokenImgLst.Add(IS.load(hierImg))
 
         self.SetImageList(self.tokenImgLst)
@@ -1287,15 +1341,17 @@ class HierarchyView(wx.TreeCtrl, EditorView):
 
     def refreshCtrl(self):
         self.DeleteAllItems()
-        self.AddRoot(_('Loading...'))
+        self.AddRoot(_("Loading..."))
         module = self.model.getModule()
         self.DeleteAllItems()
         hierc = module.createHierarchy()
 
         root = self.AddRoot(self.model.moduleName, 3)
         for top in list(hierc.keys()):
-            if top in module.classes: imgIdx = 1
-            else: imgIdx = 2
+            if top in module.classes:
+                imgIdx = 1
+            else:
+                imgIdx = 2
 
             item = self.AppendItem(root, top, imgIdx)
             self.buildTree(item, hierc[top])
@@ -1303,17 +1359,15 @@ class HierarchyView(wx.TreeCtrl, EditorView):
 
         self.Expand(root)
 
-
     def OnGoto(self, event):
-        idx  = self.GetSelection()
+        idx = self.GetSelection()
         if idx.IsOk():
             name = self.GetItemText(idx)
-            if 'Source' in self.model.views and \
-              name in self.model.getModule().classes:
-                srcView = self.model.views['Source']
+            if "Source" in self.model.views and name in self.model.getModule().classes:
+                srcView = self.model.views["Source"]
                 srcView.focus()
                 module = self.model.getModule()
-                srcView.gotoLine(int(module.classes[name].block.start) -1)
+                srcView.gotoLine(int(module.classes[name].block.start) - 1)
 
     def OnKeyPressed(self, event):
         key = event.GetKeyCode()
@@ -1321,32 +1375,38 @@ class HierarchyView(wx.TreeCtrl, EditorView):
             if self.defaultActionIdx != -1:
                 self.actions[self.defaultActionIdx][1](event)
 
+
 class DistUtilView(wx.Panel, EditorView):
-    viewName = 'DistUtils'
-    viewTitle = _('DistUtils')
+    viewName = "DistUtils"
+    viewTitle = _("DistUtils")
 
     def __init__(self, parent, model):
         wx.Panel.__init__(self, parent, -1)
-        EditorView.__init__(self, ())#('Add comment block to code', self.OnAddInfo, ()), 5)
+        EditorView.__init__(self, ())  # ('Add comment block to code', self.OnAddInfo, ()), 5)
         self.active = True
         self.model = model
-
 
     def refreshCtrl(self):
         pass
 
-class DistUtilManifestView(ListCtrlView):
-    viewName = 'Manifest'
-    viewTitle = _('Manifest')
 
-    refreshBmp = 'Images/Editor/Refresh.png'
+class DistUtilManifestView(ListCtrlView):
+    viewName = "Manifest"
+    viewTitle = _("Manifest")
+
+    refreshBmp = "Images/Editor/Refresh.png"
 
     def __init__(self, parent, model):
-        ListCtrlView.__init__(self, parent, model, wx.LC_REPORT,
-          ((_('Open'), self.OnOpen, '-', ()),
-           (_('Refresh'), self.OnRefresh, self.refreshBmp, 'Refresh')), 0)
-        self.InsertColumn(0, _('Name'))
-        self.InsertColumn(1, _('Filepath'))
+        ListCtrlView.__init__(
+            self,
+            parent,
+            model,
+            wx.LC_REPORT,
+            ((_("Open"), self.OnOpen, "-", ()), (_("Refresh"), self.OnRefresh, self.refreshBmp, "Refresh")),
+            0,
+        )
+        self.InsertColumn(0, _("Name"))
+        self.InsertColumn(1, _("Filepath"))
         self.SetColumnWidth(0, 150)
         self.SetColumnWidth(1, 450)
 
@@ -1358,18 +1418,19 @@ class DistUtilManifestView(ListCtrlView):
     def refreshCtrl(self):
         ListCtrlView.refreshCtrl(self)
 
-        from Explorers.Explorer import openEx, TransportError
-        manifestPath = self.getSetupDir() +'/Manifest'
+        from Explorers.Explorer import TransportError, openEx
+
+        manifestPath = self.getSetupDir() + "/Manifest"
         try:
             manifest = openEx(manifestPath).load()
         except TransportError as err:
-            self.InsertItem(0, _('Error'))
+            self.InsertItem(0, _("Error"))
             self.SetItem(0, 1, str(err))
             self.manifest = None
         else:
             self.manifest = []
             idx = -1
-            for path in manifest.split('\n'):
+            for path in manifest.split("\n"):
                 idx = idx + 1
                 path = path.strip()
                 if not path:
@@ -1384,28 +1445,37 @@ class DistUtilManifestView(ListCtrlView):
     def OnOpen(self, event):
         if self.selected != -1 and self.manifest is not None:
             model, controller = self.model.editor.openOrGotoModule(
-                  self.getSetupDir()+'/'+self.manifest[self.selected])
+                self.getSetupDir() + "/" + self.manifest[self.selected]
+            )
 
     def OnRefresh(self, event):
         self.refreshCtrl()
 
 
 class CVSConflictsView(ListCtrlView):
-    viewName = 'CVS conflicts'
-    viewTitle = _('CVS conflicts')
+    viewName = "CVS conflicts"
+    viewTitle = _("CVS conflicts")
 
-    gotoLineBmp = 'Images/Editor/GotoLine.png'
-    acceptBmp = 'Images/Inspector/Post.png'
-    rejectBmp = 'Images/Inspector/Cancel.png'
+    gotoLineBmp = "Images/Editor/GotoLine.png"
+    acceptBmp = "Images/Inspector/Post.png"
+    rejectBmp = "Images/Inspector/Cancel.png"
 
     def __init__(self, parent, model):
-        ListCtrlView.__init__(self, parent, model, wx.LC_REPORT,
-          ((_('Goto line'), self.OnGoto, self.gotoLineBmp, ()),
-           (_('Accept changes'), self.OnAcceptChanges, self.acceptBmp, ()),
-           (_('Reject changes'), self.OnRejectChanges, self.rejectBmp, ()) ), 0)
-        self.InsertColumn(0, _('Rev'))
-        self.InsertColumn(1, _('Line#'))
-        self.InsertColumn(2, _('Size'))
+        ListCtrlView.__init__(
+            self,
+            parent,
+            model,
+            wx.LC_REPORT,
+            (
+                (_("Goto line"), self.OnGoto, self.gotoLineBmp, ()),
+                (_("Accept changes"), self.OnAcceptChanges, self.acceptBmp, ()),
+                (_("Reject changes"), self.OnRejectChanges, self.rejectBmp, ()),
+            ),
+            0,
+        )
+        self.InsertColumn(0, _("Rev"))
+        self.InsertColumn(1, _("Line#"))
+        self.InsertColumn(2, _("Size"))
         self.SetColumnWidth(0, 40)
         self.SetColumnWidth(1, 40)
         self.SetColumnWidth(2, 40)
@@ -1424,14 +1494,13 @@ class CVSConflictsView(ListCtrlView):
             self.SetItem(confCnt, 2, repr(size))
             confCnt = confCnt + 1
 
-
         self.pastelise()
 
     def OnGoto(self, event):
-        if 'Source' in self.model.views:
-            srcView = self.model.views['Source']
+        if "Source" in self.model.views:
+            srcView = self.model.views["Source"]
             srcView.focus()
-            lineNo = int(self.conflicts[self.selected][1]) -1
+            lineNo = int(self.conflicts[self.selected][1]) - 1
             srcView.gotoLine(lineNo)
 
     # XXX I've still to decide on this, operations should usually be applied
@@ -1445,14 +1514,14 @@ class CVSConflictsView(ListCtrlView):
         if self.selected != -1:
             self.model.rejectConflictChange(self.conflicts[self.selected])
 
+
 class FolderEditorView(wx.Notebook, EditorView):
-    viewName = 'Folder'
-    viewTitle = _('Folder')
+    viewName = "Folder"
+    viewTitle = _("Folder")
 
     def __init__(self, parent, model):
         wx.Notebook.__init__(self, parent, -1)
-        EditorView.__init__(self, model,
-          (), -1)#('Goto line', self.OnGoto, self.gotoLineBmp, ''),), 0)
+        EditorView.__init__(self, model, (), -1)  # ('Goto line', self.OnGoto, self.gotoLineBmp, ''),), 0)
         self.SetImageList(self.model.editor.tabs.GetImageList())
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChange, id=self.GetId())
 
@@ -1462,7 +1531,9 @@ class FolderEditorView(wx.Notebook, EditorView):
     def OnPageChange(self, event):
         pass
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 class EditorViewPlugin:
     pass

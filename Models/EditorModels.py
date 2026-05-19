@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        EditorModels.py
 # Purpose:     Model classes usually representing different types of
 #              source code
@@ -9,31 +9,48 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 1999 - 2007 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
-""" The model classes represent different types of source code files,
-    Different views can be connected to a model  """
+"""The model classes represent different types of source code files,
+Different views can be connected to a model"""
 
-print('importing Models.EditorModels')
+print("importing Models.EditorModels")
 
-import os, sys, tempfile
+import os
+import tempfile
 from io import StringIO
 
 import wx
 
-import Preferences, Utils
-from . import EditorHelper
-from Preferences import keyDefs
+import Preferences
+import Utils
 from Utils import _
+
+from . import EditorHelper
 
 _vc_hook = None
 
+
+class CVSDir:
+    def __init__(self, entries_line):
+        name, self.revision, self.timestamp, self.options, self.tagdate = entries_line[2:].split("/")
+        self.name = name
+
+
+class CVSFile:
+    def __init__(self, entries_line, filepath):
+        name, self.revision, self.timestamp, self.options, self.tagdate = entries_line.strip()[1:].split("/")
+        self.name = name
+        self.filepath = filepath
+
+
 class EditorModel:
-    defaultName = 'abstract'
-    bitmap = 'None'
+    defaultName = "abstract"
+    bitmap = "None"
     imgIdx = -1
     objCnt = 0
     plugins = ()
+
     def __init__(self, data, name, editor, saved):
         self.active = False
         self.data = data
@@ -46,7 +63,7 @@ class EditorModel:
         self.views = {}
         self.modified = not saved
         self.viewsModified = []
-        
+
         plugins = {}
         for Plugin in self.plugins:
             plugins[Plugin.name] = Plugin(self)
@@ -67,11 +84,11 @@ class EditorModel:
                 view.pageIdx = view.pageIdx - 1
 
     def getDataAsLines(self):
-        if type(self.data) == str:
+        if isinstance(self.data, str):
             return StringIO(self.data).readlines()
         else:
             # return (self.data).decode('uft-8').readlines()
-            converted_string= str(self.data)
+            converted_string = str(self.data)
             return StringIO(converted_string).readlines()
 
     def setDataFromLines(self, lines):
@@ -81,20 +98,20 @@ class EditorModel:
             # XXX This is an unneeded bottleneck, why not on the joined str ???
             # encodes unicode in the default encoding
             strlines.append(Utils.stringFromControl(line))
-        self.data = ''.join(strlines)
+        self.data = "".join(strlines)
         self.modified = self.modified or self.data != data
 
     def hasUnsavedChanges(self):
         return self.modified or len(self.viewsModified)
 
     def notify(self):
-        """ Update all views connected to this model.
-            This method must be called after changes were made to the model """
+        """Update all views connected to this model.
+        This method must be called after changes were made to the model"""
         for view in list(self.views.values()):
             view.update()
 
     def update(self):
-        """ Rebuild additional derived structure, called when data is changed """
+        """Rebuild additional derived structure, called when data is changed"""
         for plugin in self.plugins:
             self.plugins[plugin].update()
 
@@ -103,7 +120,7 @@ class EditorModel:
             self.views[view].refreshModel()
 
     def getPageName(self):
-        if getattr(Preferences, 'showFilenameExtensions', 0):
+        if getattr(Preferences, "showFilenameExtensions", 0):
             return os.path.basename(self.filename)
         else:
             return os.path.splitext(os.path.basename(self.filename))[0]
@@ -111,35 +128,35 @@ class EditorModel:
     # XXX Move these names into overrideable attrs
     def getSourceView(self):
         views = self.views
-        if 'Source' in views:
-            return views['Source']
-        elif 'ZopeHTML' in views:
-            return views['ZopeHTML']
+        if "Source" in views:
+            return views["Source"]
+        elif "ZopeHTML" in views:
+            return views["ZopeHTML"]
         return None
 
 
-
-
 class FolderModel(EditorModel):
-    modelIdentifier = 'Folder'
-    defaultName = 'folder'
-    bitmap = 'Folder.png'
+    modelIdentifier = "Folder"
+    defaultName = "folder"
+    bitmap = "Folder.png"
     imgIdx = EditorHelper.imgFolder
 
     def __init__(self, data, name, editor, filepath):
         EditorModel.__init__(self, data, name, editor, True)
         self.filepath = filepath
 
+
 class SysPathFolderModel(FolderModel):
-    modelIdentifier = 'SysPathFolder'
-    defaultName = 'syspathfolder'
-    bitmap = 'Folder_green.png'
+    modelIdentifier = "SysPathFolder"
+    defaultName = "syspathfolder"
+    bitmap = "Folder_green.png"
     imgIdx = EditorHelper.imgPathFolder
 
+
 class CVSFolderModel(FolderModel):
-    modelIdentifier = 'CVS Folder'
-    defaultName = 'cvsfolder'
-    bitmap = 'Folder_cyan.png'
+    modelIdentifier = "CVS Folder"
+    defaultName = "cvsfolder"
+    bitmap = "Folder_cyan.png"
     imgIdx = EditorHelper.imgCVSFolder
 
     def __init__(self, data, name, editor, filepath):
@@ -147,64 +164,68 @@ class CVSFolderModel(FolderModel):
         self.readFiles()
 
     def readFile(self, filename):
-        f = open(filename, 'r')
-        try: return f.read().strip()
-        finally: f.close()
+        f = open(filename, "r")
+        try:
+            return f.read().strip()
+        finally:
+            f.close()
 
     def readFiles(self):
-        self.root = self.readFile(os.path.join(self.filepath, 'Root'))
-        self.repository = self.readFile(os.path.join(self.filepath, 'Repository'))
+        self.root = self.readFile(os.path.join(self.filepath, "Root"))
+        self.repository = self.readFile(os.path.join(self.filepath, "Repository"))
         self.entries = []
 
-        f = open(os.path.join(self.filepath, 'Entries'), 'r')
+        f = open(os.path.join(self.filepath, "Entries"), "r")
         dirpos = 0
         try:
             txtEntries = f.readlines()
             for txtEntry in txtEntries:
                 txtEntry = txtEntry.strip()
                 if txtEntry:
-                    if txtEntry == 'D':
+                    if txtEntry == "D":
                         pass
                         # maybe add all dirs?
-                    elif txtEntry[0] == 'D':
+                    elif txtEntry[0] == "D":
                         self.entries.insert(dirpos, CVSDir(txtEntry))
                         dirpos = dirpos + 1
                     else:
                         try:
                             self.entries.append(CVSFile(txtEntry, self.filepath))
-                        except IOError: pass
+                        except IOError:
+                            pass
         finally:
             f.close()
 
+
 class BasePersistentModel(EditorModel):
-    fileModes = ('rb', 'wb')
-    saveBmp = 'Images/Editor/Save.png'
-    saveAsBmp = 'Images/Editor/SaveAs.png'
+    fileModes = ("rb", "wb")
+    saveBmp = "Images/Editor/Save.png"
+    saveAsBmp = "Images/Editor/SaveAs.png"
 
     def load(self, notify=True):
-        """ Loads contents of data from file specified by self.filename.
-            Note: Load's not really used much currently cause objects are
-                  constructed with their data as parameter """
+        """Loads contents of data from file specified by self.filename.
+        Note: Load's not really used much currently cause objects are
+              constructed with their data as parameter"""
         if not self.transport:
-            raise Exception(_('No transport for loading'))
+            raise Exception(_("No transport for loading"))
 
         self.data = self.transport.load(mode=self.fileModes[0])
         self.modified = False
         self.saved = False
         self.update()
-        if notify: self.notify()
+        if notify:
+            self.notify()
 
     def save(self, overwriteNewer=False):
-        """ Saves contents of data to file specified by self.filename. """
+        """Saves contents of data to file specified by self.filename."""
         if not self.transport:
-            raise Exception(_('No transport for saving'))
+            raise Exception(_("No transport for saving"))
 
         if self.filename:
             filename = self.transport.assertFilename(self.filename)
             # this check is to minimise interface change.
             if overwriteNewer:
-                self.transport.save(filename, self.data, mode=self.fileModes[1],
-                      overwriteNewer=True)
+                self.transport.save(filename, self.data, mode=self.fileModes[1], overwriteNewer=True)
             else:
                 self.transport.save(filename, self.data, mode=self.fileModes[1])
             self.modified = False
@@ -216,33 +237,37 @@ class BasePersistentModel(EditorModel):
             if _vc_hook:
                 _vc_hook.save(filename, self.data, mode=self.fileModes[1])
         else:
-            raise Exception(_('No filename'))
+            raise Exception(_("No filename"))
 
     def saveAs(self, filename):
-        """ Saves contents of data to file specified by filename.
-            Override this to catch name changes. """
+        """Saves contents of data to file specified by filename.
+        Override this to catch name changes."""
         # Catch transport changes
-        from Explorers.Explorer import splitURI, getTransport
+        from Explorers.Explorer import getTransport, splitURI
+
         protO, catO, resO, uriO = splitURI(self.filename)
         protN, catN, resN, uriN = splitURI(filename)
 
         if protO != protN:
-            self.transport = getTransport(protN, catN, resN,
-                  self.editor.explorerStore.transports)#explorer.tree.transports)
+            self.transport = getTransport(
+                protN, catN, resN, self.editor.explorerStore.transports
+            )  # explorer.tree.transports)
 
         # Rename and save
         oldname = self.filename
         self.filename = filename
         try:
             self.save(overwriteNewer=True)
-        except:
+        except Exception:
             self.filename = oldname
             raise
         self.savedAs = True
 
     def localFilename(self, filename=None):
-        if filename is None: filename = self.filename
+        if filename is None:
+            filename = self.filename
         from Explorers.Explorer import splitURI
+
         return splitURI(filename)[2]
 
     def assertLocalFile(self, filename=None):
@@ -251,23 +276,25 @@ class BasePersistentModel(EditorModel):
         if filename is None:
             filename = self.filename
         from Explorers.Explorer import splitURI
+
         prot, cat, filename, uri = splitURI(filename)
-        assert prot=='file', _('Operation only supported on the filesystem.')
+        assert prot == "file", _("Operation only supported on the filesystem.")
         return filename
 
     def checkLocalFile(self, filename=None):
-        """ Either return the model's uri as a local filepath or raise an error """
+        """Either return the model's uri as a local filepath or raise an error"""
 
         if filename is None:
             filename = self.filename
-        from Explorers.Explorer import splitURI, TransportError
+        from Explorers.Explorer import TransportError, splitURI
+
         prot, cat, filename, uri = splitURI(filename)
-        if prot != 'file':
-            raise TransportError(_('Operation only supported on the filesystem.'))
+        if prot != "file":
+            raise TransportError(_("Operation only supported on the filesystem."))
         return filename
 
     def getDefaultData(self):
-        return ''
+        return ""
 
     def new(self):
         self.data = self.getDefaultData()
@@ -276,32 +303,39 @@ class BasePersistentModel(EditorModel):
         self.update()
         self.notify()
 
+
 class PersistentModel(BasePersistentModel):
     def __init__(self, data, name, editor, saved):
         BasePersistentModel.__init__(self, data, name, editor, saved)
-        if data: self.update()
+        if data:
+            self.update()
 
     def load(self, notify=True):
         BasePersistentModel.load(self, False)
         self.update()
-        if notify: self.notify()
+        if notify:
+            self.notify()
+
 
 class BitmapFileModel(PersistentModel):
-    modelIdentifier = 'Bitmap'
-    defaultName = 'bitmap'
-    bitmap = 'Bitmap.png'
+    modelIdentifier = "Bitmap"
+    defaultName = "bitmap"
+    bitmap = "Bitmap.png"
     imgIdx = EditorHelper.imgBitmapFileModel
-    ext = '.bmp'
+    ext = ".bmp"
 
-    fileModes = ('rb', 'wb')
+    fileModes = ("rb", "wb")
 
-    extTypeMap = {'.bmp': wx.BITMAP_TYPE_BMP, #'.gif': wx.BITMAP_TYPE_GIF,
-                  '.jpg': wx.BITMAP_TYPE_JPEG, '.png': wx.BITMAP_TYPE_PNG}
+    extTypeMap = {
+        ".bmp": wx.BITMAP_TYPE_BMP,  #'.gif': wx.BITMAP_TYPE_GIF,
+        ".jpg": wx.BITMAP_TYPE_JPEG,
+        ".png": wx.BITMAP_TYPE_PNG,
+    }
 
     def save(self, overwriteNewer=False):
         ext = os.path.splitext(self.filename)[1].lower()
-        if ext == '.gif':
-            raise Exception(_('Saving .gif format not supported'))
+        if ext == ".gif":
+            raise Exception(_("Saving .gif format not supported"))
 
         PersistentModel.save(self, overwriteNewer)
 
@@ -313,16 +347,16 @@ class BitmapFileModel(PersistentModel):
         if newExt != oldExt:
             updateViews = 1
             import io
-            bmp = wx.BitmapFromImage(wx.ImageFromStream(
-                  io.StringIO(self.data)))
+
+            bmp = wx.BitmapFromImage(wx.ImageFromStream(io.StringIO(self.data)))
             fn = tempfile.mktemp(newExt)
             try:
                 bmp.SaveFile(fn, self.extTypeMap[newExt])
             except KeyError:
-                raise Exception(_('%s image file types not supported')%newExt)
+                raise Exception(_("%s image file types not supported") % newExt)
             try:
                 # convert data to new image format
-                self.data = open(fn, 'rb').read()
+                self.data = open(fn, "rb").read()
             finally:
                 os.remove(fn)
 
@@ -332,8 +366,10 @@ class BitmapFileModel(PersistentModel):
         if updateViews:
             self.notify()
 
+
 class SourceModel(BasePersistentModel):
-    modelIdentifier = 'Source'
+    modelIdentifier = "Source"
+
     def __init__(self, data, name, editor, saved):
         BasePersistentModel.__init__(self, data, name, editor, saved)
 
@@ -345,14 +381,13 @@ class SourceModel(BasePersistentModel):
         conflictStart = -1
         confCnt = 0
         lineNo = 0
-        conflicts =[]
+        conflicts = []
         for line in self.getDataAsLines():
-            if line[:8] == '<<<<<<< ' and \
-                  line[8:].strip() == os.path.basename(self.filename):
+            if line[:8] == "<<<<<<< " and line[8:].strip() == os.path.basename(self.filename):
                 conflictStart = lineNo
-            if line[:8] == '>>>>>>> ':
+            if line[:8] == ">>>>>>> ":
                 rev = line[8:]
-                conflicts.append( (rev, conflictStart, lineNo - conflictStart) )
+                conflicts.append((rev, conflictStart, lineNo - conflictStart))
                 confCnt = confCnt + 1
             lineNo = lineNo + 1
         return conflicts
@@ -361,8 +396,8 @@ class SourceModel(BasePersistentModel):
         rev, start, size = conflict
         lines = self.getDataAsLines()
 
-        blocks = Utils.split_seq(lines[start+1 : start+size], '=======')
-        lines[start:start+size+1] = blocks[blockIdx]
+        blocks = Utils.split_seq(lines[start + 1 : start + size], "=======")
+        lines[start : start + size + 1] = blocks[blockIdx]
         self.setDataFromLines(lines)
 
         self.update()
@@ -378,42 +413,47 @@ class SourceModel(BasePersistentModel):
 
 
 class TextModel(PersistentModel):
-    modelIdentifier = 'Text'
-    defaultName = 'text'
-    bitmap = 'Text.png'
+    modelIdentifier = "Text"
+    defaultName = "text"
+    bitmap = "Text.png"
     imgIdx = EditorHelper.imgTextModel
-    ext = '.txt'
+    ext = ".txt"
+
 
 class UnknownFileModel(TextModel):
-    modelIdentifier = 'Unknown'
-    defaultName = '*'
-    bitmap = 'Unknown.png'
+    modelIdentifier = "Unknown"
+    defaultName = "*"
+    bitmap = "Unknown.png"
     imgIdx = EditorHelper.imgUnknownFileModel
-    ext = '.*'
+    ext = ".*"
+
 
 class InternalFileModel(TextModel):
-    modelIdentifier = 'Internal'
-    defaultName = ''
-    bitmap = 'InternalFile.png'
+    modelIdentifier = "Internal"
+    defaultName = ""
+    bitmap = "InternalFile.png"
     imgIdx = EditorHelper.imgInternalFileModel
-    ext = '.intfile'
+    ext = ".intfile"
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 modelReg = EditorHelper.modelReg
 extMap = EditorHelper.extMap
 
 # model registry: add to this dict to register a Model (needed for explorer images)
-modelReg.update({
-            TextModel.modelIdentifier: TextModel,
-            UnknownFileModel.modelIdentifier: UnknownFileModel,
-            BitmapFileModel.modelIdentifier: BitmapFileModel,
-            InternalFileModel.modelIdentifier: InternalFileModel,
-            })
+modelReg.update(
+    {
+        TextModel.modelIdentifier: TextModel,
+        UnknownFileModel.modelIdentifier: UnknownFileModel,
+        BitmapFileModel.modelIdentifier: BitmapFileModel,
+        InternalFileModel.modelIdentifier: InternalFileModel,
+    }
+)
 
-extMap[''] = TextModel
-extMap['.jpg'] = extMap['.gif'] = extMap['.png'] = extMap['.ico'] = BitmapFileModel
+extMap[""] = TextModel
+extMap[".jpg"] = extMap[".gif"] = extMap[".png"] = extMap[".ico"] = BitmapFileModel
 
-EditorHelper.imageExtReg.extend(['.bmp', '.jpg', '.gif', '.png', '.ico'])
-EditorHelper.internalFilesReg.extend(['.umllay', '.implay', '.brk', '.trace', '.stack', '.cycles', '.prof', '.cached'])
-EditorHelper.binaryFilesReg.extend(['.zexp', '.prof'])
+EditorHelper.imageExtReg.extend([".bmp", ".jpg", ".gif", ".png", ".ico"])
+EditorHelper.internalFilesReg.extend([".umllay", ".implay", ".brk", ".trace", ".stack", ".cycles", ".prof", ".cached"])
+EditorHelper.binaryFilesReg.extend([".zexp", ".prof"])

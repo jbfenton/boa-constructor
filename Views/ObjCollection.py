@@ -1,6 +1,6 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        ObjCollection.py
-# Purpose:     
+# Purpose:
 #
 # Author:      Riaan Booysen
 #
@@ -8,11 +8,12 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2000 - 2007
 # Licence:     GPL
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 import sourceconst
 
+
 class ObjectCollection:
-    def __init__(self):#, creators = [], properties = [], events = [], collections = []):
+    def __init__(self):  # , creators = [], properties = [], events = [], collections = []):
         self.creators = []
         self.properties = []
         self.events = []
@@ -26,10 +27,16 @@ class ObjectCollection:
         self.collectionsByName = {}
 
     def __repr__(self):
-        return '<ObjectCollection instance: %s,\n %s,\n %s,\n %s,\nBy name:\n %s,\n %s,\n %s,\n %s,>'% (repr(self.creators), repr(self.properties),
-           repr(self.collections), repr(self.events),
-           repr(self.creatorByName), repr(self.propertiesByName),
-           repr(self.collectionsByName), repr(self.eventsByName))
+        return "<ObjectCollection instance: %s,\n %s,\n %s,\n %s,\nBy name:\n %s,\n %s,\n %s,\n %s,>" % (
+            repr(self.creators),
+            repr(self.properties),
+            repr(self.collections),
+            repr(self.events),
+            repr(self.creatorByName),
+            repr(self.propertiesByName),
+            repr(self.collectionsByName),
+            repr(self.eventsByName),
+        )
 
     def setup(self, creators, properties, events, collections, initialisers, finalisers):
         self.creators = creators
@@ -40,7 +47,7 @@ class ObjectCollection:
         self.finalisers = finalisers
 
     def merge(self, objColl):
-        """ Merge another object collection with this one """
+        """Merge another object collection with this one"""
 
         def mergeList(myLst, newLst):
             for item in newLst:
@@ -56,10 +63,8 @@ class ObjectCollection:
         self.indexOnCtrlName()
 
     def getCtrlNames(self):
-        """ Return a list of (name, class) tuples """
-        return [ (self.creatorByName[n][0].comp_name, 
-                  self.creatorByName[n][0].class_name )
-                for n in self.creatorByName]
+        """Return a list of (name, class) tuples"""
+        return [(self.creatorByName[n][0].comp_name, self.creatorByName[n][0].class_name) for n in self.creatorByName]
 
     def removeReference(self, name, method):
         i = 0
@@ -82,7 +87,7 @@ class ObjectCollection:
         i = 0
         while i < len(self.properties):
             prop = self.properties[i]
-            if len(prop.params) and prop.params[0][5:len(method) +5] == method:
+            if len(prop.params) and prop.params[0][5 : len(method) + 5] == method:
                 del self.properties[i]
             else:
                 i = i + 1
@@ -92,7 +97,7 @@ class ObjectCollection:
             props = self.propertiesByName[name]
             while i < len(props):
                 prop = props[i]
-                if len(prop.params) and prop.params[0][5:len(method) +5] == method:
+                if len(prop.params) and prop.params[0][5 : len(method) + 5] == method:
                     del props[i]
                 else:
                     i = i + 1
@@ -129,21 +134,21 @@ class ObjectCollection:
                 else:
                     i = i + 1
 
-##    def findRootParent(self):
-##        for crt in self.creators:
-##            if crt.params.has_key('parent'):
+    ##    def findRootParent(self):
+    ##        for crt in self.creators:
+    ##            if crt.params.has_key('parent'):
 
     def reparent(self, oldParent, newParent):
         for crt in self.creators:
             # if crt.params.has_key('parent') and crt.params['parent'] == oldParent:
-            if 'parent' in crt.params and crt.params['parent'] == oldParent:
-                crt.params['parent'] = newParent
+            if "parent" in crt.params and crt.params["parent"] == oldParent:
+                crt.params["parent"] = newParent
 
     def setupList(self, list):
         dict = {}
         for item in list:
             # if not dict.has_key(item.comp_name):
-            if (item.comp_name not in dict.keys()):
+            if item.comp_name not in dict.keys():
                 dict[item.comp_name] = []
             dict[item.comp_name].append(item)
         return dict
@@ -154,8 +159,10 @@ class ObjectCollection:
         self.eventsByName = self.setupList(self.events)
         self.collectionsByName = self.setupList(self.collections)
 
+
 def isInitCollMeth(meth):
     return meth.startswith(sourceconst.init_coll)
 
+
 def getCollName(collInitMethod, name):
-    return collInitMethod[len(sourceconst.init_coll+name)+1:]
+    return collInitMethod[len(sourceconst.init_coll + name) + 1 :]

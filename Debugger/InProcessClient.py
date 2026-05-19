@@ -1,7 +1,7 @@
 import sys
-from DebugClient import DebugClient, DebuggerCommEvent, \
-     wxEVT_DEBUGGER_OK, wxEVT_DEBUGGER_EXC
-from IsolatedDebugger import NonBlockingDebuggerConnection, DebuggerController
+
+from DebugClient import DebugClient, DebuggerCommEvent, wxEVT_DEBUGGER_EXC, wxEVT_DEBUGGER_OK
+from IsolatedDebugger import DebuggerController, NonBlockingDebuggerConnection
 
 
 class InProcessCallback:
@@ -26,8 +26,7 @@ class InProcessCallback:
         self.event_handler.AddPendingEvent(evt)
 
 
-class InProcessClient (DebugClient):
-
+class InProcessClient(DebugClient):
     dc = DebuggerController()
 
     def __init__(self, win):
@@ -36,12 +35,11 @@ class InProcessClient (DebugClient):
 
     def invokeOnServer(self, m_name, m_args=(), r_name=None, r_args=()):
         conn = NonBlockingDebuggerConnection(self.dc, self.conn_id)
-        cb = InProcessCallback(
-            self.event_handler, self.win_id, r_name, r_args)
+        cb = InProcessCallback(self.event_handler, self.win_id, r_name, r_args)
         conn.setCallback(cb)
         try:
             getattr(conn, m_name)(*m_args)
-        except:
+        except Exception:
             cb.notifyException()
 
     def __del__(self):

@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Name:        SizersView.py
 # Purpose:     Designer for sizer objects
 #
@@ -8,39 +8,36 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2003 - 2007 Riaan Booysen
 # Licence:     GPL
-#----------------------------------------------------------------------
-print('importing Views.SizersView')
+# ----------------------------------------------------------------------
+print("importing Views.SizersView")
 
-import os, copy
 
 import wx
 
-import Preferences, Utils
+import sourceconst
+import Utils
 from Utils import _
 
-import sourceconst
-import PaletteMapping, PaletteStore, Help
-
-from .InspectableViews import DesignerError
 from .DataView import DataView
-from . import ObjCollection
+
 
 class SizersView(DataView):
-    viewName = 'Sizers'
-    viewTitle = _('Sizers')
-    
+    viewName = "Sizers"
+    viewTitle = _("Sizers")
+
     collectionMethod = sourceconst.init_sizers
+
     def __init__(self, parent, inspector, model, compPal, designer):
         DataView.__init__(self, parent, inspector, model, compPal)
         designer.initSizers(self)
 
         self.sizerConnectList = []
 
-##    def layoutSizers(self):
-##        objs = self.objectOrder[:]
-##        objs.reverse()
-##        for name in objs:
-##            self.objects[name][1].Layout()
+    ##    def layoutSizers(self):
+    ##        objs = self.objectOrder[:]
+    ##        objs.reverse()
+    ##        for name in objs:
+    ##            self.objects[name][1].Layout()
 
     def recreateSizers(self):
         # disconnect controls from sizers
@@ -52,7 +49,7 @@ class SizersView(DataView):
         delLst = []
         for itemInfo in list(self.objects.values()):
             sizer = itemInfo[1]
-            if not hasattr(sizer, '_sub_sizer'):
+            if not hasattr(sizer, "_sub_sizer"):
                 delLst.append(sizer)
         for sizer in delLst:
             if sizer:
@@ -61,9 +58,9 @@ class SizersView(DataView):
         # remove references
         for objInfo in list(self.controllerView.objects.values()):
             ctrl = objInfo[1]
-            if hasattr(ctrl, '_in_sizer'):
+            if hasattr(ctrl, "_in_sizer"):
                 del ctrl._in_sizer
-            if hasattr(ctrl, '_has_sizer'):
+            if hasattr(ctrl, "_has_sizer"):
                 del ctrl._has_sizer
 
         # recreate
@@ -93,10 +90,9 @@ class SizersView(DataView):
     def checkCollectionRename(self, oldName, newName, companion=None):
         for objInfo in list(self.objects.values()):
             cmp = objInfo[0]
-            if cmp != companion and 'Items' in cmp.collections:
-                collEditView = cmp.collections['Items']
-                objColl = self.model.objectCollections[
-                      collEditView.collectionMethod]
+            if cmp != companion and "Items" in cmp.collections:
+                collEditView = cmp.collections["Items"]
+                objColl = self.model.objectCollections[collEditView.collectionMethod]
                 objColl.renameCtrl(oldName, newName)
 
     def designerRenameNotify(self, oldName, newName):
@@ -106,27 +102,25 @@ class SizersView(DataView):
 
         self.checkCollectionRename(oldName, newName)
 
-
-    def writeSizerConnectProps(self, output, stripFrmId=''):
+    def writeSizerConnectProps(self, output, stripFrmId=""):
         from Companions import BaseCompanions
-        writerDTC = BaseCompanions.DesignTimeCompanion('SizerWriter', self)
+
+        writerDTC = BaseCompanions.DesignTimeCompanion("SizerWriter", self)
         for prop in self.sizerConnectList:
-            writerDTC.addContinuedLine(sourceconst.bodyIndent+prop.asText(stripFrmId),
-                  output, sourceconst.bodyIndent)
+            writerDTC.addContinuedLine(sourceconst.bodyIndent + prop.asText(stripFrmId), output, sourceconst.bodyIndent)
 
     def initObjectsAndCompanions(self, creators, objColl, dependents, depLinks):
         DataView.initObjectsAndCompanions(self, creators, objColl, dependents, depLinks)
 
         for ctrlName in list(objColl.propertiesByName.keys()):
             for prop in objColl.propertiesByName[ctrlName]:
-                if prop.prop_setter == 'SetSizer':
+                if prop.prop_setter == "SetSizer":
                     compn, ctrl = self.controllerView.objects[ctrlName][:2]
                     sizer = self.objects[Utils.ctrlNameFromSrcRef(prop.params[0])][1]
                     compn.SetSizer(sizer)
                     self.sizerConnectList.append(prop)
 
-
-    def deleteCtrl(self, name, parentRef = None):
+    def deleteCtrl(self, name, parentRef=None):
         DataView.deleteCtrl(self, name, parentRef)
 
         srName = Utils.srcRefFromCtrlName(name)
@@ -138,5 +132,4 @@ class SizersView(DataView):
                 self.sizerConnectList.remove(prop)
 
         wx.CallAfter(self.recreateSizers)
-        wx.CallAfter(self.controllerView.OnRelayoutDesigner, None)#Refresh()
-
+        wx.CallAfter(self.controllerView.OnRelayoutDesigner, None)  # Refresh()

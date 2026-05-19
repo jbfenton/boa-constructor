@@ -2,13 +2,17 @@
 #            equivalent place, so that both the plug-in and your code can import it
 
 import io
+
 import wx
 
-ART_IDS = ['wxART_BOA_ICON']
+ART_IDS = ["wxART_BOA_ICON"]
+
 
 def getBoaBitmapSmall():
-    return wx.Bitmap(wx.Image(io.BytesIO(
-b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
+    return wx.Bitmap(
+        wx.Image(
+            io.BytesIO(
+                b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
 \x00\x00\x00\x1f\xf3\xffa\x00\x00\x00\x04sBIT\x08\x08\x08\x08|\x08d\x88\x00\
 \x00\x01\x95IDATx\x9c}\x93}\x91\x1b1\x0c\xc5\x7f{\x13\x00\x86`\x08b\xb0\n\
 \x82.\x04\x97A\x8a \x1b\x04g\x08\x86P\x06\xabE\xd0\x85\xa000\x03\xf7\x8f\xfd\
@@ -26,14 +30,20 @@ LJo,p\xbbQE\x089\x93BAD(\xcb\xc0\xf2\xe7\x07\x9c\x1f\xe4\x9c\x97\xa7\xa7\x84\
 ry\xd9\x1f\xdb1\x89\xcb\xb2@\xf8|q\xd8?\xe5\xcb\xd2\x03\xf3z\xb1@\x8a\xfe\
 \x18\xe5a\x18\xb0:\x83\xf5\xabo\x03l?\xbc\t\x8d7r\x0e\x87d\xad\x91\xce\xdd\
 \xdb>a\xeeN\x89\x11\x0cb\xf4\xbd\xd0\xf1\xa1T\x95W\xfc\x05\x9b8\xd9j\xa1\xaa\
-\x82\x9a\x00\x00\x00\x00IEND\xaeB`\x82')))
+\x82\x9a\x00\x00\x00\x00IEND\xaeB`\x82'
+            )
+        )
+    )
 
-# Note, the real wx.NullBitmap must be saved at import time, because at 
+
+# Note, the real wx.NullBitmap must be saved at import time, because at
 # design time wx.NullBitmap is aliased to a placeholder bitmap.
 _NULL_BMP = wx.NullBitmap
+
+
 class ArtProviderExample(wx.ArtProvider):
     def CreateBitmap(self, artId, artClient, size):
-        if artId == 'wxART_BOA_ICON':
+        if artId == "wxART_BOA_ICON":
             return getBoaBitmapSmall()
         else:
             return _NULL_BMP

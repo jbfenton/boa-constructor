@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        XMLView.py
 # Purpose:
 #
@@ -9,28 +9,25 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2001 - 2007
 # Licence:     GPL
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-import sys
 
 import wx
+from EditorViews import EditorView
 
 from Utils import _
 
-from EditorViews import EditorView
-
 
 class XMLTreeView(wx.TreeCtrl, EditorView):
-    viewName = 'XMLTree'
-    viewTitle = _('XMLTree')
-    
-    gotoLineBmp = 'Images/Editor/GotoLine.png'
+    viewName = "XMLTree"
+    viewTitle = _("XMLTree")
+
+    gotoLineBmp = "Images/Editor/GotoLine.png"
 
     def __init__(self, parent, model):
         id = wx.NewIdRef(count=1)
-        wx.TreeCtrl.__init__(self, parent, id)#, style=wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER)
-        EditorView.__init__(self, model,
-          ((_('Goto line'), self.OnGoto, self.gotoLineBmp, ''),), 0)
+        wx.TreeCtrl.__init__(self, parent, id)  # , style=wx.TR_HAS_BUTTONS | wx.SUNKEN_BORDER)
+        EditorView.__init__(self, model, ((_("Goto line"), self.OnGoto, self.gotoLineBmp, ""),), 0)
 
         self.nodeStack = []
         self.locations = {}
@@ -48,45 +45,45 @@ class XMLTreeView(wx.TreeCtrl, EditorView):
             self.Expand(child)
 
     def refreshCtrl(self):
-        self.nodeStack = [self.AddRoot('Root')]
+        self.nodeStack = [self.AddRoot("Root")]
         self.loadTree(self.model.filename)
         self.Expand(self.nodeStack[0])
         return
 
     # Define a handler for start element events
-    def startElement(self, name, attrs ):
+    def startElement(self, name, attrs):
         name = name.encode()
         if attrs:
             for k in attrs:
-                name += ', %s=%s' % (k, attrs[k])
-            
-##            if attrs.has_key('class'):
-##                if attrs.has_key('name'):
-##                    name = '%s (%s:%s)' % (name, attrs['name'], attrs['class'])
-##                else:
-##                    name = '%s (%s)' % (name, attrs['class'])
-##            else:
-##                if attrs.has_key('name'):
-##                    name = '%s :%s' % (name, attrs['name'])
+                name += ", %s=%s" % (k, attrs[k])
+
+        ##            if attrs.has_key('class'):
+        ##                if attrs.has_key('name'):
+        ##                    name = '%s (%s:%s)' % (name, attrs['name'], attrs['class'])
+        ##                else:
+        ##                    name = '%s (%s)' % (name, attrs['class'])
+        ##            else:
+        ##                if attrs.has_key('name'):
+        ##                    name = '%s :%s' % (name, attrs['name'])
 
         id = self.AppendItem(self.nodeStack[-1], name)
         self.nodeStack.append(id)
         if self._parser:
             self.locations[id] = (self._parser.CurrentColumnNumber, self._parser.CurrentLineNumber)
 
-    def endElement(self,  name ):
+    def endElement(self, name):
         self.nodeStack = self.nodeStack[:-1]
 
-    def characterData(self, data ):
+    def characterData(self, data):
         if data.strip():
             data = data.encode()
             self.AppendItem(self.nodeStack[-1], data)
-
 
     def loadTree(self, filename):
         # Create a parser
 
         from xml.parsers import expat
+
         self._parser = parser = expat.ParserCreate()
 
         # Tell the parser what the start element handler is
@@ -95,14 +92,14 @@ class XMLTreeView(wx.TreeCtrl, EditorView):
         parser.CharacterDataHandler = self.characterData
 
         # Parse the XML File
-        parserStatus = parser.Parse(self.model.data, 1)
+        parser.Parse(self.model.data, 1)
 
     def OnGoto(self, event):
-        idx  = self.GetSelection()
+        idx = self.GetSelection()
         if idx.IsOk():
             if idx in self.locations:
                 col, line = self.locations[idx]
-                xmlSrcView = self.model.views['XML']
+                xmlSrcView = self.model.views["XML"]
                 xmlSrcView.focus()
                 xmlSrcView.gotoLine(line)
 
@@ -111,6 +108,7 @@ class XMLTreeView(wx.TreeCtrl, EditorView):
         if key == 13:
             if self.defaultActionIdx != -1:
                 self.actions[self.defaultActionIdx][1](event)
+
 
 ##class XMLTree(wx.TreeCtrl):
 ##    def __init__(self, parent, ID):

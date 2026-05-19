@@ -2,10 +2,11 @@ import threading
 
 PRINT_TRACEBACKS = 0
 
+
 class ThreadedTaskHandler:
-    '''Rather than creating a new thread for each task, reuses existing
+    """Rather than creating a new thread for each task, reuses existing
     threads for speed.
-    '''
+    """
 
     def __init__(self, target_threads=1, limit_threads=0):
         self.queue = []
@@ -16,14 +17,15 @@ class ThreadedTaskHandler:
         self.limit_threads = limit_threads
 
     def addTask(self, task, args=(), kw=None):
-        '''
+        """
         task is a callable object which will be executed in another
         thread.
-        '''
+        """
 
         # if 0:  # Set to 1 to get equivalent but slower processing.  # orig code
         if True:  # Set to True to get equivalent but slower processing.
-            if kw is None: kw = {}
+            if kw is None:
+                kw = {}
             t = threading.Thread(target=task, args=args, kwargs=kw)
             # t.setDaemon(1)   #orig
             t.daemon = True
@@ -35,8 +37,7 @@ class ThreadedTaskHandler:
         try:
             self.queue.append((task, args, kw))
             if self.idle_threads < 1:
-                if self.limit_threads < 1 or (self.running_threads
-                                              < self.limit_threads):
+                if self.limit_threads < 1 or (self.running_threads < self.limit_threads):
                     t = threading.Thread(target=self.clientThread)
                     t.setDaemon(1)
                     self.running_threads = self.running_threads + 1
@@ -48,9 +49,9 @@ class ThreadedTaskHandler:
             cond.release()
 
     def clientThread(self):
-        '''
+        """
         Performs tasks.
-        '''
+        """
         exit_loop = 0
         while not exit_loop:
             task = args = kw = None
@@ -82,16 +83,18 @@ class ThreadedTaskHandler:
                 except SystemExit:
                     exit_loop = 1
                     self.running_threads = self.running_threads - 1
-                except:
+                except Exception:
                     if PRINT_TRACEBACKS:
                         # The task ought to do its own error handling,
                         # but sometimes it doesn't.
                         import traceback
+
                         traceback.print_exc()
 
 
-if __name__ == '__main__':
-    from time import time, sleep
+if __name__ == "__main__":
+    from time import time
+
     evt = threading.Event()
     tth = ThreadedTaskHandler()
     start = 0
@@ -100,6 +103,7 @@ if __name__ == '__main__':
     class SpeedTest:
         def __init__(self, count):
             self.count = count
+
         def __call__(self):
             global end
             self.count = self.count - 1
@@ -114,5 +118,4 @@ if __name__ == '__main__':
     start = time()
     tth.addTask(t)
     evt.wait()
-    print('Performed %d tasks in %d ms' % (count,
-                                           int((end - start) * 1000)))
+    print("Performed %d tasks in %d ms" % (count, int((end - start) * 1000)))

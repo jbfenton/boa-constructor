@@ -67,6 +67,21 @@ run_installer() {
     fi
 }
 
+install_git_hooks() {
+    echo ""
+    echo "Installing Git hooks..."
+    echo ""
+
+    if uv run pre-commit install; then
+        print_success "Git hooks installed successfully."
+        return 0
+    else
+        local exit_code=$?
+        print_error "Git hook installation failed with exit code $exit_code."
+        return $exit_code
+    fi
+}
+
 # ============================================================================
 # Main execution
 # ============================================================================
@@ -75,6 +90,7 @@ main() {
     print_header
     check_dependencies
     run_installer
+    install_git_hooks
 
     echo ""
     read -p "Installation complete, press ENTER to close..."

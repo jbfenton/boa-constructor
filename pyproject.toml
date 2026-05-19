@@ -7,3 +7,34 @@ requires-python = ">=3.12.4"
 dependencies = [
     "wxPython==4.2.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [
+    "ExternalLib/Cyclops.py",
+    "ExternalLib/zipfile.py",
+    "ZopeLib/DateTime/DateTime.py",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E402",
+    "E701",
+    "E741",
+    "F706",
+    "F821",
+    "F403",
+    "F405"
+]
+select = [
+    "E",
+    "F",
+    "I"
+]

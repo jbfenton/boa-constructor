@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        WizardCompanions.py
 # Purpose:
 #
@@ -8,35 +8,35 @@
 # RCS-ID:      $Id$
 # Copyright:   (c) 2003 - 2007
 # Licence:     GPL
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-print('importing Companions.WizardCompanions')
+print("importing Companions.WizardCompanions")
 
 import wx
+
 # import wx.wizard
-from wx import adv
-
-
-
-from Preferences import wxDefaultFrameSize, wxDefaultFramePos
-from .FrameCompanions import DialogDTC, FramePanelDTC
+from Preferences import wxDefaultFramePos
 from PropEdit.PropertyEditors import BitmapConstrPropEdit, StrConstrPropEdit
 
 from . import EventCollections
-import sourceconst
+from .FrameCompanions import DialogDTC, FramePanelDTC
 
 ##defWizardImport = 'import wx.wizard'
 
 wizardSize = (400, 370)
 wizardPageSize = (270, 300)
-wizardFrameStyle = wx.MINIMIZE_BOX | wx.SYSTEM_MENU | wx.CAPTION #wx.MAXIMIZE_BOX
+wizardFrameStyle = wx.MINIMIZE_BOX | wx.SYSTEM_MENU | wx.CAPTION  # wx.MAXIMIZE_BOX
 
-EventCollections.EventCategories['WizardEvent'] = (
-      'wx.wizard.EVT_WIZARD_PAGE_CHANGED', 'wx.wizard.EVT_WIZARD_PAGE_CHANGING',
-      'wx.wizard.EVT_WIZARD_CANCEL', 'wx.wizard.EVT_WIZARD_HELP',
-      'wx.wizard.EVT_WIZARD_FINISHED')
+EventCollections.EventCategories["WizardEvent"] = (
+    "wx.wizard.EVT_WIZARD_PAGE_CHANGED",
+    "wx.wizard.EVT_WIZARD_PAGE_CHANGING",
+    "wx.wizard.EVT_WIZARD_CANCEL",
+    "wx.wizard.EVT_WIZARD_HELP",
+    "wx.wizard.EVT_WIZARD_FINISHED",
+)
 
-EventCollections.commandCategories.append('WizardEvent')
+EventCollections.commandCategories.append("WizardEvent")
+
 
 class WizardDTC(DialogDTC):
     defFrameSize = wx.Size(*wizardSize)
@@ -44,66 +44,67 @@ class WizardDTC(DialogDTC):
 
     def __init__(self, name, designer, frameCtrl):
         DialogDTC.__init__(self, name, designer, frameCtrl)
-        self.editors['Bitmap'] = BitmapConstrPropEdit
+        self.editors["Bitmap"] = BitmapConstrPropEdit
         self.index = 0
 
     def constructor(self):
-        return {'Title': 'title', 'Position': 'pos', 'Bitmap': 'bitmap'}
+        return {"Title": "title", "Position": "pos", "Bitmap": "bitmap"}
 
     def designTimeSource(self):
-        return {'title': repr(self.name),
-                'pos':   repr(wxDefaultFramePos),
-                'bitmap': 'wx.NullBitmap'}
+        return {"title": repr(self.name), "pos": repr(wxDefaultFramePos), "bitmap": "wx.NullBitmap"}
 
     def hideDesignTime(self):
-        return DialogDTC.hideDesignTime(self) + ['Size', 'ClientSize']
+        return DialogDTC.hideDesignTime(self) + ["Size", "ClientSize"]
 
     def events(self):
-        return DialogDTC.events(self) + ['WizardEvent']
+        return DialogDTC.events(self) + ["WizardEvent"]
 
 
 class PyWizardPageDTC(FramePanelDTC):
     defFrameSize = wx.Size(*wizardPageSize)
     defFrameStyle = wizardFrameStyle
     suppressWindowId = True
+
     def __init__(self, name, designer, frameCtrl):
         FramePanelDTC.__init__(self, name, designer, frameCtrl)
-        self.editors['Bitmap'] = BitmapConstrPropEdit
-        self.editors['Resource'] = StrConstrPropEdit
+        self.editors["Bitmap"] = BitmapConstrPropEdit
+        self.editors["Resource"] = StrConstrPropEdit
         self.index = 0
 
     def constructor(self):
-        return {'Bitmap': 'bitmap', 'Resource': 'resource'}
+        return {"Bitmap": "bitmap", "Resource": "resource"}
 
     def designTimeSource(self):
-        return {'bitmap': 'wx.NullBitmap', 'resource': "''"}
+        return {"bitmap": "wx.NullBitmap", "resource": "''"}
 
     def hideDesignTime(self):
-        return FramePanelDTC.hideDesignTime(self) + ['Position', 'Size', 'ClientSize']
+        return FramePanelDTC.hideDesignTime(self) + ["Position", "Size", "ClientSize"]
 
 
 class WizardPageSimpleDTC(FramePanelDTC):
     defFrameSize = wx.Size(*wizardPageSize)
     defFrameStyle = wizardFrameStyle
     suppressWindowId = True
+
     def __init__(self, name, designer, frameCtrl):
         FramePanelDTC.__init__(self, name, designer, frameCtrl)
 
     def constructor(self):
-        return {'Previous': 'prev', 'Next': 'next'}
+        return {"Previous": "prev", "Next": "next"}
 
     def designTimeSource(self):
-        return {'prev': 'None', 'next': 'None'}
+        return {"prev": "None", "next": "None"}
 
     def hideDesignTime(self):
-        return FramePanelDTC.hideDesignTime(self) + ['Position', 'Size', 'ClientSize']
+        return FramePanelDTC.hideDesignTime(self) + ["Position", "Size", "ClientSize"]
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import Plugins
 
-Plugins.registerComponents(None,
-      (wx.adv.Wizard, 'wx.adv.Wizard', WizardDTC),
-      (wx.adv.PyWizardPage, 'wx.adv.PyWizardPage', PyWizardPageDTC), # May no longer be available
-      (wx.adv.WizardPage, 'wx.adv.WizardPage', WizardPageSimpleDTC),
-    )
+Plugins.registerComponents(
+    None,
+    (wx.adv.Wizard, "wx.adv.Wizard", WizardDTC),
+    (wx.adv.PyWizardPage, "wx.adv.PyWizardPage", PyWizardPageDTC),  # May no longer be available
+    (wx.adv.WizardPage, "wx.adv.WizardPage", WizardPageSimpleDTC),
+)

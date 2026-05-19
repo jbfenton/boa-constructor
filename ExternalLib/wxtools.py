@@ -1,12 +1,12 @@
-'''
+"""
 Created on Jul 28, 2014
 
 @author: cwt
-'''
+"""
 
 # Code from wxPython-2.8 wx.tools.img2py
-import zlib
 import io
+import zlib
 
 
 def crunch_data(data, compressed):
@@ -32,16 +32,16 @@ def crunch_data(data, compressed):
                 for n in range(2, 5):
                     if data[i + n] not in octdigits:
                         break
-                word = data[i:i + n]
+                word = data[i : i + n]
                 i = i + n
-            elif data[i + 1] == 'x':
+            elif data[i + 1] == "x":
                 for n in range(2, 5):
                     if data[i + n] not in hexdigits:
                         break
-                word = data[i:i + n]
+                word = data[i : i + n]
                 i = i + n
             else:
-                word = data[i:i + 2]
+                word = data[i : i + 2]
                 i = i + 2
 
         l = len(word)
