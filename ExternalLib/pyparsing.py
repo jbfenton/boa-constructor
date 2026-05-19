@@ -843,7 +843,7 @@ class Word(Token):
     def __str__(self):
         try:
             return super(Word, self).__str__()
-        except:
+        except Exception:
             pass
 
         if self.strRepr is None:
@@ -917,7 +917,7 @@ class CharsNotIn(Token):
     def __str__(self):
         try:
             return super(CharsNotIn, self).__str__()
-        except:
+        except Exception:
             pass
 
         if self.strRepr is None:
@@ -1148,7 +1148,7 @@ class ParseExpression(ParserElement):
     def __str__(self):
         try:
             return super(ParseExpression, self).__str__()
-        except:
+        except Exception:
             pass
 
         if self.strRepr is None:
@@ -1416,7 +1416,7 @@ class ParseElementEnhance(ParserElement):
     def __str__(self):
         try:
             return super(ParseElementEnhance, self).__str__()
-        except:
+        except Exception:
             pass
 
         if self.strRepr is None and self.expr is not None:

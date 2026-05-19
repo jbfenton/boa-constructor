@@ -48,7 +48,7 @@ class XMLListBuilder:
             if xmlEnd == -1:
                 raise Exception(_("Invalid XML response: %s") % str(data))
             self.status = parser.Parse(data[xmlStart : xmlEnd + 1], 1)
-        except:
+        except Exception:
             wx.MessageBox(Utils.html2txt(data), _("Error"), wx.ICON_ERROR)
             raise
 
@@ -308,7 +308,7 @@ class DAVContConfPropEdit(PropertyEditors.ContainerConfPropEdit):
 StringTypes = [bytes]
 try:
     StringTypes.append(str)
-except:
+except Exception:
     pass
 
 

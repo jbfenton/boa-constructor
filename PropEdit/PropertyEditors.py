@@ -1155,7 +1155,7 @@ class ObjEnumConstrPropEdit(EnumConstrPropEdit):
                 vals.remove("self")
             else:
                 vals.remove("self." + val)
-        except:
+        except Exception:
             pass
         return vals
 

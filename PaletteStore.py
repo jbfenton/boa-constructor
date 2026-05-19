@@ -41,7 +41,7 @@ def bitmapForComponent(wxClass, wxBase="None"):
         cls = wxClass
         try:
             bse = wxClass.__bases__[0]
-        except:
+        except Exception:
             # if compInfo.has_key(wxClass):
             if wxClass in compInfo:
                 return loadBitmap(compInfo[wxClass][0])
@@ -54,5 +54,5 @@ def bitmapForComponent(wxClass, wxBase="None"):
                 bse = cls.__bases__[0]
 
             return loadBitmap(compInfo[cls][0])
-        except:
+        except Exception:
             return loadBitmap("Component")

@@ -1266,7 +1266,7 @@ class TarFile:
             ti.gname = tarinfo.gname
             try:
                 self._extract_member(ti, ti.name)
-            except:
+            except Exception:
                 pass
 
         if tarinfo.isreg():

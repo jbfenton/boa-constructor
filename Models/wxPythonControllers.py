@@ -125,7 +125,7 @@ class BaseFrameController(ModuleController):
                         dataView.initialize()
                     else:
                         dataView = model.views["Data"]
-                except:
+                except Exception:
                     if "Data" in model.views:
                         self._cancelView(model.views["Data"], "Data")
                     raise
@@ -146,7 +146,7 @@ class BaseFrameController(ModuleController):
                         )
                         model.views["Designer"] = designer
                         designer.refreshCtrl()
-                except:
+                except Exception:
                     self._cancelDesigner(model.views)
                     raise
 
@@ -166,7 +166,7 @@ class BaseFrameController(ModuleController):
                             sizersView.initialize()
                         else:
                             sizersView = model.views["Sizers"]
-                    except:
+                    except Exception:
                         if "Sizers" in model.views:
                             self._cancelView(model.views["Sizers"], "Sizers")
                         self._cancelDesigner(model.views)

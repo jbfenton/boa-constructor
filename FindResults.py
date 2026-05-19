@@ -97,7 +97,7 @@ class FindResults(ListCtrlView, CloseableViewMix):
             srcView.lastSearchResults = self.results[modName]
             try:
                 srcView.lastMatchPosition = self.results[modName].index(foundInfo)
-            except:
+            except Exception:
                 srcView.lastMatchPosition = 0
                 print("foundInfo not found")
             srcView.selectSection(foundInfo[0] - 1, foundInfo[1] - 1, self.findPattern)

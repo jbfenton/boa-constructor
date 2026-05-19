@@ -866,7 +866,7 @@ class EditorFrame(wx.Frame, Utils.FrameRestorerMixin):
         if lineno != -1:
             try:
                 name, lineno = name[:lineno], int(name[lineno + 2 :]) - 1
-            except:
+            except Exception:
                 lineno = -1
 
         controller = None
@@ -1103,7 +1103,7 @@ class EditorFrame(wx.Frame, Utils.FrameRestorerMixin):
             try:
                 if insp.selCmp and insp.sessionHandler and hasattr(insp.selCmp, "model") and model is insp.selCmp.model:
                     insp.sessionHandler.promptPostOrCancel(insp)
-            except:
+            except Exception:
                 if focusPromptingPages:
                     self.tabs.SetSelection(idx)
                     self.setupToolBar(idx, force=True)
@@ -1330,7 +1330,7 @@ class EditorFrame(wx.Frame, Utils.FrameRestorerMixin):
                             view = mod.addView(viewCls)
                             try:
                                 view.refreshCtrl()
-                            except:
+                            except Exception:
                                 notebook = view.notebook
                                 view.deleteFromNotebook(mod.default, view.viewName)
                                 self.mainMenu.Check(evtId, False)
@@ -1479,7 +1479,7 @@ class EditorFrame(wx.Frame, Utils.FrameRestorerMixin):
                         actPage = conf.getint("editor", "activepage")
                         if actPage < self.tabs.GetPageCount():
                             self.tabs.SetSelection(actPage)
-                    except:
+                    except Exception:
                         pass
 
                 finally:

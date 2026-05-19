@@ -237,7 +237,7 @@ class BasePersistentModel(EditorModel):
         self.filename = filename
         try:
             self.save(overwriteNewer=True)
-        except:
+        except Exception:
             self.filename = oldname
             raise
         self.savedAs = True

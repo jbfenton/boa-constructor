@@ -157,7 +157,7 @@ def translate(phrase, from_lang, to_lang):
         response = urllib.urlopen(what, params)
     except IOError:
         raise BabelizerIOError("Couldn't talk to server: %s" % what)
-    except:
+    except Exception:
         print("Unexpected error:", sys.exc_info()[0])
 
     html = response.read()

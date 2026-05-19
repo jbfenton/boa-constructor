@@ -135,7 +135,7 @@ class ZopeUndoView(ListCtrlView):
             undos = self.model.transport.getUndoableTransactions()
         # except xmlrpclib.Fault, error:    # orig code
         #     wx.LogError(Utils.html2txt(error.faultString))
-        except:
+        except Exception:
             wx.LogError("A problem occurred in ZopeViews.ZopeUndoView.refresh()")
         else:
             i = 0

@@ -421,7 +421,7 @@ if __name__ == "__main__":
     try:
         f.lc = LanguageListCtrl(f.p, pos=(220, 10), size=(200, 25))
         s.Add(f.lc, 0, wx.GROW)
-    except:
+    except Exception:
         pass
     f.llc = LanguageListCtrl(
         f.p,

@@ -337,7 +337,7 @@ class DesignTimeCompanion(Companion):
                 try:
                     if prop.prop_setter == setterName:
                         return prop.params
-                except:
+                except Exception:
                     # print 'except in persistprop'
                     raise
         return None
@@ -702,7 +702,7 @@ class ControlDTC(DesignTimeCompanion):
             # Disabled controls do not pass thru mouse clicks to their parents on GTK :(
             if wx.Platform != "__WXGTK__" and self.ctrlDisabled:
                 self.control.Enable(False)
-        except:
+        except Exception:
             pass
 
         self.initDesignTimeEvents(self.control)

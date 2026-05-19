@@ -31,7 +31,7 @@ def _fix(match, offset, length, selectionStart):
     try:
         for i in match.span():
             r.append((i + offset) % length + selectionStart)
-    except:
+    except Exception:
         pass
     return tuple(r)
 
@@ -235,7 +235,7 @@ class FindReplaceEngine:
                 if not dlg.Update(i, _("Searching in file '%s'") % filename):
                     try:
                         view.model.editor.statusBar.setHint(_("Search aborted"))
-                    except:
+                    except Exception:
                         pass
 
             view.rerunCallback = self.findAllInFiles
@@ -307,7 +307,7 @@ class FindReplaceEngine:
             if conf.has_section("finder"):
                 self.wrap = conf.getint("finder", "wrap")
                 self.closeOnFound = conf.getint("finder", "closeonfound")
-        except:
+        except Exception:
             print("Problem loading finder options")
 
     def saveOptions(self):

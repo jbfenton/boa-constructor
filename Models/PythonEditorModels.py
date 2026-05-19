@@ -377,14 +377,14 @@ class ModuleModel(SourceModel):
 
         try:
             code = compile(self.data, self.filename, "exec")
-        except:
+        except Exception:
             oldOut = sys.stdout
             sys.stdout = Utils.PseudoFileOutStore()
             try:
                 print(_("''' Code does not compile\n\n    Disassembly of Traceback:\n'''"))
                 try:
                     dis.distb(sys.exc_info()[2])
-                except:
+                except Exception:
                     print(_("''' Could not disassemble traceback '''\n"))
                 return sys.stdout.read()
             finally:
@@ -395,7 +395,7 @@ class ModuleModel(SourceModel):
         try:
             try:
                 dis.disco(code)
-            except:
+            except Exception:
                 raise
             return sys.stdout.read()
         finally:
@@ -924,7 +924,7 @@ class BaseAppModel(ClassModel, ImportRelationshipMix):
             else:
                 try:
                     self.moduleModels[name], main = Controllers.identifyFile(res, localfs=prot == "file")
-                except:
+                except Exception:
                     pass
         else:
             self.moduleModels[name], main = identifySource(src)

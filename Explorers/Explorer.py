@@ -747,7 +747,7 @@ class BaseExplorerSplitter(wx.SplitterWindow):
             event.Skip()
             try:
                 self.list.node.renameItem(self.oldLabelVal, newText)
-            except:
+            except Exception:
                 wx.CallAfter(self.list.refreshCurrent)
                 raise
             self.list.refreshCurrent()

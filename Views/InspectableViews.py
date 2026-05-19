@@ -197,7 +197,7 @@ class InspectableObjectView(EditorViews.EditorView, Utils.InspectorSessionMix):
                         value = PaletteMapping.evalCtrl(prop.params[0], self.model.specialAttrs)
                     except AttributeError as name:
                         value = PaletteMapping.evalCtrl(prop.params[0], {"self": self.controllerView.objectNamespace})
-                    except:
+                    except Exception:
                         print(_("Problem with: %s") % prop.asText())
                         raise
 

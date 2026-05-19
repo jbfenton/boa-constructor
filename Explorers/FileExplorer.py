@@ -487,7 +487,7 @@ class FileSysNode(ExplorerNodes.ExplorerNode):
                     if os.path.exists(newName):
                         try:
                             num = str(int(num) + 1)
-                        except:
+                        except Exception:
                             num = "2"
                     else:
                         shutil.copy(node.resourcepath, newName)

@@ -454,7 +454,7 @@ class DesignerView(wx.Frame, InspectableObjectView, Utils.FrameRestorerMixin):
             self.model.editor.statusBar.progress.SetValue(0)
             self.model.editor.statusBar.setHint(_("Designer refreshed"))
             self.opened = True
-        except:
+        except Exception:
             self.model.editor.statusBar.progress.SetValue(0)
             # self.model.editor.statusBar.setHint('Error opening the Designer', 'Error')
             raise
@@ -1167,7 +1167,7 @@ class DesignerView(wx.Frame, InspectableObjectView, Utils.FrameRestorerMixin):
 
             # generate source
             self.refreshModel()
-        except:
+        except Exception:
             self.destroying = False
             self.vetoResize = False
             raise

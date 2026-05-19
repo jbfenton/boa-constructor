@@ -1633,7 +1633,7 @@ def readPyValFromConfig(conf, name):
     value = conf.Read(name).replace("\r\n", "\n") + "\n"
     try:
         return eval(value, ns)
-    except:
+    except Exception:
         print(value)
         raise
 

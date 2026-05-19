@@ -63,14 +63,14 @@ class PythonInterpreter:
             else:
                 self.showtraceback()
 
-        except:
+        except (Exception, KeyboardInterrupt, SystemExit):
             self.showtraceback()
 
         else:
             # execute
             try:
                 exec(code, self.locals)
-            except:
+            except (Exception, KeyboardInterrupt, SystemExit):
                 self.showtraceback()
 
         return 0

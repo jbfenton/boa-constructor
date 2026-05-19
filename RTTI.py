@@ -166,7 +166,7 @@ def getPropList(obj, cmp):
             propMeths = props["Properties"][propName]
             try:
                 catalogProperty(propName, "CtrlRoute", propMeths, constrNames, propLst, constrLst)
-            except:
+            except Exception:
                 catalogProperty(propName, "NoneRoute", (None, None), constrNames, propLst, constrLst)
         if cmp:
             xtraProps = cmp.properties()
@@ -178,7 +178,7 @@ def getPropList(obj, cmp):
                 propMeths = xtraProps[propName]
                 try:
                     catalogProperty(propName, propMeths[0], propMeths[1:], constrNames, propLst, constrLst)
-                except:
+                except Exception:
                     pass
 
         # propLst.sort()

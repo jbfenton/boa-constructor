@@ -93,7 +93,7 @@ class AppFindResults(ListCtrlView, CloseableViewMix):
             srcView.lastSearchResults = self.results[modName]
             try:
                 srcView.lastMatchPosition = self.results[modName].index(foundInfo)
-            except:
+            except Exception:
                 srcView.lastMatchPosition = 0
                 # print 'foundInfo not found'
 
@@ -233,7 +233,7 @@ class AppView(ListCtrlView, FindResultsAdderMixin):
         for mod in modules:
             try:
                 self.model.editor.openOrGotoModule(self.model.modules[mod][2])
-            except:
+            except Exception:
                 pass
 
     def OnFind(self, event):

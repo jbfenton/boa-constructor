@@ -45,6 +45,6 @@ def initialize(context):
             get_transaction().note("Added BoaDebugger")
             get_transaction().commit()
             zLOG.LOG("BoaDebugger", zLOG.INFO, "Created new BoaDebugger")
-        except:
+        except Exception:
             zLOG.LOG("BoaDebugger", zLOG.ERROR, "Failed to create new BoaDebugger!")
             raise

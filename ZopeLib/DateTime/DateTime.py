@@ -329,7 +329,7 @@ def _findLocalTimeZoneName(isDST):
         # Get the name of the current time zone depending
         # on DST.
         _localzone = _cache._zmap[lower(tzname[isDST])]
-    except:
+    except Exception:
         try:
             # Generate a GMT-offset zone name.
             if isDST:
@@ -344,7 +344,7 @@ def _findLocalTimeZoneName(isDST):
             m=majorOffset >= 0 and '+' or ''
             lz='%s%0.02d%0.02d' % (m, majorOffset, minorOffset)
             _localzone = _cache._zmap[lower('GMT%s' % lz)]
-        except:
+        except Exception:
             _localzone = ''
     return _localzone
 
@@ -440,7 +440,7 @@ def _calendarday(j):
 def _tzoffset(tz, t):
     try:
         return DateTime._tzinfo[tz].info(t)[0]
-    except:
+    except Exception:
         if numericTimeZoneMatch(tz) is not None:
             return atoi(tz[1:3])*3600+atoi(tz[3:5])*60
         else:
@@ -902,7 +902,7 @@ class DateTime:
         # nearTime is within an hour of being correct.
         try:
             ltm = safelocaltime(nearTime)
-        except:
+        except Exception:
             # We are beyond the range of Python's date support.
             # Hopefully we can assume that daylight savings schedules
             # repeat every 28 years.  Calculate the name of the
@@ -1392,7 +1392,7 @@ class DateTime:
     def millis(self):
         """Return the millisecond since the epoch in GMT."""
         try: millis = self._millis
-        except:
+        except Exception:
             # Upgrade a previously pickled DateTime object.
             millis = long(math.floor(self._t * 1000.0))
             self._millis = millis
@@ -1570,7 +1570,7 @@ class DateTime:
                     subsec = split('%g' % s, '.')[1]
                     return '%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%s %s' % (
                         y,m,d,h,mn,s,subsec,t)
-                except:
+                except Exception:
                     # Didn't produce the decimal point as expected.
                     # Just fall through.
                     pass

@@ -282,7 +282,7 @@ class SizerItemsCDTC(CollectionDTC):
                 try:
                     # XXX improve
                     int(srcRef)
-                except:
+                except Exception:
                     params = copy.copy(vals)
                     del params[ctrlIdx]
                     dtd = CollectionDTC.designTimeDefaults(self, params, method)

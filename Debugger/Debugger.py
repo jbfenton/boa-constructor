@@ -396,7 +396,7 @@ class DebuggerFrame(wx.Frame, Utils.FrameRestorerMixin):
         if self.debug_client:
             try:
                 self.debug_client.kill()
-            except:
+            except Exception:
                 print(_("Error on killing debugger: %s: %s") % sys.exc_info()[:2])
         self.clearViews()
 
@@ -627,7 +627,7 @@ class DebuggerFrame(wx.Frame, Utils.FrameRestorerMixin):
             if exc_value is not None:
                 try:
                     m1 = "%s: %s" % (m1, str(exc_value))
-                except:
+                except Exception:
                     m1 = "internal error"
             self.sb.updateState(m1)
         else:
@@ -868,7 +868,7 @@ class DebuggerFrame(wx.Frame, Utils.FrameRestorerMixin):
                 try:
                     if self.isInShellNamepace():
                         self.editor.shell.debugShell(0, None)
-                except:
+                except Exception:
                     pass
                     # cls, err = sys.exc_info()[:2]
                 self.editor.debugger = None

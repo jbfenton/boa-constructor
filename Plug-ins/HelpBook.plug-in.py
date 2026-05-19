@@ -588,7 +588,7 @@ class HelpBookFilesView(EditorViews.VirtualListCtrlView):
                         HtmlDocDetailParser(fmtr, breakOnTitle=True).feed(data)
                     except BreakOnTitle as title:
                         return str(title)
-                    except:
+                    except Exception:
                         return ""
                     else:
                         return ""

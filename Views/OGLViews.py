@@ -112,7 +112,7 @@ class PersistentShapeCanvas(ogl.ShapeCanvas):
             try:
                 if hasattr(shape, "unqPclName"):
                     persProps[shape.unqPclName] = shape.getPos()
-            except:
+            except Exception:
                 print("error:", shape)
                 raise
 

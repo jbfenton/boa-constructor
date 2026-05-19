@@ -83,7 +83,7 @@ class ThreadedTaskHandler:
                 except SystemExit:
                     exit_loop = 1
                     self.running_threads = self.running_threads - 1
-                except:
+                except Exception:
                     if PRINT_TRACEBACKS:
                         # The task ought to do its own error handling,
                         # but sometimes it doesn't.

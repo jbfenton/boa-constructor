@@ -861,7 +861,7 @@ class ImageEditorPanel(wx.Panel):
             data = wx.BitmapDataObject()
             try:
                 clip.GetData(data)
-            except:
+            except Exception:
                 wx.LogError(_("Not a picture"))
             else:
                 self.modeChoice.SetSelection(0)

@@ -61,7 +61,7 @@ class _CyclopsHTMLRepr(_repr.Repr):
             return replaceLT(_repr(x))
             # Bugs in x.__repr__() can cause arbitrary
             # exceptions -- then make up something
-        except:
+        except Exception:
             return replaceLT("<" + x.__class__.__name__ + " instance at " + hex(id(x))[2:] + ">")
 
     def repr_class(self, x, level):

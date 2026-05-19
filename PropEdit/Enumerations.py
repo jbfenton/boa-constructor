@@ -204,7 +204,7 @@ class BinarySet:
         element = self.names[elementName]
         try:
             self.set.remove(element)
-        except:
+        except Exception:
             pass
 
     def has_element(self, elementName):

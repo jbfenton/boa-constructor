@@ -494,7 +494,7 @@ class CVSController(ExplorerNodes.Controller):
                 if answer and answer != _("(not defined)"):
                     try:
                         os.environ[envKey] = answer
-                    except:
+                    except Exception:
                         wx.MessageBox(
                             _("Changing environment variables is not supported on this OS\n")
                             + _("Consult CVS howtos on how to set these globally")

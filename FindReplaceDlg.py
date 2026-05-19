@@ -649,7 +649,7 @@ class FindReplaceDlg(wx.Dialog):
 
         try:
             working_folder = os.path.dirname(self.view.model.localFilename())
-        except:
+        except Exception:
             working_folder = ""
 
         self.cmbFolder.Clear()

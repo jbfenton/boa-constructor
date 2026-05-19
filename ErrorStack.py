@@ -90,7 +90,7 @@ class PyCheckerErrorParser(StackErrorParser):
             pyCheckWarn = self.lines.pop()
             try:
                 filename, lineNo, warng = eval(pyCheckWarn.strip(), {})
-            except:
+            except Exception:
                 pass
             else:
                 self.error[:] = [warng]
@@ -150,7 +150,7 @@ class CrashTraceLogParser(StackErrorParser):
             del lines[0]
             try:
                 file, lineno, frameid, event, arg = line.split("|", 4)
-            except:
+            except Exception:
                 print("Error on line", cnt, line)
                 break
             if event == "call":

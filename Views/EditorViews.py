@@ -99,7 +99,7 @@ class EditorView:
         self.model = model
         try:
             self.editorDisconnect = self.model.editor.Disconnect
-        except:
+        except Exception:
             pass
         self.modified = False
         if editorIsWindow:
@@ -479,7 +479,7 @@ class ModuleDocView(HTMLDocView):
             for super in module.classes[aclass].super:
                 try:
                     supers.append('<a href="#%s">%s</a>' % (super.name, super.name))
-                except:
+                except Exception:
                     supers.append(super)
             if len(supers) > 0:
                 supers = ", ".join(supers)

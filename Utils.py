@@ -103,7 +103,7 @@ class BoaFileDropTarget(wx.FileDropTarget):
         try:
             for filename in filenames:
                 self.editor.openOrGotoModule(filename)
-        except:
+        except Exception:
             error_occurred = False
         finally:
             wx.EndBusyCursor()
@@ -528,7 +528,7 @@ def visit_update(paths, dirname, names):
 def get_current_frame():
     try:
         Exception, "get_exc_info"
-    except:
+    except Exception:
         return sys.exc_info()[2].tb_frame.f_back
 
 

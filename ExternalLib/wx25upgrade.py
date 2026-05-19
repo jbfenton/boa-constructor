@@ -414,7 +414,7 @@ class Upgrade:
                 i = i + 2
             try:
                 kw = subs[kw]
-            except:
+            except Exception:
                 pass
             if kw == "kind":
                 arg = arg.replace("wx", "wx.")

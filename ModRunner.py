@@ -86,7 +86,7 @@ class CompileModuleRunner(ModuleRunner):
                 traceback.print_exception(etype, value, tb, 0, sys.stderr)
             finally:
                 etype = value = tb = None
-        except:
+        except Exception:
             # Add filename to traceback object
             etype, value, tb = sys.exc_info()
             try:

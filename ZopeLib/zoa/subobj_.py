@@ -11,7 +11,7 @@ obj = context.aq_parent
 for subobj in obj.objectValues():
     try:
         name = subobj.id
-    except:
+    except Exception:
         continue
     if name == objname:
         return subobj

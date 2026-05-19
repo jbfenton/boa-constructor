@@ -141,7 +141,7 @@ class PythonSourceDiffView(wx.stc.StyledTextCtrl, EditorView, PythonStyledTextCt
                     dst = StringIO(openEx(self.diffWith).load("rb")).readlines()
                     #                    self.model.editor.app.saveStdio = sys.stdout, sys.stderr
                     ndiff_lcompare(src, dst)
-                except:
+                except Exception:
                     (sys.last_type, sys.last_value, sys.last_traceback) = sys.exc_info()
                     linecache.checkcache()
                     traceback.print_exc()

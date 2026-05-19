@@ -318,7 +318,7 @@ class DebuggerController:
             ds = self._debug_servers[id]
             ds.set_quit()
             self._deleteServer(id)
-        except:
+        except Exception:
             pass
 
     def _deleteServer(self, id):
@@ -371,7 +371,7 @@ class MethodCall(ServerMessage):
             result = getattr(ob, self.func_name)(*self.args, **self.kw)
         except (SystemExit, BdbQuit):
             raise
-        except:
+        except Exception:
             if hasattr(self, "callback"):  # orig
                 # if 'callback' in self:
                 self.callback.notifyException()
@@ -518,7 +518,7 @@ class DebugServer(Bdb):
         while 1:
             try:
                 self.eventLoop()
-            except:
+            except Exception:
                 # ??
                 import traceback
 
@@ -660,7 +660,7 @@ class DebugServer(Bdb):
         sys.settrace(None)
         try:
             raise Exception("gen_exc_info")
-        except:
+        except Exception:
             frame = sys.exc_info()[2].tb_frame
             while frame:
                 # Clear all the f_trace attributes
@@ -704,7 +704,7 @@ class DebugServer(Bdb):
             # Add trace hooks.
             try:
                 raise Exception("gen_exc_info")
-            except:
+            except Exception:
                 frame = sys.exc_info()[2].tb_frame.f_back
             self.add_trace_hooks(frame)
             sys.settrace(self.trace_dispatch)
@@ -736,7 +736,7 @@ class DebugServer(Bdb):
         """
         try:
             raise Exception("gen_exc_info")
-        except:
+        except Exception:
             frame = sys.exc_info()[2].tb_frame.f_back
         stop = self.hard_break_here(frame)
         if not stop:
@@ -894,7 +894,7 @@ class DebugServer(Bdb):
                 Bdb.run(self, cmd, globals, locals)
             except (BdbQuit, SystemExit):
                 pass
-            except:
+            except Exception:
                 import traceback
 
                 traceback.print_exc()
@@ -1191,11 +1191,11 @@ class DebugServer(Bdb):
         globalsDict, localsDict = self.getFrameNamespaces(frame)
         try:
             inst_items = dir(eval(expr, globalsDict, localsDict))
-        except:
+        except Exception:
             inst_items = []
         try:
             clss_items = dir(eval(expr, globalsDict, localsDict).__class__)
-        except:
+        except Exception:
             clss_items = []
         return inst_items + clss_items
 
@@ -1230,7 +1230,7 @@ class DebugServer(Bdb):
             try:
                 globalsDict, localsDict = self.getFrameNamespaces(frame)
                 return self.pythonShell(expr, globalsDict, localsDict)
-            except:
+            except Exception:
                 t, v = sys.exc_info()[:2]
                 import traceback
 

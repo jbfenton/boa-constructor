@@ -139,7 +139,7 @@ class Resource:
             ver, code, msg, hdrs = h.getreply()
             data = h.getfile().read()
             h.close()
-        except:
+        except Exception:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             raise Exception("NotAvailable", exc_value)
         return http_response(ver, code, msg, hdrs, data)

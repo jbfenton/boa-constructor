@@ -321,7 +321,7 @@ class TransportError(Exception):
     def __str__(self):
         try:
             return str(self.args[0])
-        except:
+        except Exception:
             return str(self.args)
 
 
@@ -1078,7 +1078,7 @@ class CategoryCompanion(ExplorerCompanion):
     propMapping = {type(""): StrConfPropEdit, "password": PasswdStrConfPropEdit, "default": EvalConfPropEdit}
     try:
         propMapping[type("")] = StrConfPropEdit
-    except:
+    except Exception:
         pass
 
     def __init__(self, name, catNode):

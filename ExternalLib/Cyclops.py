@@ -450,7 +450,7 @@ class _CyclopsRepr(_repr.Repr):
             return 'x'
             # Bugs in x.__repr__() can cause arbitrary
             # exceptions -- then make up something
-        except:
+        except Exception:
             return '<' + x.__class__.__name__ + ' instance at ' + \
                    hex(id(x))[2:] + '>'
 
@@ -762,7 +762,7 @@ class CycleFinder:
                 if locals:
                     # first argname is first element of locals
                     self.register(frame.f_locals[locals[0]])
-        except:
+        except Exception:
             print `event`, frame, frame.f_code, frame.f_code.co_name
 
 

@@ -51,7 +51,6 @@ extend-exclude = [
 ignore = [
     "E402",
     "E701",
-    "E722",
     "E741",
     "F403",
     "F405"

@@ -357,7 +357,7 @@ def decorateWxPythonWithDocStrs(dbfile):
 
                 wxClass = namespace[name + "Ptr"]
                 wxClass.__doc__ = doc
-            except:
+            except Exception:
                 pass
 
         for name, doc in list(db["methods"].items()):
@@ -368,7 +368,7 @@ def decorateWxPythonWithDocStrs(dbfile):
 
                 wxMeth = getattr(namespace[cls + "Ptr"], mth)
                 wxMeth.__func__.__doc__ = doc
-            except:
+            except Exception:
                 pass
 
 

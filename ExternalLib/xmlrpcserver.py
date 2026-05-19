@@ -43,7 +43,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
                 response = self.call(method, params)
                 if not isinstance(response, tuple):
                     response = (response,)
-            except:
+            except Exception:
                 # report exception back to server
                 response = xmlrpclib.dumps(xmlrpclib.Fault(1, "%s:%s" % (sys.exc_info()[0], sys.exc_info()[1])))
             else:

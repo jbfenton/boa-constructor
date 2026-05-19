@@ -499,7 +499,7 @@ class DebuggingViewSTCMix:
 
         try:
             wx.stc.STC_MARK_BACKGROUND
-        except:
+        except Exception:
             self.MarkerDefine(
                 self.stepPosBackMrk, wx.stc.STC_MARK_EMPTY, wx.Colour(255, 255, 255), wx.Colour(128, 128, 255)
             )

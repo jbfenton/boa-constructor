@@ -211,7 +211,7 @@ def spawnChild(monitor, process, args=""):
             return server, istream, estream, pid, pyIntpPath
         else:
             raise Exception("The debug server failed to start", RuntimeError)
-    except:
+    except (Exception, KeyboardInterrupt, SystemExit):
         if monitor.isAlive():
             process.CloseOutput()
         monitor.kill()
@@ -336,7 +336,7 @@ class ChildProcessClient(MultiThreadedDebugClient):
                     #     dlg.Destroy()
 
                 self.taskHandler.addTask(evt.GetTask())
-            except:
+            except Exception:
                 t, v, tb = sys.exc_info()
                 evt = self.createEvent(wxEVT_DEBUGGER_EXC)
                 evt.SetExc(t, v)

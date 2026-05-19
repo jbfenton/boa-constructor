@@ -51,7 +51,7 @@ def run():
         z = HTMLCyclops.CycleFinderHTML()
         try:
             mod = __import__(mod_name)
-        except:
+        except Exception:
             handle_error(f)
 
         # Comment out any of the following lines to not add a chaser or filter
@@ -68,7 +68,7 @@ serves as the entrypoint for Cyclops.<br>"""
             # Execute the module and trace the first round of cycles
             try:
                 z.run(mod.main)
-            except:
+            except Exception:
                 handle_error(f)
             else:
                 z.find_cycles()

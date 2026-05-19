@@ -389,7 +389,7 @@ class InspectorFrame(wx.Frame, Utils.FrameRestorerMixin):
                 # XXX Ugly must change
                 try:
                     treeId = self.containment.treeItems[compn.name]
-                except:
+                except Exception:
                     treeId = self.containment.treeItems[""]
 
                 self.containment.valid = False

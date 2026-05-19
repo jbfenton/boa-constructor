@@ -223,7 +223,7 @@ class ZopeCompanion(ExplorerCompanion, ZopeConnection):
         # [ (<prop name>, <prop value>), ...]
         try:
             mime, res = self.call(self.objPath, "propertyItems")
-        except:
+        except Exception:
             # pass bci.
             return []
         return eval(res, {})

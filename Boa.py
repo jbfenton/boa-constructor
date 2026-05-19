@@ -67,7 +67,7 @@ def trace_func(frame, event, arg):
 def get_current_frame():
     try:
         raise Exception("get_exc_info")
-    except:
+    except Exception:
         return sys.exc_info()[2].tb_frame.f_back
 
 

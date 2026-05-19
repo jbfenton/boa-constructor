@@ -248,7 +248,7 @@ class Function:
                 h.send(query)
             ec, em, headers = h.getreply()
             response = h.getfile().read()
-        except:
+        except Exception:
             raise NotAvailable(RemoteException(NotAvailable, sys.exc_info()[1], self.url, query))
         if (ec - (ec % 100)) == 200:
             return (headers, response)
@@ -257,19 +257,19 @@ class Function:
     def handleError(self, query, ec, em, headers, response):
         try:
             v = headers.dict["bobo-exception-value"]
-        except:
+        except Exception:
             v = ec
         try:
             f = headers.dict["bobo-exception-file"]
-        except:
+        except Exception:
             f = "Unknown"
         try:
             l = headers.dict["bobo-exception-line"]
-        except:
+        except Exception:
             l = "Unknown"
         try:
             t = exceptmap[headers.dict["bobo-exception-type"]]
-        except:
+        except Exception:
             if ec >= 400 and ec < 500:
                 t = NotFound
             elif ec == 503:
@@ -712,7 +712,7 @@ def main():
                     v = open(v, "rb")
             kw[name] = v
 
-    except:
+    except Exception:
         print(usage)
         sys.exit(1)
 

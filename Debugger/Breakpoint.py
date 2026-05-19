@@ -29,7 +29,7 @@ class FileBreakpointList:
                 return 1
             else:
                 return 0
-        except:
+        except Exception:
             self.lines = {}
             return 0
 
@@ -48,7 +48,7 @@ class FileBreakpointList:
                 p.dump(savelines)
             else:
                 os.remove(fn)
-        except:
+        except Exception:
             pass
 
     def addBreakpoint(self, lineno, temp=0, cond="", ignore=0):

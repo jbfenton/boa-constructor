@@ -39,7 +39,7 @@ class InProcessClient(DebugClient):
         conn.setCallback(cb)
         try:
             getattr(conn, m_name)(*m_args)
-        except:
+        except Exception:
             cb.notifyException()
 
     def __del__(self):
