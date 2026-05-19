@@ -9,13 +9,20 @@
 ##
 
 # silly xml-rpc restrictions
-if obj_ids==(): obj_ids=None
-if obj_metatypes==0: obj_metatypes=None
-if obj_searchterm==0: obj_searchterm=None
+if obj_ids == ():
+    obj_ids = None
+if obj_metatypes == 0:
+    obj_metatypes = None
+if obj_searchterm == 0:
+    obj_searchterm = None
 
-results = context.ZopeFind(context.aq_parent, obj_ids=obj_ids,
-          obj_metatypes=obj_metatypes, obj_searchterm=obj_searchterm,
-          search_sub=search_sub)
+results = context.ZopeFind(
+    context.aq_parent,
+    obj_ids=obj_ids,
+    obj_metatypes=obj_metatypes,
+    obj_searchterm=obj_searchterm,
+    search_sub=search_sub,
+)
 ##, obj_expr=None, obj_mtime=None,
 ##obj_mspec=None, obj_permission=None, obj_roles=None, search_sub=1,
 ##REQUEST=REQUEST))

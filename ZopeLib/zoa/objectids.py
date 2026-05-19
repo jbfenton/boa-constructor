@@ -8,22 +8,24 @@
 ##title=objectids
 ##
 obj = context.aq_parent
-if obj.meta_type == 'Local File System' or obj.meta_type == 'Local Directory':
+if obj.meta_type == "Local File System" or obj.meta_type == "Local Directory":
     l = []
     for f in obj.fileIds():
         l.append(f)
     return l
-elif obj.meta_type == 'User Folder':
+elif obj.meta_type == "User Folder":
     usernames = obj.getUserNames()
     if usernames:
         # dict or string ? (for exUserFolder)
-        try: name = usernames[0]['username']
-        except: pass
+        try:
+            name = usernames[0]["username"]
+        except Exception:
+            pass
         else:
             userdicts = usernames
             usernames = []
             for dct in userdicts:
-                usernames.append(dct['username'])
+                usernames.append(dct["username"])
     return usernames
 else:
     return obj.objectIds()

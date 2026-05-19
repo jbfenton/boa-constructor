@@ -7,5 +7,4 @@
 ##parameters=
 ##title=DBAdapter
 ##
-return {'title': context.title,
-        'connection_string': context.connection_string}
+return {"title": context.title, "connection_string": context.connection_string}

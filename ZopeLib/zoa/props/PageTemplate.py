@@ -9,6 +9,4 @@
 ##
 ctx = context.aq_parent.aq_parent
 pt = ctx.zoa.subobj_(name)
-return {'title': pt.title,
-        'content_type': pt.content_type,
-        'expand': pt.expand}
+return {"title": pt.title, "content_type": pt.content_type, "expand": pt.expand}

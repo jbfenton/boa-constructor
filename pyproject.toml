@@ -18,17 +18,9 @@ dev = [
 line-length = 120
 target-version = "py312"
 extend-exclude = [
-    "Debugger/BoaDebugger/BoaDebugger.py",
-    "Debugger/test.py",
     "ExternalLib/Cyclops.py",
-    "ExternalLib/pylint.py",
     "ExternalLib/zipfile.py",
-    "Models/EditorModels.py",
-    "Plug-ins/BicycleRepairMan.plug-in.py",
-    "Scripts/FixPythonDocs.py",
     "ZopeLib/DateTime/DateTime.py",
-    "ZopeLib/ZopeFTP.py",
-    "ZopeLib/zoa",
 ]
 
 [tool.ruff.lint]
@@ -36,6 +28,8 @@ ignore = [
     "E402",
     "E701",
     "E741",
+    "F706",
+    "F821",
     "F403",
     "F405"
 ]

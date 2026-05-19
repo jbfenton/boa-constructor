@@ -15,4 +15,4 @@ for subobj in obj.objectValues():
         continue
     if name == objname:
         return subobj
-raise 'Method not found in %s'%obj.id
+raise "Method not found in %s" % obj.id

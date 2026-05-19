@@ -10,9 +10,9 @@
 try:
     import sys
 except ImportError:
-    raise Exception('Please install the Breakpoint product in the ZopeLib directory')
+    raise Exception("Please install the Breakpoint product in the ZopeLib directory")
 
 try:
     sys.breakpoint()
 except AttributeError:
-    raise Exception('Zope must be running in the Debugger')
+    raise Exception("Zope must be running in the Debugger")

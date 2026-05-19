@@ -7,8 +7,12 @@
 ##parameters=name=None
 ##title=ownerinfo
 ##
-if name: obj = context.aq_parent.zoa.subobj_(name)
-else:    obj = context.aq_parent
+if name:
+    obj = context.aq_parent.zoa.subobj_(name)
+else:
+    obj = context.aq_parent
 
-try: return obj.owner_info()
-except: return {}
+try:
+    return obj.owner_info()
+except Exception:
+    return {}

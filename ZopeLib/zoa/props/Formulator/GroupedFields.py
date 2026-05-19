@@ -12,6 +12,6 @@ result = []
 for group in ctx.get_groups():
     fields = []
     for field in ctx.get_fields_in_group(group):
-        fields.append( (field.id, field.meta_type) )
-    result.append( (group, fields) )
+        fields.append((field.id, field.meta_type))
+    result.append((group, fields))
 return result

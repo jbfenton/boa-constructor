@@ -7,10 +7,12 @@
 ##parameters=name=None
 ##title=proxyroles
 ##
-if name: obj = context.aq_parent.zoa.subobj_(name)
-else: obj = context.aq_parent
+if name:
+    obj = context.aq_parent.zoa.subobj_(name)
+else:
+    obj = context.aq_parent
 
 res = []
 for role in obj.valid_roles():
-    res.append( (role, obj.manage_haveProxy(role)) )
+    res.append((role, obj.manage_haveProxy(role)))
 return res
