@@ -1,32 +1,38 @@
-""" Plugin that adds a simple time tracking view to Application Models """
+"""Plugin that adds a simple time tracking view to Application Models"""
 
 import os
 import time
+
 import wx
 
-from Utils import _
-
-from Models import PythonControllers
-
 from Explorers import Explorer
-from Views.EditorViews import ListCtrlView
+from Models import PythonControllers
+from Utils import _
 from Views.AppViews import TextInfoFileView
+from Views.EditorViews import ListCtrlView
 
 
 class AppTimeTrackView(ListCtrlView):
-    viewName = 'Time Tracking'
-    viewTitle = _('Time Tracking')
+    viewName = "Time Tracking"
+    viewTitle = _("Time Tracking")
 
     def __init__(self, parent, model):
-        ListCtrlView.__init__(self, parent, model, wx.LC_REPORT,
-                              ((_('Start'), self.OnStart, '-', ''),
-                               (_('End'), self.OnEnd, '-', ''),
-                               (_('Delete'), self.OnDelete, '-', ''),
-                               ), 1)
+        ListCtrlView.__init__(
+            self,
+            parent,
+            model,
+            wx.LC_REPORT,
+            (
+                (_("Start"), self.OnStart, "-", ""),
+                (_("End"), self.OnEnd, "-", ""),
+                (_("Delete"), self.OnDelete, "-", ""),
+            ),
+            1,
+        )
 
-        self.InsertColumn(0, _('Start'), width=150)
-        self.InsertColumn(1, _('End'), width=150)
-        self.InsertColumn(2, _('Description'), width=350)
+        self.InsertColumn(0, _("Start"), width=150)
+        self.InsertColumn(1, _("End"), width=150)
+        self.InsertColumn(2, _("Description"), width=350)
 
         self.sortOnColumns = [0, 1]
 
@@ -48,24 +54,22 @@ class AppTimeTrackView(ListCtrlView):
         modSort = self.model.modules.keys()
         modSort.sort()
         for start, end, desc in self.times:
-            i = self.addReportItems(i,
-                                    (self.getTimeStr(start),
-                                     end and self.getTimeStr(end) or '',
-                                     desc))
+            i = self.addReportItems(i, (self.getTimeStr(start), end and self.getTimeStr(end) or "", desc))
 
         self.pastelise()
 
     def getTimeStr(self, thetime):
-        return time.strftime('%Y/%m/%d : %H:%M:%S', time.gmtime(thetime))
+        return time.strftime("%Y/%m/%d : %H:%M:%S", time.gmtime(thetime))
 
     def getTTVFilename(self):
-        return os.path.splitext(self.model.filename)[0] + '.ttv'
+        return os.path.splitext(self.model.filename)[0] + ".ttv"
 
     def writeTimeEntry(self, file, start, end, desc):
-        file.write("(%s, %s, %s)\n" % ('start', 'end', 'desc'))
+        file.write("(%s, %s, %s)\n" % ("start", "end", "desc"))
 
     def readTimes(self):
         from io import StringIO
+
         transp = Explorer.openEx(self.getTTVFilename())
         data = StringIO(transp.load())
 
@@ -73,7 +77,8 @@ class AppTimeTrackView(ListCtrlView):
 
     def writeTimes(self):
         from io import StringIO
-        timesFile = StringIO('')  # open(self.getTTVFilename(), 'w')
+
+        timesFile = StringIO("")  # open(self.getTTVFilename(), 'w')
         for start, end, desc in self.times:
             self.writeTimeEntry(timesFile, start, end, desc)
         timesFile.seek(0)
@@ -83,7 +88,7 @@ class AppTimeTrackView(ListCtrlView):
         transp.save(transp.currentFilename(), timesFile.read())
 
     def OnStart(self, event):
-        self.times.append((time.time(), 0, ''))
+        self.times.append((time.time(), 0, ""))
         # self.writeTimeEntry(open(self.getTTVFilename(), 'a'), time.time(), 0, '')
 
         self.writeTimes()
@@ -96,10 +101,13 @@ class AppTimeTrackView(ListCtrlView):
         if not end:
             end = time.time()
 
-        dlg = wx.TextEntryDialog(self, _('Start time :%s\nEnd time :%s\n\n' \
-                                         'Enter a description for the time spent') % (self.getTimeStr(start),
-                                                                                      self.getTimeStr(end)),
-                                 _('Time tracking'), desc)
+        dlg = wx.TextEntryDialog(
+            self,
+            _("Start time :%s\nEnd time :%s\n\nEnter a description for the time spent")
+            % (self.getTimeStr(start), self.getTimeStr(end)),
+            _("Time tracking"),
+            desc,
+        )
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 answer = dlg.GetValue()
@@ -115,8 +123,7 @@ class AppTimeTrackView(ListCtrlView):
         if selIdx == -1:
             return
 
-        dlg = wx.MessageDialog(self, _('Are you sure?'),
-                               'Delete', wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(self, _("Are you sure?"), "Delete", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 del self.times[selIdx]
@@ -128,8 +135,8 @@ class AppTimeTrackView(ListCtrlView):
 
 
 class AppFEATURES_TIFView(TextInfoFileView):
-    viewName = 'Features.txt'
-    viewTitle = 'Features.txt'
+    viewName = "Features.txt"
+    viewTitle = "Features.txt"
 
 
 # -------------------------------------------------------------------------------
@@ -138,4 +145,4 @@ PythonControllers.BaseAppController.AdditionalViews.append(AppFEATURES_TIFView)
 
 from Models import EditorHelper
 
-EditorHelper.internalFilesReg.append('.ttv')
+EditorHelper.internalFilesReg.append(".ttv")

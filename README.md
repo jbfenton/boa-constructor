@@ -67,13 +67,17 @@ Contributions are welcome. The easiest way to contribute is to set up the projec
 ### Suggested contributor workflow
 
 1. Clone the repository.
-2. Run the bootstrap script for your platform so `uv` is available.
+2. Run `make bootstrap` from the repository root. This runs the platform bootstrap script, installs `uv`, and then installs the project's `pre-commit` hooks.
 3. Start Boa locally with `run.bat`, `run.sh`, or `uv run Boa.py`.
 4. Make your code changes.
 5. Review `git status` before running any formatting commands so you know what is already modified.
 6. Run `make format` to apply the project's Ruff formatting and safe autofixes.
 7. Run `make check` to confirm formatting and linting pass.
 8. Review the final diff and open a pull request.
+
+If you need to install the hooks manually, run `uv run pre-commit install`.
+
+To run the hooks manually across the repository, run `uv run pre-commit run --all-files`.
 
 ## Code Quality Checks
 

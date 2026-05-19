@@ -37,5 +37,19 @@ if errorlevel 1 (
 )
 
 echo.
+echo Installing Git hooks...
+call uv run pre-commit install
+set "HOOK_EXIT=%ERRORLEVEL%"
+if not "%HOOK_EXIT%"=="0" (
+    echo.
+    echo ERROR: Git hook installation failed with error code %HOOK_EXIT%.
+    pause
+    exit /b %HOOK_EXIT%
+)
+
+echo.
+echo Git hooks installed successfully.
+
+echo.
 pause
 endlocal
